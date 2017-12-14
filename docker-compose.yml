@@ -1,0 +1,24 @@
+version: '2'
+services:
+  web:
+    build: .
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./:/go/src/github.com/Scalingo/networking-agent
+      - /var/run/netns:/var/run/netns
+    environment:
+      GO_ENV: development
+    ports:
+      - 9999:9999
+    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/networking-agent'
+  test:
+    build: .
+    volumes:
+     - ./:/go/src/github.com/Scalingo/networking-agent
+    environment:
+      GO_ENV: testing
+    command: "tail -F /dev/null"
+  etcd:
+    image: quay.io/coreos/etcd:v3.2.11
+    command: etcd --name etcd-cluster
