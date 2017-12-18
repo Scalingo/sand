@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type NetworkType string
 
@@ -13,4 +16,9 @@ type Network struct {
 	Name         string      `json:"name"`
 	Type         NetworkType `json:"type"`
 	NSHandlePath string      `json:"ns_handle_path"`
+	VxLANVNI     int         `json:"vxlan_vni"`
+}
+
+func (n *Network) StorageKey() string {
+	return fmt.Sprintf("/network/%s", n.Name)
 }

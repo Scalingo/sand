@@ -11,10 +11,12 @@ import (
 	"github.com/Scalingo/networking-agent/config"
 	"github.com/Scalingo/networking-agent/web"
 	"github.com/docker/docker/pkg/reexec"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	log := logger.Default()
+	log.SetLevel(logrus.DebugLevel)
 
 	// If reexec to create network namespace
 	if filepath.Base(os.Args[0]) != "networking-agent" {
@@ -26,10 +28,15 @@ func main() {
 		return
 	}
 
-	c := config.Build()
-	err := c.CreateDirectories()
+	c, err := config.Build()
 	if err != nil {
-		log.Error("fail to create runtime directories")
+		log.WithError(err).Error("fail to generate initial config")
+		os.Exit(-1)
+	}
+
+	err = c.CreateDirectories()
+	if err != nil {
+		log.WithError(err).Error("fail to create runtime directories")
 		os.Exit(-1)
 	}
 
@@ -38,6 +45,7 @@ func main() {
 
 	r.HandleFunc("/networks", web.NewNetworksController(c).List).Methods("GET")
 	r.HandleFunc("/networks", web.NewNetworksController(c).Create).Methods("POST")
+	r.HandleFunc("/networks/{name}", web.NewNetworksController(c).Destroy).Methods("DELETE")
 
 	log.WithField("port", c.HttpPort).Info("Listening")
 	http.ListenAndServe(fmt.Sprintf(":%d", c.HttpPort), r)

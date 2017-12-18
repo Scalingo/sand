@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/Scalingo/go-etcd-lock"
+  packages = ["lock"]
+  revision = "60492ce8c163cdd7821ac69588eb4bb6e4d57363"
+  version = "v3.0.0"
+
+[[projects]]
   name = "github.com/Scalingo/go-handlers"
   packages = ["."]
   revision = "1e7a8b51aeb5ea022d23c6f3a9e1ee68d48aad72"
@@ -20,6 +26,12 @@
   version = "v0.3.0"
 
 [[projects]]
+  name = "github.com/coreos/etcd"
+  packages = ["auth/authpb","clientv3","clientv3/concurrency","etcdserver/api/v3rpc/rpctypes","etcdserver/etcdserverpb","mvcc/mvccpb","pkg/tlsutil","pkg/transport"]
+  revision = "1e1dbb23924672c6cd72c62ee0db2b45f778da71"
+  version = "v3.2.11"
+
+[[projects]]
   name = "github.com/docker/docker"
   packages = ["pkg/reexec"]
   revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
@@ -30,6 +42,12 @@
   name = "github.com/docker/libnetwork"
   packages = ["ns"]
   revision = "26531e56a76d7334e594098d7cfab88285d9065c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/protobuf"
+  packages = ["proto","protoc-gen-go/descriptor","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
+  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -87,9 +105,33 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
   revision = "1d2aa6dbdea45adaaebb9905d0666e4537563829"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/text"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/api/annotations","googleapis/rpc/status"]
+  revision = "a8101f21cf983e773d0c1133ebc5424792003214"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [".","balancer","balancer/roundrobin","codes","connectivity","credentials","encoding","grpclb/grpc_lb_v1/messages","grpclog","health/grpc_health_v1","internal","keepalive","metadata","naming","peer","resolver","resolver/dns","resolver/passthrough","stats","status","tap","transport"]
+  revision = "e687fa4e6424368ece6e4fe727cea2c806a0fcb4"
+  version = "v1.8.2"
 
 [[projects]]
   branch = "v1"
@@ -100,6 +142,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9f7d6d36cb3ce2570eca2bb152bc0c0bce9ba64fd07f5aa38d6918f7b693d136"
+  inputs-digest = "e09e62ad8059a03552feeeb666a74f0100593e01b76dc44641585f21a4040cdb"
   solver-name = "gps-cdcl"
   solver-version = 1
