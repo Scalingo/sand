@@ -3,9 +3,6 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/networking-agent/api/types"
@@ -29,26 +26,13 @@ type NetworkList struct {
 
 func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params map[string]string) error {
 	w.Header().Set("Content-Type", "application/json")
-	log := logger.Get(r.Context())
+	ctx := r.Context()
+	log := logger.Get(ctx)
 
-	f, err := os.Open(c.Config.NetnsPath)
+	var res NetworkList
+	err := c.Store.Get(ctx, "/network/", true, &res.Networks)
 	if err != nil {
-		return errors.Wrapf(err, "fail to open netns directory")
-	}
-
-	filenames, err := f.Readdirnames(-1)
-	if err != nil {
-		return errors.Wrapf(err, "fail to list netns handlers in %v", c.Config.NetnsPath)
-	}
-
-	log.Debugf("%v namespace handlers are present")
-	res := NetworkList{Networks: []types.Network{}}
-	for _, n := range filenames {
-		ns := filepath.Base(n)
-		if strings.HasPrefix(ns, c.Config.NetnsPrefix) {
-			name := strings.TrimPrefix(ns, c.Config.NetnsPrefix)
-			res.Networks = append(res.Networks, types.Network{NSHandlePath: n, Name: name, Type: types.OverlayNetworkType})
-		}
+		return errors.Wrapf(err, "fail to query store")
 	}
 
 	w.WriteHeader(200)

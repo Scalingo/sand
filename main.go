@@ -45,7 +45,7 @@ func main() {
 
 	r.HandleFunc("/networks", web.NewNetworksController(c).List).Methods("GET")
 	r.HandleFunc("/networks", web.NewNetworksController(c).Create).Methods("POST")
-	r.HandleFunc("/networks/{name}", web.NewNetworksController(c).Destroy).Methods("DELETE")
+	r.HandleFunc("/networks/{id}", web.NewNetworksController(c).Destroy).Methods("DELETE")
 
 	log.WithField("port", c.HttpPort).Info("Listening")
 	http.ListenAndServe(fmt.Sprintf(":%d", c.HttpPort), r)

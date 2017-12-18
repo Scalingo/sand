@@ -68,6 +68,12 @@
   version = "v1.3.0"
 
 [[projects]]
+  name = "github.com/pborman/uuid"
+  packages = ["."]
+  revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
+  version = "v1.1"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -142,6 +148,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e09e62ad8059a03552feeeb666a74f0100593e01b76dc44641585f21a4040cdb"
+  inputs-digest = "35337d7324f5165660f383d67fc48be31190f4d41b5a46abae0ebb231aef64f8"
   solver-name = "gps-cdcl"
   solver-version = 1

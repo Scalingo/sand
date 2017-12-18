@@ -12,6 +12,7 @@ const (
 )
 
 type Network struct {
+	ID           string      `json:"id"`
 	CreatedAt    time.Time   `json:"created_at"`
 	Name         string      `json:"name"`
 	Type         NetworkType `json:"type"`
@@ -20,5 +21,9 @@ type Network struct {
 }
 
 func (n *Network) StorageKey() string {
-	return fmt.Sprintf("/network/%s", n.Name)
+	return fmt.Sprintf("/network/%s", n.ID)
+}
+
+func (n *Network) String() string {
+	return fmt.Sprintf("Network<%s|%s>", n.ID, n.Name)
 }
