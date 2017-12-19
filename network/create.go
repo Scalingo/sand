@@ -18,6 +18,7 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, params params.CreateNetworkParams) (types.Network, error)
+	Ensure(ctx context.Context, network types.Network) error
 	Delete(ctx context.Context, network types.Network) error
 
 	// If the network exists, return it, nil otherwise
@@ -33,6 +34,20 @@ func NewRepository(config *config.Config, store store.Store) Repository {
 	return &repository{config: config, store: store}
 }
 
+func (c *repository) Ensure(ctx context.Context, network types.Network) error {
+	switch network.Type {
+	case types.OverlayNetworkType:
+		err := overlay.Ensure(ctx, c.config, network)
+		if err != nil {
+			return errors.Wrapf(err, "fail to ensure overlay network %s", network)
+		}
+	default:
+		return errors.New("invalid network type")
+	}
+
+	return nil
+}
+
 func (c *repository) Create(ctx context.Context, params params.CreateNetworkParams) (types.Network, error) {
 	log := logger.Get(ctx).WithField("network_name", params.Name)
 
@@ -40,31 +55,17 @@ func (c *repository) Create(ctx context.Context, params params.CreateNetworkPara
 		params.Type = types.OverlayNetworkType
 	}
 
-	network, ok, err := c.Exists(ctx, params.Name)
+	network, err := c.new(ctx, params)
 	if err != nil {
-		return network, errors.Wrapf(err, "fail to check existance of network '%s'", params.Name)
-	}
-
-	if ok {
-		log.Info("existing network")
-	} else {
-		log.Info("creating new network")
-		network, err = c.new(ctx, params)
-		if err != nil {
-			return network, errors.Wrapf(err, "fail to initialize network %s", params.Name)
-		}
+		return network, errors.Wrapf(err, "fail to initialize network %s", params.Name)
 	}
 
 	log = log.WithField("network_id", network.ID)
+	ctx = logger.ToCtx(ctx, log)
 
-	switch network.Type {
-	case types.OverlayNetworkType:
-		err = overlay.Ensure(ctx, c.config, network)
-		if err != nil {
-			return network, errors.Wrapf(err, "fail to ensure overlay network %s", network)
-		}
-	default:
-		return network, errors.Wrapf(err, "invalid network type")
+	err = c.Ensure(ctx, network)
+	if err != nil {
+		return network, errors.Wrapf(err, "fail to ensure network %s", network)
 	}
 
 	return network, nil
@@ -123,6 +124,23 @@ func (c *repository) new(ctx context.Context, params params.CreateNetworkParams)
 	err := c.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
 		return network, errors.Wrapf(err, "fail to get network %s from store", network)
+	}
+
+	err = c.store.Set(
+		ctx,
+		fmt.Sprintf("/nodes/%s/networks/%s", c.config.PublicHostname, network.ID),
+		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
+	)
+	if err != nil {
+		return network, errors.Wrapf(err, "err to store nodes link to network %s", network)
+	}
+	err = c.store.Set(
+		ctx,
+		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.PublicHostname),
+		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
+	)
+	if err != nil {
+		return network, errors.Wrapf(err, "err to store network %s link to hostname", network)
 	}
 
 	if vniGen != nil {

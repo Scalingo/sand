@@ -20,10 +20,10 @@ type Network struct {
 	VxLANVNI     int         `json:"vxlan_vni"`
 }
 
-func (n *Network) StorageKey() string {
+func (n Network) StorageKey() string {
 	return fmt.Sprintf("/network/%s", n.ID)
 }
 
-func (n *Network) String() string {
+func (n Network) String() string {
 	return fmt.Sprintf("Network<%s|%s>", n.ID, n.Name)
 }

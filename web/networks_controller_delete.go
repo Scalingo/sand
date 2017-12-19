@@ -35,11 +35,6 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 		return errors.Wrapf(err, "fail to delete network %s", n)
 	}
 
-	err = c.Store.Delete(ctx, n.StorageKey())
-	if err != nil {
-		return errors.Wrapf(err, "fail to delete network %s from store", n)
-	}
-
 	w.WriteHeader(204)
 	return nil
 }

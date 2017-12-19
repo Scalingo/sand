@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,15 +9,20 @@ import (
 
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/networking-agent/api/types"
 	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/networking-agent/network"
+	"github.com/Scalingo/networking-agent/store"
 	"github.com/Scalingo/networking-agent/web"
 	"github.com/docker/docker/pkg/reexec"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	log := logger.Default()
 	log.SetLevel(logrus.DebugLevel)
+	ctx := logger.ToCtx(context.Background(), log)
 
 	// If reexec to create network namespace
 	if filepath.Base(os.Args[0]) != "networking-agent" {
@@ -40,6 +46,12 @@ func main() {
 		os.Exit(-1)
 	}
 
+	err = ensureNetworks(ctx, c)
+	if err != nil {
+		log.WithError(err).Error("fail to ensure existing networks")
+		os.Exit(-1)
+	}
+
 	r := handlers.NewRouter(log)
 	r.Use(handlers.ErrorMiddleware)
 
@@ -49,4 +61,43 @@ func main() {
 
 	log.WithField("port", c.HttpPort).Info("Listening")
 	http.ListenAndServe(fmt.Sprintf(":%d", c.HttpPort), r)
+}
+
+func ensureNetworks(ctx context.Context, c *config.Config) error {
+	log := logger.Get(ctx)
+	ctx = logger.ToCtx(ctx, log)
+
+	log.Info("ensure networks on node")
+
+	s := store.New(c)
+	var networks []types.Network
+	err := s.Get(ctx, fmt.Sprintf("/nodes/%s/networks/", c.PublicHostname), true, &networks)
+	if err == store.ErrNotFound {
+		return nil
+	}
+	if err != nil {
+		return errors.Wrapf(err, "fail to get existing networks on %v", c.PublicHostname)
+	}
+
+	repo := network.NewRepository(c, s)
+
+	for _, network := range networks {
+		log = log.WithField("network_id", network.ID)
+
+		err = s.Get(ctx, "/network/"+network.ID, false, &network)
+		if err != nil {
+			log.WithError(err).Error("fail to get network details")
+			continue
+		}
+
+		log = log.WithField("network_name", network.Name)
+		ctx = logger.ToCtx(ctx, log)
+
+		log.Info("ensuring network is setup")
+		err = repo.Ensure(ctx, network)
+		if err != nil {
+			log.WithError(err).Error("fail to ensure network")
+		}
+	}
+	return nil
 }

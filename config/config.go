@@ -10,11 +10,12 @@ import (
 )
 
 type Config struct {
-	RollbarToken string
-	GoEnv        string `default:"development"`
-	NetnsPrefix  string `default:"sc-ns-"`
-	NetnsPath    string `default:"/var/run/netns"`
-	HttpPort     int    `default:"9999"`
+	RollbarToken   string
+	GoEnv          string `default:"development"`
+	NetnsPrefix    string `default:"sc-ns-"`
+	NetnsPath      string `default:"/var/run/netns"`
+	HttpPort       int    `default:"9999"`
+	PublicHostname string
 
 	EtcdPrefix  string `default:"/sc-net"`
 	EtcdURL     string `envconfig:"ETCD_URL" default:"http://127.0.0.1:2379"`
@@ -33,6 +34,14 @@ func Build() (*Config, error) {
 	err := c.checkEtcdConfig()
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to build etcd config")
+	}
+
+	if c.PublicHostname == "" {
+		h, err := os.Hostname()
+		if err != nil {
+			return nil, errors.Wrapf(err, "fail to get hostname")
+		}
+		c.PublicHostname = h
 	}
 
 	return &c, nil
