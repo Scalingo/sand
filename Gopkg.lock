@@ -33,14 +33,14 @@
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["pkg/reexec"]
+  packages = ["pkg/ioutils","pkg/longpath","pkg/reexec"]
   revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
   version = "v1.13.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/docker/libnetwork"
-  packages = ["ns"]
+  packages = ["ipamutils","netutils","ns","osl","resolvconf","resolvconf/dns","types"]
   revision = "26531e56a76d7334e594098d7cfab88285d9065c"
 
 [[projects]]
@@ -104,6 +104,12 @@
   revision = "be1fbeda19366dea804f00efff2dd73a1642fdcc"
 
 [[projects]]
+  name = "github.com/willf/bitset"
+  packages = ["."]
+  revision = "d860f346b89450988a379d7d705e83c58d1ea227"
+  version = "v1.1.3"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -148,6 +154,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "35337d7324f5165660f383d67fc48be31190f4d41b5a46abae0ebb231aef64f8"
+  inputs-digest = "ede5afa58c1fcad76c362fae8e000ebc25dacfcd02e9383d8bac9ffd204de022"
   solver-name = "gps-cdcl"
   solver-version = 1
