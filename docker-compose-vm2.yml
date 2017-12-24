@@ -1,0 +1,18 @@
+version: '2'
+services:
+  web:
+    build: .
+    pid: "host"
+    network_mode: "host"
+    privileged: true
+    volumes:
+      - ./:/go/src/github.com/Scalingo/networking-agent
+      - /var/run/netns:/var/run/netns:shared
+      - /var/run/docker/netns:/var/run/docker/netns:shared
+    environment:
+      GO_ENV: development
+      ETCD_URL: "http://192.168.254.2:2379"
+      PUBLIC_IP: "192.168.254.3"
+    ports:
+      - 9999:9999
+    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/networking-agent'

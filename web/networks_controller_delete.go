@@ -16,7 +16,7 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 	log = log.WithField("network_id", p["id"])
 	ctx = logger.ToCtx(ctx, log)
 
-	repo := network.NewRepository(c.Config, c.Store)
+	repo := network.NewRepository(c.Config, c.Store, c.Listener)
 
 	n, ok, err := repo.Exists(ctx, p["id"])
 	if err != nil {

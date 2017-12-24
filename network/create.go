@@ -3,6 +3,7 @@ package network
 import (
 	"context"
 	"fmt"
+	"net"
 	"path/filepath"
 	"time"
 
@@ -10,10 +11,15 @@ import (
 	"github.com/Scalingo/networking-agent/api/params"
 	"github.com/Scalingo/networking-agent/api/types"
 	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/networking-agent/ipallocator"
 	"github.com/Scalingo/networking-agent/network/overlay"
 	"github.com/Scalingo/networking-agent/store"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
+)
+
+const (
+	DefaultIPRange = "10.0.0.0/24"
 )
 
 type Repository interface {
@@ -26,23 +32,63 @@ type Repository interface {
 }
 
 type repository struct {
-	config *config.Config
-	store  store.Store
+	config   *config.Config
+	store    store.Store
+	listener overlay.NetworkEndpointListener
 }
 
-func NewRepository(config *config.Config, store store.Store) Repository {
-	return &repository{config: config, store: store}
+func NewRepository(config *config.Config, store store.Store, listener overlay.NetworkEndpointListener) Repository {
+	return &repository{config: config, store: store, listener: listener}
 }
 
 func (c *repository) Ensure(ctx context.Context, network types.Network) error {
+	allocator := ipallocator.New(c.config, c.store, network.ID)
+
 	switch network.Type {
 	case types.OverlayNetworkType:
-		err := overlay.Ensure(ctx, c.config, network)
+		err := overlay.Ensure(ctx, c.config, allocator, network)
 		if err != nil {
 			return errors.Wrapf(err, "fail to ensure overlay network %s", network)
 		}
+		var endpoints []types.Endpoint
+		err = c.store.Get(ctx, network.EndpointsStorageKey(""), true, &endpoints)
+		if err != nil && err != store.ErrNotFound {
+			return errors.Wrapf(err, "fail to get network endpoints")
+		}
+
+		if len(endpoints) > 0 {
+			err = overlay.EnsureEndpointsNeigh(ctx, c.config, network, endpoints)
+			if err != nil {
+				return errors.Wrapf(err, "fail to ensure neighbors (ARP/FDB)")
+			}
+		}
+
+		err = c.listener.Add(ctx, network)
+		if err != nil {
+			return errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
+		}
 	default:
 		return errors.New("invalid network type")
+	}
+
+	// Ability to list all networks with node hostname as prefix
+	err := c.store.Set(
+		ctx,
+		fmt.Sprintf("/nodes/%s/networks/%s", c.config.PublicHostname, network.ID),
+		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
+	)
+	if err != nil {
+		return errors.Wrapf(err, "err to store nodes link to network %s", network)
+	}
+
+	// Ability to list nodes present in a network
+	err = c.store.Set(
+		ctx,
+		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.PublicHostname),
+		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
+	)
+	if err != nil {
+		return errors.Wrapf(err, "err to store network %s link to hostname", network)
 	}
 
 	return nil
@@ -91,9 +137,29 @@ func (c *repository) Exists(ctx context.Context, id string) (types.Network, bool
 
 func (c *repository) new(ctx context.Context, params params.CreateNetworkParams) (types.Network, error) {
 	log := logger.Get(ctx)
-	uuid := uuid.NewUUID().String()
+	uuid := uuid.NewRandom().String()
+
+	iprange := DefaultIPRange
+	if params.IPRange != "" {
+		_, _, err := net.ParseCIDR(params.IPRange)
+		if err != nil {
+			return types.Network{}, errors.Wrapf(err, "invalid IP CIDR")
+		}
+		iprange = params.IPRange
+	}
+
+	allocator := ipallocator.New(c.config, c.store, uuid, ipallocator.WithIPRange(iprange))
+	ip, mask, err := allocator.AllocateIP(ctx)
+	if err != nil {
+		return types.Network{}, errors.Wrapf(err, "fail to allocate gateway IP")
+	}
+
+	log.Infof("gateway IP allocated: %s/%d", ip, mask)
+
 	network := types.Network{
 		ID:        uuid,
+		IPRange:   iprange,
+		Gateway:   fmt.Sprintf("%s/%d", ip.String(), mask),
 		CreatedAt: time.Now(),
 		Name:      params.Name,
 		Type:      params.Type,
@@ -121,26 +187,9 @@ func (c *repository) new(ctx context.Context, params params.CreateNetworkParams)
 		return network, errors.New("invalid network type for init")
 	}
 
-	err := c.store.Set(ctx, network.StorageKey(), &network)
+	err = c.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
 		return network, errors.Wrapf(err, "fail to get network %s from store", network)
-	}
-
-	err = c.store.Set(
-		ctx,
-		fmt.Sprintf("/nodes/%s/networks/%s", c.config.PublicHostname, network.ID),
-		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
-	)
-	if err != nil {
-		return network, errors.Wrapf(err, "err to store nodes link to network %s", network)
-	}
-	err = c.store.Set(
-		ctx,
-		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.PublicHostname),
-		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
-	)
-	if err != nil {
-		return network, errors.Wrapf(err, "err to store network %s link to hostname", network)
 	}
 
 	if vniGen != nil {

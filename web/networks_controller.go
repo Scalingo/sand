@@ -7,17 +7,19 @@ import (
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/networking-agent/api/types"
 	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/networking-agent/network/overlay"
 	"github.com/Scalingo/networking-agent/store"
 	"github.com/pkg/errors"
 )
 
 type NetworksController struct {
-	Config *config.Config
-	Store  store.Store
+	Config   *config.Config
+	Store    store.Store
+	Listener overlay.NetworkEndpointListener
 }
 
-func NewNetworksController(c *config.Config) NetworksController {
-	return NetworksController{Config: c, Store: store.New(c)}
+func NewNetworksController(c *config.Config, listener overlay.NetworkEndpointListener) NetworksController {
+	return NetworksController{Config: c, Store: store.New(c), Listener: listener}
 }
 
 type NetworkList struct {
@@ -31,7 +33,9 @@ func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params 
 
 	var res NetworkList
 	err := c.Store.Get(ctx, "/network/", true, &res.Networks)
-	if err != nil {
+	if err == store.ErrNotFound {
+		res.Networks = []types.Network{}
+	} else if err != nil {
 		return errors.Wrapf(err, "fail to query store")
 	}
 

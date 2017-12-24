@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	reexec.Register("netns-create", reexecCreateNamespace)
+	reexec.Register("sc-netns-create", reexecCreateNamespace)
 }
 
 func reexecCreateNamespace() {

@@ -56,7 +56,7 @@ func (m *manager) createNS(ctx context.Context, path string) error {
 
 	cmd := &exec.Cmd{
 		Path:   reexec.Self(),
-		Args:   append([]string{"netns-create"}, path),
+		Args:   append([]string{"sc-netns-create"}, path),
 		Stdout: os.Stdout,
 		Stderr: os.Stderr,
 	}

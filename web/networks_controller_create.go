@@ -26,7 +26,7 @@ func (c NetworksController) Create(w http.ResponseWriter, r *http.Request, p map
 		return errors.Wrap(err, "invalid JSON")
 	}
 
-	netRepo := network.NewRepository(c.Config, c.Store)
+	netRepo := network.NewRepository(c.Config, c.Store, c.Listener)
 	network, err := netRepo.Create(ctx, cnp)
 	if err != nil {
 		return errors.Wrapf(err, "fail to create network '%v'", cnp.Name)

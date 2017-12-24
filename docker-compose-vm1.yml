@@ -11,19 +11,13 @@ services:
       - /var/run/docker/netns:/var/run/docker/netns:shared
     environment:
       GO_ENV: development
-      ETCD_URL: "http://localhost:22379"
+      ETCD_URL: "http://192.168.254.2:2379"
+      PUBLIC_IP: "192.168.254.2"
     ports:
       - 9999:9999
     command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/networking-agent'
-  test:
-    build: .
-    volumes:
-     - ./:/go/src/github.com/Scalingo/networking-agent
-    environment:
-      GO_ENV: testing
-    command: "tail -F /dev/null"
   etcd:
     image: quay.io/coreos/etcd:v3.2.11
-    command: etcd --name etcd-cluster --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://172.17.0.1:22379
+    command: etcd --name etcd-cluster --listen-peer-urls http://0.0.0.0:2380 --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://192.168.254.2:2379
     ports:
-      - 22379:2379
+      - 2379:2379

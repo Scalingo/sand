@@ -5,6 +5,7 @@ import (
 )
 
 type CreateNetworkParams struct {
-	Name string            `json:"name"`
-	Type types.NetworkType `json:"type"`
+	Name    string            `json:"name"`
+	Type    types.NetworkType `json:"type"`
+	IPRange string            `json:"ip_range"`
 }

@@ -3,6 +3,7 @@ package network
 import (
 	"context"
 	"fmt"
+	"os"
 	"syscall"
 
 	"github.com/Scalingo/go-internal-tools/logger"
@@ -28,6 +29,9 @@ func (c *repository) Delete(ctx context.Context, network types.Network) error {
 
 func (c *repository) deleteNamespace(ctx context.Context, network types.Network) error {
 	nsfd, err := netns.GetFromPath(network.NSHandlePath)
+	if os.IsNotExist(err) {
+		return nil
+	}
 	if err != nil {
 		return errors.Wrapf(err, "fail to get namespace handler")
 	}

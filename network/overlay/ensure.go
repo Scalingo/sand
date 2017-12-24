@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"net"
 	"syscall"
 	"time"
 
 	"github.com/Scalingo/networking-agent/api/types"
 	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/networking-agent/ipallocator"
 	"github.com/Scalingo/networking-agent/netnsbuilder"
 	"github.com/docker/libnetwork/ns"
 	"github.com/pkg/errors"
@@ -24,7 +24,7 @@ const (
 	VxLANInHostPrefix = "vxlan-"
 )
 
-func Ensure(ctx context.Context, config *config.Config, network types.Network) error {
+func Ensure(ctx context.Context, config *config.Config, allocator ipallocator.IPAllocator, network types.Network) error {
 	m := netnsbuilder.NewManager(config)
 	err := m.Create(ctx, network.Name, network)
 	if err != nil && err != netnsbuilder.ErrAlreadyExist {
@@ -84,22 +84,14 @@ func Ensure(ctx context.Context, config *config.Config, network types.Network) e
 		return errors.Wrapf(err, "fail to list addresses of %s", BridgeName)
 	}
 
-	exist = false
-	for _, addr := range addresses {
-		if addr.IP.Equal(net.IPv4(10, 0, 0, 1)) {
-			exist = true
-			break
-		}
-	}
-
-	if !exist {
-		brAddr, err := netlink.ParseAddr("10.0.0.1/24")
+	if len(addresses) == 0 {
+		brAddr, err := netlink.ParseAddr(network.Gateway)
 		if err != nil {
-			return errors.Wrapf(err, "fail to parse 10.0.0.1/24 IP address")
+			return errors.Wrapf(err, "fail to parse %s IP address", network.Gateway)
 		}
 		err = nlh.AddrAdd(link, brAddr)
 		if err != nil {
-			return errors.Wrapf(err, "fail to add 10.0.0.1/24 on bridge")
+			return errors.Wrapf(err, "fail to add %s on bridge", network.Gateway)
 		}
 	}
 
