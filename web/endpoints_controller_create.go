@@ -3,13 +3,12 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"gopkg.in/errgo.v1"
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/params"
-	"github.com/Scalingo/sand/endpoint"
-	"github.com/Scalingo/sand/network"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -21,7 +20,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	var params params.CreateEndpointParams
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
-		w.WriteHeader(404)
+		w.WriteHeader(400)
 		return errors.Wrap(err, "invalid JSON")
 	}
 
@@ -30,8 +29,16 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 		"network_id":   params.NetworkID,
 	})
 
-	repo := network.NewRepository(c.Config, c.Store, c.Listener)
-	network, ok, err := repo.Exists(ctx, params.NetworkID)
+	if params.NSHandlePath == "" {
+		w.WriteHeader(400)
+		return errors.New("missing ns_handle_path")
+	}
+	if _, err := os.Stat(params.NSHandlePath); err != nil {
+		w.WriteHeader(400)
+		return errors.Errorf("ns_handle_path '%s' is invalid: %v", params.NSHandlePath, err)
+	}
+
+	network, ok, err := c.NetworkRepository.Exists(ctx, params.NetworkID)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get network %v", params.NetworkID)
 	}
@@ -40,7 +47,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 		return errors.New("not found")
 	}
 
-	err = repo.Ensure(ctx, network)
+	err = c.NetworkRepository.Ensure(ctx, network)
 	if err != nil {
 		return errors.Wrapf(err, "fail to ensure network %s", network)
 	}
@@ -49,8 +56,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	log.Info("creating endpoint")
 	ctx = logger.ToCtx(ctx, log)
 
-	erepo := endpoint.NewRepository(c.Config, c.Store)
-	endpoint, err := erepo.Create(ctx, network, params)
+	endpoint, err := c.EndpointRepository.Create(ctx, network, params)
 	if err != nil {
 		return errgo.Notef(err, "fail to create endpoint")
 	}

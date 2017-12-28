@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/Scalingo/sand/api/types"
-	"github.com/Scalingo/sand/config"
-	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/netnsbuilder"
 	"github.com/docker/libnetwork/ns"
 	"github.com/pkg/errors"
@@ -24,8 +22,8 @@ const (
 	VxLANInHostPrefix = "vxlan-"
 )
 
-func Ensure(ctx context.Context, config *config.Config, allocator ipallocator.IPAllocator, network types.Network) error {
-	m := netnsbuilder.NewManager(config)
+func (netm manager) Ensure(ctx context.Context, network types.Network) error {
+	m := netnsbuilder.NewManager(netm.config)
 	err := m.Create(ctx, network.Name, network)
 	if err != nil && err != netnsbuilder.ErrAlreadyExist {
 		return errors.Wrapf(err, "fail to create network namspace")

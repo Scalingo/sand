@@ -12,6 +12,7 @@ import (
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/ipallocator"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/Scalingo/sand/store"
 	"github.com/pborman/uuid"
@@ -35,18 +36,23 @@ type repository struct {
 	config   *config.Config
 	store    store.Store
 	listener overlay.NetworkEndpointListener
+	managers map[types.NetworkType]netmanager.NetManager
 }
 
 func NewRepository(config *config.Config, store store.Store, listener overlay.NetworkEndpointListener) Repository {
-	return &repository{config: config, store: store, listener: listener}
+	return &repository{
+		config: config, store: store, listener: listener,
+		managers: map[types.NetworkType]netmanager.NetManager{
+			types.OverlayNetworkType: overlay.NewManager(config, listener),
+		},
+	}
 }
 
 func (c *repository) Ensure(ctx context.Context, network types.Network) error {
-	allocator := ipallocator.New(c.config, c.store, network.ID)
-
 	switch network.Type {
 	case types.OverlayNetworkType:
-		err := overlay.Ensure(ctx, c.config, allocator, network)
+		m := c.managers[network.Type]
+		err := m.Ensure(ctx, network)
 		if err != nil {
 			return errors.Wrapf(err, "fail to ensure overlay network %s", network)
 		}
@@ -57,13 +63,13 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 		}
 
 		if len(endpoints) > 0 {
-			err = overlay.EnsureEndpointsNeigh(ctx, c.config, network, endpoints)
+			err = m.EnsureEndpointsNeigh(ctx, network, endpoints)
 			if err != nil {
 				return errors.Wrapf(err, "fail to ensure neighbors (ARP/FDB)")
 			}
 		}
 
-		err = c.listener.Add(ctx, network)
+		err = c.listener.Add(ctx, m, network)
 		if err != nil {
 			return errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
 		}

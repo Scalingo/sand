@@ -10,6 +10,7 @@ import (
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/mvcc/mvccpb"
@@ -18,7 +19,7 @@ import (
 )
 
 type NetworkEndpointListener interface {
-	Add(context.Context, types.Network) error
+	Add(context.Context, netmanager.NetManager, types.Network) error
 	Remove(context.Context, types.Network) error
 }
 
@@ -49,7 +50,7 @@ func (l *listener) Remove(ctx context.Context, network types.Network) error {
 	return nil
 }
 
-func (l *listener) Add(ctx context.Context, network types.Network) error {
+func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network types.Network) error {
 	log := logger.Get(ctx)
 	l.Lock()
 	defer l.Unlock()
@@ -95,7 +96,7 @@ func (l *listener) Add(ctx context.Context, network types.Network) error {
 					log.Info("etcd watch got new endpoint")
 					ctx = logger.ToCtx(ctx, log)
 
-					err = AddEndpointNeigh(ctx, l.config, network, endpoint)
+					err = nm.AddEndpointNeigh(ctx, network, endpoint)
 					if err != nil {
 						log.WithError(err).Errorf("fail to add endpoint '%s' ARP/FDB neigh rules", endpoint)
 					}

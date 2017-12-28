@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	types "github.com/Scalingo/sand/api/types"
+	netmanager "github.com/Scalingo/sand/network/netmanager"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -36,15 +37,15 @@ func (m *MockNetworkEndpointListener) EXPECT() *MockNetworkEndpointListenerMockR
 }
 
 // Add mocks base method
-func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 types.Network) error {
-	ret := m.ctrl.Call(m, "Add", arg0, arg1)
+func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 netmanager.NetManager, arg2 types.Network) error {
+	ret := m.ctrl.Call(m, "Add", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Add indicates an expected call of Add
-func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), arg0, arg1)
+func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), arg0, arg1, arg2)
 }
 
 // Remove mocks base method

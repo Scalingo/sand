@@ -32,13 +32,14 @@ func Build(ctx context.Context) error {
 
 // Run specs on the project
 func Test(ctx context.Context) error {
-	mg.CtxDeps(ctx, InstallTestDeps, GenerateMocks)
 	fmt.Println("Testing…")
-	return sh.Run("go", "test", "./...")
+	return sh.RunV("go", "test", "./...")
 }
 
 // Generate the mocks of used interface for `mockgen/gomock`
 func GenerateMocks(ctx context.Context) error {
+	mg.CtxDeps(ctx, InstallTestDeps)
+
 	mocks := []struct {
 		Package   string
 		Interface string
@@ -50,6 +51,7 @@ func GenerateMocks(ctx context.Context) error {
 		{Package: "store", Interface: "Store"},
 		{Package: "endpoint", Interface: "Repository"},
 		{Package: "network", Interface: "Repository"},
+		{Package: "network/netmanager", Interface: "NetManager"},
 		{Package: "network/overlay", Interface: "NetworkEndpointListener"},
 	}
 

@@ -8,14 +8,13 @@ import (
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/Scalingo/sand/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 )
 
-func EnsureEndpointsNeigh(ctx context.Context, config *config.Config, network types.Network, endpoints []types.Endpoint) error {
+func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network, endpoints []types.Endpoint) error {
 	log := logger.Get(ctx)
 	for _, endpoint := range endpoints {
 		log = log.WithFields(logrus.Fields{
@@ -24,7 +23,7 @@ func EnsureEndpointsNeigh(ctx context.Context, config *config.Config, network ty
 			"endpoint_target_hostname": endpoint.Hostname,
 		})
 		ctx = logger.ToCtx(ctx, log)
-		err := AddEndpointNeigh(ctx, config, network, endpoint)
+		err := m.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
 			return errors.Wrapf(err, "fail to add endpoint ARP/FDB neigh rules")
 		}
@@ -32,11 +31,11 @@ func EnsureEndpointsNeigh(ctx context.Context, config *config.Config, network ty
 	return nil
 }
 
-func AddEndpointNeigh(ctx context.Context, config *config.Config, network types.Network, endpoint types.Endpoint) error {
+func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, endpoint types.Endpoint) error {
 	log := logger.Get(ctx)
 
 	// No rule to add for endpoint located on the current server
-	if endpoint.HostIP == config.PublicIP {
+	if endpoint.HostIP == m.config.PublicIP {
 		return nil
 	}
 
