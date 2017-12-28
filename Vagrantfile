@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
     end
 
-    host.vm.synced_folder "./", "/opt/networking-agent"
+    host.vm.synced_folder "./", "/opt/sand"
     host.vm.network "private_network", ip: "192.168.254.2"
   end
 
@@ -21,7 +21,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
     end
 
-    host.vm.synced_folder "./", "/opt/networking-agent"
+    host.vm.synced_folder "./", "/opt/sand"
     host.vm.network "private_network", ip: "192.168.254.3"
   end
 

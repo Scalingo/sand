@@ -9,7 +9,7 @@ import (
 	"gopkg.in/errgo.v1"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/types"
+	"github.com/Scalingo/sand/api/types"
 	"github.com/docker/libnetwork/netutils"
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"

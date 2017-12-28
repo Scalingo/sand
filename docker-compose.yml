@@ -6,7 +6,7 @@ services:
     network_mode: "host"
     privileged: true
     volumes:
-      - ./:/go/src/github.com/Scalingo/networking-agent
+      - ./:/go/src/github.com/Scalingo/sand
       - /var/run/netns:/var/run/netns:shared
       - /var/run/docker/netns:/var/run/docker/netns:shared
     environment:
@@ -14,11 +14,11 @@ services:
       ETCD_URL: "http://localhost:22379"
     ports:
       - 9999:9999
-    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/networking-agent'
+    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/sand'
   test:
     build: .
     volumes:
-     - ./:/go/src/github.com/Scalingo/networking-agent
+     - ./:/go/src/github.com/Scalingo/sand
     environment:
       GO_ENV: testing
     command: "tail -F /dev/null"

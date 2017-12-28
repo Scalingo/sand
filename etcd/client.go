@@ -3,7 +3,7 @@ package etcd
 import (
 	"time"
 
-	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/sand/config"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/pkg/transport"
 	"github.com/pkg/errors"

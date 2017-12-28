@@ -7,9 +7,9 @@ import (
 	"gopkg.in/errgo.v1"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/params"
-	"github.com/Scalingo/networking-agent/endpoint"
-	"github.com/Scalingo/networking-agent/network"
+	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/endpoint"
+	"github.com/Scalingo/sand/network"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

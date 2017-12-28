@@ -1,7 +1,7 @@
 package params
 
 import (
-	"github.com/Scalingo/networking-agent/api/types"
+	"github.com/Scalingo/sand/api/types"
 )
 
 type CreateNetworkParams struct {

@@ -9,13 +9,13 @@ import (
 
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/endpoint"
-	"github.com/Scalingo/networking-agent/network"
-	"github.com/Scalingo/networking-agent/network/overlay"
-	"github.com/Scalingo/networking-agent/store"
-	"github.com/Scalingo/networking-agent/web"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/endpoint"
+	"github.com/Scalingo/sand/network"
+	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/store"
+	"github.com/Scalingo/sand/web"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -27,7 +27,7 @@ func main() {
 	ctx := logger.ToCtx(context.Background(), log)
 
 	// If reexec to create network namespace
-	if filepath.Base(os.Args[0]) != "networking-agent" {
+	if filepath.Base(os.Args[0]) != "sand" {
 		log.WithField("args", os.Args).Info("reexec")
 	}
 	ok := reexec.Init()

@@ -6,7 +6,7 @@ services:
     network_mode: "host"
     privileged: true
     volumes:
-      - ./:/go/src/github.com/Scalingo/networking-agent
+      - ./:/go/src/github.com/Scalingo/sand
       - /var/run/netns:/var/run/netns:shared
       - /var/run/docker/netns:/var/run/docker/netns:shared
     environment:
@@ -15,4 +15,4 @@ services:
       PUBLIC_IP: "192.168.254.3"
     ports:
       - 9999:9999
-    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/networking-agent'
+    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/sand'

@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/network"
+	"github.com/Scalingo/sand/network"
 	"github.com/pkg/errors"
 )
 

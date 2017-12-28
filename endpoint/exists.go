@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 )
 

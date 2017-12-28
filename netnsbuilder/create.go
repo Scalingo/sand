@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/config"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/config"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/pkg/errors"
 )

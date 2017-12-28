@@ -8,9 +8,9 @@ import (
 	"sync"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/store"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/mvcc/mvccpb"
 	"github.com/pkg/errors"

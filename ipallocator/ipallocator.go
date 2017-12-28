@@ -6,8 +6,8 @@ import (
 	"math"
 	"net"
 
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 	"github.com/willf/bitset"
 )

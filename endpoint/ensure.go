@@ -8,10 +8,10 @@ import (
 
 	"gopkg.in/errgo.v1"
 
-	"github.com/Scalingo/networking-agent/api/params"
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/ipallocator"
-	"github.com/Scalingo/networking-agent/network/overlay"
+	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/ipallocator"
+	"github.com/Scalingo/sand/network/overlay"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )

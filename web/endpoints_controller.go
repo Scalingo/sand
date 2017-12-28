@@ -1,9 +1,9 @@
 package web
 
 import (
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/network/overlay"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/store"
 )
 
 type EndpointsController struct {

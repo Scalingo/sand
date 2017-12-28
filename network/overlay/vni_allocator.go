@@ -3,9 +3,9 @@ package overlay
 import (
 	"context"
 
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/idmanager"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/idmanager"
+	"github.com/Scalingo/sand/store"
 )
 
 const (

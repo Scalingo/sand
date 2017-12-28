@@ -6,9 +6,9 @@ import (
 	"sort"
 
 	"github.com/Scalingo/go-etcd-lock/lock"
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/etcd"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/etcd"
+	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 )
 

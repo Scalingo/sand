@@ -8,8 +8,8 @@ import (
 	"reflect"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/etcd"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/etcd"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/params"
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/ipallocator"
-	"github.com/Scalingo/networking-agent/network/overlay"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/ipallocator"
+	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/store"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )

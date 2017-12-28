@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/networking-agent/api/types"
-	"github.com/Scalingo/networking-agent/config"
-	"github.com/Scalingo/networking-agent/network/overlay"
-	"github.com/Scalingo/networking-agent/store"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 )
 
