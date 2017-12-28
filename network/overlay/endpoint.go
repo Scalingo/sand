@@ -10,9 +10,9 @@ import (
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/docker/libnetwork/netutils"
+	"github.com/Scalingo/sand/netlink"
+	"github.com/Scalingo/sand/netutils"
 	"github.com/pkg/errors"
-	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netlink/nl"
 	"github.com/vishvananda/netns"
 )
@@ -21,8 +21,8 @@ type overlayEndpoint struct {
 	endpoint    types.Endpoint
 	targetnsfd  netns.NsHandle
 	overlaynsfd netns.NsHandle
-	targetnlh   *netlink.Handle
-	overlaynlh  *netlink.Handle
+	targetnlh   netlink.Handler
+	overlaynlh  netlink.Handler
 }
 
 func EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.Endpoint) (types.Endpoint, error) {
@@ -87,7 +87,7 @@ func EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.E
 		return endpoint, errors.Wrapf(err, "fail to set link up %s in target", vethTarget.Attrs().Name)
 	}
 
-	addr, err := netlink.ParseAddr(endpoint.TargetVethIP)
+	addr, err := netutils.ParseAddr(endpoint.TargetVethIP)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to parse %s IP address", endpoint.TargetVethIP)
 	}

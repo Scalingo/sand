@@ -14,7 +14,7 @@ services:
       ETCD_URL: "http://localhost:22379"
     ports:
       - 9999:9999
-    command: reflex -r '\.go$$' -s -- sh -c 'go install -race && /go/bin/sand'
+    command: reflex -r '\.go$$' -s -- sh -c 'go install -race github.com/Scalingo/sand/cmd/sand-agent && /go/bin/sand-agent'
   test:
     build: .
     volumes:
