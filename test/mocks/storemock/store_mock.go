@@ -6,10 +6,9 @@ package storemock
 
 import (
 	context "context"
-	io "io"
 	reflect "reflect"
 
-	clientv3 "github.com/coreos/etcd/clientv3"
+	store "github.com/Scalingo/sand/store"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -73,12 +72,11 @@ func (mr *MockStoreMockRecorder) Set(arg0, arg1, arg2 interface{}) *gomock.Call 
 }
 
 // Watch mocks base method
-func (m *MockStore) Watch(arg0 context.Context, arg1 string) (clientv3.WatchChan, io.Closer, error) {
+func (m *MockStore) Watch(arg0 context.Context, arg1 string) (store.Watcher, error) {
 	ret := m.ctrl.Call(m, "Watch", arg0, arg1)
-	ret0, _ := ret[0].(clientv3.WatchChan)
-	ret1, _ := ret[1].(io.Closer)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret0, _ := ret[0].(store.Watcher)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Watch indicates an expected call of Watch

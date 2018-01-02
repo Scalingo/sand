@@ -7,6 +7,8 @@ import (
 	"io"
 	"sync"
 
+	"gopkg.in/errgo.v1"
+
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
@@ -59,53 +61,57 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 		return nil
 	}
 
-	w, closer, err := l.store.Watch(ctx, network.EndpointsStorageKey(""))
+	w, err := l.store.Watch(ctx, network.EndpointsStorageKey(""))
 	if err != nil {
 		return errors.Wrapf(err, "fail to create watcher for network %s", network)
 	}
 
-	l.networkWatchers[network.ID] = closer
+	l.networkWatchers[network.ID] = w
 
-	go func(wchan clientv3.WatchChan) {
-		defer func() {
-			err := closer.Close()
-			if err != nil {
-				log.WithError(err).Error("fail to stop etcd watcher")
-			}
-		}()
+	go func(w store.Watcher) {
 		log.Debug("start listening to etcd watch chan")
-		for resp := range wchan {
-			if err := resp.Err(); err != nil {
-				log.WithError(err).Error("error when watching events")
-			}
-			for _, event := range resp.Events {
-				switch event.Type {
-				case mvccpb.PUT:
-					var endpoint types.Endpoint
-					err := json.NewDecoder(bytes.NewReader(event.Kv.Value)).Decode(&endpoint)
-					if err != nil {
-						log.WithError(err).Error("fail to decode JSON")
-						continue
-					}
-
-					log = log.WithFields(logrus.Fields{
-						"endpoint_id":        endpoint.ID,
-						"endpoint_target_ip": endpoint.TargetVethIP,
-						"endpoint_hostname":  endpoint.Hostname,
-					})
-					log.Info("etcd watch got new endpoint")
-					ctx = logger.ToCtx(ctx, log)
-
-					err = nm.AddEndpointNeigh(ctx, network, endpoint)
-					if err != nil {
-						log.WithError(err).Errorf("fail to add endpoint '%s' ARP/FDB neigh rules", endpoint)
-					}
-
-				case mvccpb.DELETE:
-				}
+		for resp, ok := w.NextResponse(); ok; {
+			err := l.handleMessage(ctx, resp, nm, network)
+			if err != nil {
+				log.WithError(err).Error("fail to handle watch response")
 			}
 		}
 		log.Debug("etcd watch chan is closed")
 	}(w)
+
+	return nil
+}
+
+func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchResponse, nm netmanager.NetManager, network types.Network) error {
+	log := logger.Get(ctx)
+
+	if err := resp.Err(); err != nil {
+		return errgo.Notef(err, "error when watching events")
+	}
+	for _, event := range resp.Events {
+		switch event.Type {
+		case mvccpb.PUT:
+			var endpoint types.Endpoint
+			err := json.NewDecoder(bytes.NewReader(event.Kv.Value)).Decode(&endpoint)
+			if err != nil {
+				return errgo.Notef(err, "fail to decode JSON")
+			}
+
+			log = log.WithFields(logrus.Fields{
+				"endpoint_id":        endpoint.ID,
+				"endpoint_target_ip": endpoint.TargetVethIP,
+				"endpoint_hostname":  endpoint.Hostname,
+			})
+			log.Info("etcd watch got new endpoint")
+			ctx = logger.ToCtx(ctx, log)
+
+			err = nm.AddEndpointNeigh(ctx, network, endpoint)
+			if err != nil {
+				return errgo.Notef(err, "fail to add endpoint '%s' ARP/FDB neigh rules", endpoint)
+			}
+
+		case mvccpb.DELETE:
+		}
+	}
 	return nil
 }

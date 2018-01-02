@@ -3,32 +3,39 @@ package network
 import (
 	"context"
 	"errors"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/test/mocks/network/netmanagermock"
+	"github.com/Scalingo/sand/test/mocks/network/overlaymock"
 	"github.com/Scalingo/sand/test/mocks/storemock"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// func NewRepository(config *config.Config, store store.Store, listener overlay.NetworkEndpointListener) Repository {
-// 	return &repository{
-// 		config: config, store: store, listener: listener,
-// 		managers: map[types.NetworkType]netmanager.NetManager{
-// 			types.OverlayNetworkType: overlay.NewManager(config, listener),
-// 		},
-// 	}
-// }
-
 func TestRepository_Ensure(t *testing.T) {
+	expectNetManager := func(err error) func(t *testing.T, m *netmanagermock.MockNetManager, n types.Network) {
+		return func(t *testing.T, m *netmanagermock.MockNetManager, n types.Network) {
+			m.EXPECT().Ensure(gomock.Any(), n).Return(nil)
+			m.EXPECT().EnsureEndpointsNeigh(gomock.Any(), n, gomock.Any()).Do(func(ctx context.Context, n types.Network, eps []types.Endpoint) {
+				require.Len(t, eps, 1)
+				require.Equal(t, eps[0].ID, "ep-1")
+			}).Return(err)
+		}
+	}
+
 	cases := []struct {
 		Name             string
 		Network          func() types.Network
 		Error            string
-		ExpectNetManager func(*netmanagermock.MockNetManager, types.Network)
+		ExpectNetManager func(*testing.T, *netmanagermock.MockNetManager, types.Network)
+		ExpectStore      func(*testing.T, *storemock.MockStore, types.Network)
+		ExpectListener   func(*overlaymock.MockNetworkEndpointListener, netmanager.NetManager, types.Network)
 	}{
 		{
 			Name: "network with unknown type should return an error",
@@ -38,10 +45,75 @@ func TestRepository_Ensure(t *testing.T) {
 			Error: "invalid",
 		}, {
 			Name: "overlay: should return error if manager Ensure fails",
-			ExpectNetManager: func(m *netmanagermock.MockNetManager, n types.Network) {
+			ExpectNetManager: func(t *testing.T, m *netmanagermock.MockNetManager, n types.Network) {
 				m.EXPECT().Ensure(gomock.Any(), n).Return(errors.New("fail to ensure network"))
 			},
 			Error: "fail to ensure",
+		}, {
+			Name: "overlay: should return error if storage fails to retrieve list of endpoints",
+			ExpectNetManager: func(t *testing.T, m *netmanagermock.MockNetManager, n types.Network) {
+				m.EXPECT().Ensure(gomock.Any(), n).Return(nil)
+			},
+			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
+				m.EXPECT().Get(
+					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
+				).Return(errors.New("fail to get endpoints"))
+			},
+			Error: "fail to get endpoints",
+		}, {
+			Name:             "overlay: if there are more than 1 endpoint, add neighbors",
+			ExpectNetManager: expectNetManager(errors.New("fail to add neighbors")),
+			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
+				m.EXPECT().Get(
+					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
+				).Do(
+					func(ctx context.Context, key string, recursive bool, data interface{}) {
+						reflect.ValueOf(data).Elem().Set(reflect.ValueOf([]types.Endpoint{{ID: "ep-1"}}))
+					},
+				).Return(nil)
+			},
+			Error: "fail to add neighbors",
+		}, {
+			Name:             "overlay: it should return an error if the network listener fail to add new network",
+			ExpectNetManager: expectNetManager(nil),
+			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
+				m.EXPECT().Get(
+					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
+				).Do(
+					func(ctx context.Context, key string, recursive bool, data interface{}) {
+						reflect.ValueOf(data).Elem().Set(reflect.ValueOf([]types.Endpoint{{ID: "ep-1"}}))
+					},
+				).Return(nil)
+			},
+			ExpectListener: func(m *overlaymock.MockNetworkEndpointListener, nm netmanager.NetManager, n types.Network) {
+				m.EXPECT().Add(gomock.Any(), nm, n).Return(errors.New("fail to add endpoint listener"))
+			},
+			Error: "fail to add endpoint listener",
+		}, {
+			Name:             "overlay: it should add entries in the store",
+			ExpectNetManager: expectNetManager(nil),
+			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
+				m.EXPECT().Get(
+					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
+				).Do(
+					func(ctx context.Context, key string, recursive bool, data interface{}) {
+						reflect.ValueOf(data).Elem().Set(reflect.ValueOf([]types.Endpoint{{ID: "ep-1"}}))
+					},
+				).Return(nil)
+				for _, key := range []string{"/nodes/test-hostname/networks/1", "/nodes-networks/1/test-hostname"} {
+					m.EXPECT().Set(
+						gomock.Any(), key, gomock.Any(),
+					).Do(func(ctx context.Context, key string, data interface{}) {
+						m, ok := data.(map[string]interface{})
+						assert.True(t, ok)
+						assert.Equal(t, "1", m["id"].(string))
+						assert.IsType(t, time.Now(), m["created_at"])
+					}).Return(nil)
+				}
+			},
+			ExpectListener: func(m *overlaymock.MockNetworkEndpointListener, nm netmanager.NetManager, n types.Network) {
+				m.EXPECT().Add(gomock.Any(), nm, n).Return(nil)
+			},
 		},
 	}
 
@@ -51,8 +123,11 @@ func TestRepository_Ensure(t *testing.T) {
 			defer ctrl.Finish()
 
 			config, err := config.Build()
+			config.PublicHostname = "test-hostname"
+
 			require.NoError(t, err)
 
+			listener := overlaymock.NewMockNetworkEndpointListener(ctrl)
 			omanager := netmanagermock.NewMockNetManager(ctrl)
 			managers := map[types.NetworkType]netmanager.NetManager{
 				types.OverlayNetworkType: omanager,
@@ -63,6 +138,7 @@ func TestRepository_Ensure(t *testing.T) {
 				config:   config,
 				store:    store,
 				managers: managers,
+				listener: listener,
 			}
 
 			network := types.Network{ID: "1", Type: types.OverlayNetworkType}
@@ -71,7 +147,15 @@ func TestRepository_Ensure(t *testing.T) {
 			}
 
 			if c.ExpectNetManager != nil {
-				c.ExpectNetManager(omanager, network)
+				c.ExpectNetManager(t, omanager, network)
+			}
+
+			if c.ExpectStore != nil {
+				c.ExpectStore(t, store, network)
+			}
+
+			if c.ExpectListener != nil {
+				c.ExpectListener(listener, omanager, network)
 			}
 
 			err = r.Ensure(context.Background(), network)
@@ -84,162 +168,3 @@ func TestRepository_Ensure(t *testing.T) {
 		})
 	}
 }
-
-// func (c *repository) Ensure(ctx context.Context, network types.Network) error {
-// 	switch network.Type {
-// 	case types.OverlayNetworkType:
-// 		m := c.managers[network.Type]
-// 		err := m.Ensure(ctx, network)
-// 		if err != nil {
-// 			return errors.Wrapf(err, "fail to ensure overlay network %s", network)
-// 		}
-// 		var endpoints []types.Endpoint
-// 		err = c.store.Get(ctx, network.EndpointsStorageKey(""), true, &endpoints)
-// 		if err != nil && err != store.ErrNotFound {
-// 			return errors.Wrapf(err, "fail to get network endpoints")
-// 		}
-
-// 		if len(endpoints) > 0 {
-// 			err = m.EnsureEndpointsNeigh(ctx, network, endpoints)
-// 			if err != nil {
-// 				return errors.Wrapf(err, "fail to ensure neighbors (ARP/FDB)")
-// 			}
-// 		}
-
-// 		err = c.listener.Add(ctx, m, network)
-// 		if err != nil {
-// 			return errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
-// 		}
-// 	default:
-// 		return errors.New("invalid network type")
-// 	}
-
-// 	// Ability to list all networks with node hostname as prefix
-// 	err := c.store.Set(
-// 		ctx,
-// 		fmt.Sprintf("/nodes/%s/networks/%s", c.config.PublicHostname, network.ID),
-// 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
-// 	)
-// 	if err != nil {
-// 		return errors.Wrapf(err, "err to store nodes link to network %s", network)
-// 	}
-
-// 	// Ability to list nodes present in a network
-// 	err = c.store.Set(
-// 		ctx,
-// 		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.PublicHostname),
-// 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
-// 	)
-// 	if err != nil {
-// 		return errors.Wrapf(err, "err to store network %s link to hostname", network)
-// 	}
-
-// 	return nil
-// }
-
-// func (c *repository) Create(ctx context.Context, params params.CreateNetworkParams) (types.Network, error) {
-// 	log := logger.Get(ctx).WithField("network_name", params.Name)
-
-// 	if params.Type == "" {
-// 		params.Type = types.OverlayNetworkType
-// 	}
-
-// 	network, err := c.new(ctx, params)
-// 	if err != nil {
-// 		return network, errors.Wrapf(err, "fail to initialize network %s", params.Name)
-// 	}
-
-// 	log = log.WithField("network_id", network.ID)
-// 	ctx = logger.ToCtx(ctx, log)
-
-// 	err = c.Ensure(ctx, network)
-// 	if err != nil {
-// 		return network, errors.Wrapf(err, "fail to ensure network %s", network)
-// 	}
-
-// 	return network, nil
-// }
-
-// func (c *repository) Exists(ctx context.Context, id string) (types.Network, bool, error) {
-// 	network := types.Network{
-// 		ID: id,
-// 	}
-// 	if id == "" {
-// 		return network, false, nil
-// 	}
-
-// 	err := c.store.Get(ctx, network.StorageKey(), false, &network)
-// 	if err != nil && err != store.ErrNotFound {
-// 		return network, false, errors.Wrapf(err, "fail to get network %s from store", network.Name)
-// 	}
-// 	if err == store.ErrNotFound {
-// 		return network, false, nil
-// 	}
-// 	return network, true, err
-// }
-
-// func (c *repository) new(ctx context.Context, params params.CreateNetworkParams) (types.Network, error) {
-// 	log := logger.Get(ctx)
-// 	uuid := uuid.NewRandom().String()
-
-// 	iprange := DefaultIPRange
-// 	if params.IPRange != "" {
-// 		_, _, err := net.ParseCIDR(params.IPRange)
-// 		if err != nil {
-// 			return types.Network{}, errors.Wrapf(err, "invalid IP CIDR")
-// 		}
-// 		iprange = params.IPRange
-// 	}
-
-// 	allocator := ipallocator.New(c.config, c.store, uuid, ipallocator.WithIPRange(iprange))
-// 	ip, mask, err := allocator.AllocateIP(ctx)
-// 	if err != nil {
-// 		return types.Network{}, errors.Wrapf(err, "fail to allocate gateway IP")
-// 	}
-
-// 	log.Infof("gateway IP allocated: %s/%d", ip, mask)
-
-// 	network := types.Network{
-// 		ID:        uuid,
-// 		IPRange:   iprange,
-// 		Gateway:   fmt.Sprintf("%s/%d", ip.String(), mask),
-// 		CreatedAt: time.Now(),
-// 		Name:      params.Name,
-// 		Type:      params.Type,
-// 		NSHandlePath: filepath.Join(
-// 			c.config.NetnsPath, fmt.Sprintf("%s%s", c.config.NetnsPrefix, uuid),
-// 		),
-// 	}
-
-// 	vniGen := overlay.NewVNIGenerator(ctx, c.config, c.store)
-
-// 	switch network.Type {
-// 	case types.OverlayNetworkType:
-// 		err := vniGen.Lock(ctx)
-// 		if err != nil {
-// 			return network, errors.Wrapf(err, "fail to lock VNI generator for %s", network)
-// 		}
-// 		vni, err := vniGen.Generate(ctx)
-// 		if err != nil {
-// 			return network, errors.Wrapf(err, "fail to generate VNI for %s", network)
-// 		}
-
-// 		log.Debugf("vni is %v", vni)
-// 		network.VxLANVNI = vni
-// 	default:
-// 		return network, errors.New("invalid network type for init")
-// 	}
-
-// 	err = c.store.Set(ctx, network.StorageKey(), &network)
-// 	if err != nil {
-// 		return network, errors.Wrapf(err, "fail to get network %s from store", network)
-// 	}
-
-// 	if vniGen != nil {
-// 		err := vniGen.Unlock(ctx)
-// 		if err != nil {
-// 			log.WithError(err).Errorf("fail to unlock VNI generator for %s", network)
-// 		}
-// 	}
-// 	return network, nil
-// }

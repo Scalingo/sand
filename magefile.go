@@ -49,6 +49,7 @@ func GenerateMocks(ctx context.Context) error {
 		{Package: "netnsbuilder", Interface: "Manager"},
 		{Package: "idmanager", Interface: "Manager"},
 		{Package: "store", Interface: "Store"},
+		{Package: "store", Interface: "Watcher"},
 		{Package: "endpoint", Interface: "Repository"},
 		{Package: "network", Interface: "Repository"},
 		{Package: "network/netmanager", Interface: "NetManager"},
