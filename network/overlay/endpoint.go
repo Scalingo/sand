@@ -6,8 +6,6 @@ import (
 	"strings"
 	"syscall"
 
-	"gopkg.in/errgo.v1"
-
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netlink"
@@ -175,16 +173,16 @@ func (e overlayEndpoint) isTargetVethPresent(ctx context.Context) (netlink.Link,
 func (e overlayEndpoint) createVethPair(ctx context.Context) (netlink.Link, netlink.Link, error) {
 	vethOverlayName, err := netutils.GenerateIfaceName(e.overlaynlh, "veth", 4)
 	if err != nil {
-		return nil, nil, errgo.Notef(err, "fail to generate veth-overlay name")
+		return nil, nil, errors.Wrapf(err, "fail to generate veth-overlay name")
 	}
 	vethTargetName, err := netutils.GenerateIfaceName(e.overlaynlh, "veth", 4)
 	if err != nil {
-		return nil, nil, errgo.Notef(err, "fail to generate veth-target name")
+		return nil, nil, errors.Wrapf(err, "fail to generate veth-target name")
 	}
 
 	mac, err := net.ParseMAC(e.endpoint.TargetVethMAC)
 	if err != nil {
-		return nil, nil, errgo.Notef(err, "fail to parse target MAC address")
+		return nil, nil, errors.Wrapf(err, "fail to parse target MAC address")
 	}
 
 	veth := &netlink.Veth{

@@ -7,8 +7,6 @@ import (
 	"io"
 	"sync"
 
-	"gopkg.in/errgo.v1"
-
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
@@ -21,7 +19,7 @@ import (
 )
 
 type NetworkEndpointListener interface {
-	Add(context.Context, netmanager.NetManager, types.Network) error
+	Add(context.Context, netmanager.NetManager, types.Network) (chan struct{}, error)
 	Remove(context.Context, types.Network) error
 }
 
@@ -52,41 +50,47 @@ func (l *listener) Remove(ctx context.Context, network types.Network) error {
 	return nil
 }
 
-func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network types.Network) error {
+func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network types.Network) (chan struct{}, error) {
 	log := logger.Get(ctx)
 	l.Lock()
 	defer l.Unlock()
 
 	if _, ok := l.networkWatchers[network.ID]; ok {
-		return nil
+		return nil, nil
 	}
 
 	w, err := l.store.Watch(ctx, network.EndpointsStorageKey(""))
 	if err != nil {
-		return errors.Wrapf(err, "fail to create watcher for network %s", network)
+		return nil, errors.Wrapf(err, "fail to create watcher for network %s", network)
 	}
 
 	l.networkWatchers[network.ID] = w
 
+	done := make(chan struct{})
 	go func(w store.Watcher) {
+		defer close(done)
 		log.Debug("start listening to etcd watch chan")
-		for resp, ok := w.NextResponse(); ok; {
+		for {
+			resp, ok := w.NextResponse()
+			if !ok {
+				break
+			}
 			err := l.handleMessage(ctx, resp, nm, network)
 			if err != nil {
 				log.WithError(err).Error("fail to handle watch response")
 			}
 		}
-		log.Debug("etcd watch chan is closed")
+		log.Debug("watcher closed")
 	}(w)
 
-	return nil
+	return done, nil
 }
 
 func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchResponse, nm netmanager.NetManager, network types.Network) error {
 	log := logger.Get(ctx)
 
 	if err := resp.Err(); err != nil {
-		return errgo.Notef(err, "error when watching events")
+		return errors.Wrapf(err, "error when watching events")
 	}
 	for _, event := range resp.Events {
 		switch event.Type {
@@ -94,7 +98,7 @@ func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchRespons
 			var endpoint types.Endpoint
 			err := json.NewDecoder(bytes.NewReader(event.Kv.Value)).Decode(&endpoint)
 			if err != nil {
-				return errgo.Notef(err, "fail to decode JSON")
+				return errors.Wrapf(err, "fail to decode JSON")
 			}
 
 			log = log.WithFields(logrus.Fields{
@@ -107,7 +111,7 @@ func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchRespons
 
 			err = nm.AddEndpointNeigh(ctx, network, endpoint)
 			if err != nil {
-				return errgo.Notef(err, "fail to add endpoint '%s' ARP/FDB neigh rules", endpoint)
+				return errors.Wrapf(err, "fail to add endpoint '%s' ARP/FDB neigh rules", endpoint)
 			}
 
 		case mvccpb.DELETE:

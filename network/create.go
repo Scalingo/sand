@@ -69,7 +69,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 			}
 		}
 
-		err = c.listener.Add(ctx, m, network)
+		_, err = c.listener.Add(ctx, m, network)
 		if err != nil {
 			return errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
 		}

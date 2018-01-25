@@ -6,8 +6,6 @@ import (
 	"net"
 	"time"
 
-	"gopkg.in/errgo.v1"
-
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
@@ -26,7 +24,7 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 		allocator := ipallocator.New(r.config, r.store, n.ID, ipallocator.WithIPRange(n.IPRange))
 		ip, mask, err := allocator.AllocateIP(ctx)
 		if err != nil {
-			return endpoint, errgo.Notef(err, "fail to allocate IP for endpoint")
+			return endpoint, errors.Wrapf(err, "fail to allocate IP for endpoint")
 		}
 
 		endpoint = types.Endpoint{

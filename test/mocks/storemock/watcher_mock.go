@@ -46,18 +46,6 @@ func (mr *MockWatcherMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockWatcher)(nil).Close))
 }
 
-// IsReady mocks base method
-func (m *MockWatcher) IsReady() bool {
-	ret := m.ctrl.Call(m, "IsReady")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsReady indicates an expected call of IsReady
-func (mr *MockWatcherMockRecorder) IsReady() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsReady", reflect.TypeOf((*MockWatcher)(nil).IsReady))
-}
-
 // NextResponse mocks base method
 func (m *MockWatcher) NextResponse() (clientv3.WatchResponse, bool) {
 	ret := m.ctrl.Call(m, "NextResponse")
@@ -69,24 +57,4 @@ func (m *MockWatcher) NextResponse() (clientv3.WatchResponse, bool) {
 // NextResponse indicates an expected call of NextResponse
 func (mr *MockWatcherMockRecorder) NextResponse() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NextResponse", reflect.TypeOf((*MockWatcher)(nil).NextResponse))
-}
-
-// Ready mocks base method
-func (m *MockWatcher) Ready() {
-	m.ctrl.Call(m, "Ready")
-}
-
-// Ready indicates an expected call of Ready
-func (mr *MockWatcherMockRecorder) Ready() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ready", reflect.TypeOf((*MockWatcher)(nil).Ready))
-}
-
-// WaitReady mocks base method
-func (m *MockWatcher) WaitReady() {
-	m.ctrl.Call(m, "WaitReady")
-}
-
-// WaitReady indicates an expected call of WaitReady
-func (mr *MockWatcherMockRecorder) WaitReady() *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitReady", reflect.TypeOf((*MockWatcher)(nil).WaitReady))
 }

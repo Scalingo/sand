@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	"gopkg.in/errgo.v1"
-
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/pkg/errors"
@@ -58,7 +56,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 
 	endpoint, err := c.EndpointRepository.Create(ctx, network, params)
 	if err != nil {
-		return errgo.Notef(err, "fail to create endpoint")
+		return errors.Wrapf(err, "fail to create endpoint")
 	}
 
 	log.Info("endpoint created")
