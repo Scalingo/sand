@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/sand/network"
 	"github.com/pkg/errors"
 )
 
@@ -16,9 +15,7 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 	log = log.WithField("network_id", p["id"])
 	ctx = logger.ToCtx(ctx, log)
 
-	repo := network.NewRepository(c.Config, c.Store, c.Listener)
-
-	n, ok, err := repo.Exists(ctx, p["id"])
+	n, ok, err := c.NetworkRepository.Exists(ctx, p["id"])
 	if err != nil {
 		return errors.Wrapf(err, "fail to know if network '%s' exists", p["id"])
 	}
@@ -30,7 +27,19 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 	log = log.WithField("network_name", n.Name)
 	ctx = logger.ToCtx(ctx, log)
 
-	err = repo.Delete(ctx, n)
+	endpoints, err := c.EndpointRepository.List(ctx, map[string]string{
+		"network_id": n.ID,
+	})
+	if err != nil {
+		return errors.Wrapf(err, "fail to get network %s endpoints", n)
+	}
+
+	if len(endpoints) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		return errors.Errorf("fail to delete network %s, %d endpoints are still present.", n, len(endpoints))
+	}
+
+	err = c.NetworkRepository.Delete(ctx, n)
 	if err != nil {
 		return errors.Wrapf(err, "fail to delete network %s", n)
 	}

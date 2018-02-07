@@ -24,9 +24,11 @@ const (
 )
 
 type Repository interface {
-	Create(ctx context.Context, params params.CreateNetworkParams) (types.Network, error)
+	List(ctx context.Context) ([]types.Network, error)
+	Create(ctx context.Context, params params.NetworkCreate) (types.Network, error)
 	Ensure(ctx context.Context, network types.Network) error
 	Delete(ctx context.Context, network types.Network) error
+	DeleteEndpoint(ctx context.Context, network types.Network, endpoint types.Endpoint) error
 
 	// If the network exists, return it, nil otherwise
 	Exists(ctx context.Context, name string) (types.Network, bool, error)
@@ -100,7 +102,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	return nil
 }
 
-func (c *repository) Create(ctx context.Context, params params.CreateNetworkParams) (types.Network, error) {
+func (c *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	log := logger.Get(ctx).WithField("network_name", params.Name)
 
 	if params.Type == "" {
@@ -141,7 +143,7 @@ func (c *repository) Exists(ctx context.Context, id string) (types.Network, bool
 	return network, true, err
 }
 
-func (c *repository) new(ctx context.Context, params params.CreateNetworkParams) (types.Network, error) {
+func (c *repository) new(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	log := logger.Get(ctx)
 	uuid := uuid.NewRandom().String()
 
@@ -161,6 +163,10 @@ func (c *repository) new(ctx context.Context, params params.CreateNetworkParams)
 	}
 
 	log.Infof("gateway IP allocated: %s/%d", ip, mask)
+
+	if params.Name == "" {
+		params.Name = fmt.Sprintf("net-sc-%s", uuid)
+	}
 
 	network := types.Network{
 		ID:        uuid,

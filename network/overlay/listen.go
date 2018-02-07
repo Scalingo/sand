@@ -111,10 +111,28 @@ func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchRespons
 
 			err = nm.AddEndpointNeigh(ctx, network, endpoint)
 			if err != nil {
-				return errors.Wrapf(err, "fail to add endpoint '%s' ARP/FDB neigh rules", endpoint)
+				log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
 			}
 
 		case mvccpb.DELETE:
+			var endpoint types.Endpoint
+			err := l.store.GetWithRevision(ctx, string(event.Kv.Key), event.Kv.ModRevision-1, false, &endpoint)
+			if err != nil {
+				return errors.Wrapf(err, "fail to get endpoint %v", string(event.Kv.Key))
+			}
+
+			log = log.WithFields(logrus.Fields{
+				"endpoint_id":        endpoint.ID,
+				"endpoint_target_ip": endpoint.TargetVethIP,
+				"endpoint_hostname":  endpoint.Hostname,
+			})
+			log.Info("etcd watch got deleted endpoint")
+			ctx = logger.ToCtx(ctx, log)
+
+			err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
+			if err != nil {
+				log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
+			}
 		}
 	}
 	return nil

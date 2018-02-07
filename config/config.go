@@ -24,6 +24,10 @@ type Config struct {
 	EtcdTLSKey  string `envconfig:"ETCD_TLS_KEY"`
 	EtcdTLSCA   string `envconfig:"ETCD_TLS_CA"`
 
+	HttpTLSCert string `envconfig:"HTTP_TLS_CERT"`
+	HttpTLSKey  string `envconfig:"HTTP_TLS_KEY"`
+	HttpTLSCA   string `envconfig:"HTTP_TLS_CA"`
+
 	EtcdWithTLS   bool
 	EtcdEndpoints []string
 }

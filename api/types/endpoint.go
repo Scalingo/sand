@@ -29,7 +29,7 @@ func (e Endpoint) String() string {
 }
 
 func (e Endpoint) StorageKey() string {
-	return fmt.Sprintf("%s/%s/%s/%s", EndpointStoragePrefix, e.Hostname, e.NetworkID, e.ID)
+	return fmt.Sprintf("%s/%s/%s", EndpointStoragePrefix, e.Hostname, e.ID)
 }
 
 func (e Endpoint) NetworkStorageKey() string {

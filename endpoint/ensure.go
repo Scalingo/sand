@@ -14,29 +14,24 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *repository) Create(ctx context.Context, n types.Network, params params.CreateEndpointParams) (types.Endpoint, error) {
-	endpoint, ok, err := r.Exists(ctx, n, params.NSHandlePath)
+func (r *repository) Create(ctx context.Context, n types.Network, params params.EndpointCreate) (types.Endpoint, error) {
+	var endpoint types.Endpoint
+
+	allocator := ipallocator.New(r.config, r.store, n.ID, ipallocator.WithIPRange(n.IPRange))
+	ip, mask, err := allocator.AllocateIP(ctx)
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to get existance of endpoint in %s (store)", params.NSHandlePath)
+		return endpoint, errors.Wrapf(err, "fail to allocate IP for endpoint")
 	}
 
-	if !ok {
-		allocator := ipallocator.New(r.config, r.store, n.ID, ipallocator.WithIPRange(n.IPRange))
-		ip, mask, err := allocator.AllocateIP(ctx)
-		if err != nil {
-			return endpoint, errors.Wrapf(err, "fail to allocate IP for endpoint")
-		}
-
-		endpoint = types.Endpoint{
-			ID:              uuid.NewRandom().String(),
-			Hostname:        r.config.PublicHostname,
-			HostIP:          r.config.PublicIP,
-			NetworkID:       n.ID,
-			CreatedAt:       time.Now(),
-			TargetVethIP:    fmt.Sprintf("%s/%d", ip.String(), mask),
-			TargetVethMAC:   ipv4ToMac(ip),
-			TargetNetnsPath: params.NSHandlePath,
-		}
+	endpoint = types.Endpoint{
+		ID:              uuid.NewRandom().String(),
+		Hostname:        r.config.PublicHostname,
+		HostIP:          r.config.PublicIP,
+		NetworkID:       n.ID,
+		CreatedAt:       time.Now(),
+		TargetVethIP:    fmt.Sprintf("%s/%d", ip.String(), mask),
+		TargetVethMAC:   ipv4ToMac(ip),
+		TargetNetnsPath: params.NSHandlePath,
 	}
 
 	return r.Ensure(ctx, n, endpoint)

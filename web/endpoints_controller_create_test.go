@@ -90,7 +90,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			},
 			ExpectEndpointRepository: func(r *endpointmock.MockRepository) {
 				network := types.Network{ID: "1"}
-				params := params.CreateEndpointParams{NetworkID: network.ID, NSHandlePath: "/proc/self/ns/net"}
+				params := params.EndpointCreate{NetworkID: network.ID, NSHandlePath: "/proc/self/ns/net"}
 				r.EXPECT().Create(gomock.Any(), network, params).Return(types.Endpoint{}, errors.New("fail to create endpoint"))
 			},
 		},

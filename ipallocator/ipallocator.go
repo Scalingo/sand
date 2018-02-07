@@ -6,6 +6,7 @@ import (
 	"math"
 	"net"
 
+	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ func WithIPRange(r string) AllocatorOpt {
 
 type IPAllocator interface {
 	AllocateIP(ctx context.Context) (net.IP, uint, error)
+	ReleaseIP(ctx context.Context, ip net.IP) error
 }
 
 type allocator struct {
@@ -41,6 +43,9 @@ func New(config *config.Config, store store.Store, id string, opts ...AllocatorO
 	for _, opt := range opts {
 		opt(a)
 	}
+	if a.ipRange == "" {
+		a.ipRange = DefaultIPRange
+	}
 	return a
 }
 
@@ -49,9 +54,7 @@ func (a *allocator) StorageKey() string {
 }
 
 func (a *allocator) AllocateIP(ctx context.Context) (net.IP, uint, error) {
-	if a.ipRange == "" {
-		a.ipRange = DefaultIPRange
-	}
+	log := logger.Get(ctx)
 
 	_, ipnet, err := net.ParseCIDR(a.ipRange)
 	if err != nil {
@@ -87,12 +90,59 @@ func (a *allocator) AllocateIP(ctx context.Context) (net.IP, uint, error) {
 	ip := ipnet.IP
 	addIntToIP(ip, uint64(i))
 
+	log.WithField("ip", ip).WithField("ip-range", a.ipRange).Info("allocate IP")
+
 	err = a.store.Set(ctx, a.StorageKey(), &r)
 	if err != nil {
 		return ip, 0, errors.Wrapf(err, "fail to store ip range in store")
 	}
 
 	return ip, uint(mask), nil
+}
+
+func (a *allocator) ReleaseIP(ctx context.Context, ip net.IP) error {
+	log := logger.Get(ctx)
+
+	var r *bitset.BitSet
+	err := a.store.Get(ctx, a.StorageKey(), false, &r)
+	if err != nil {
+		return errors.Wrapf(err, "fail to get ip range from store")
+	}
+
+	_, network, err := net.ParseCIDR(a.ipRange)
+	if err != nil {
+		return errors.Wrapf(err, "fail to parse iprange of allocator %v", a.ipRange)
+	}
+
+	log = log.WithField("ip", ip).WithField("ip-range", a.ipRange)
+	i := ordinalFromIP4(ip, network.Mask)
+	log.WithField("ordinal", i).Debug("IP ordinal")
+	r.Clear(i)
+
+	log.Info("release IP")
+
+	err = a.store.Set(ctx, a.StorageKey(), &r)
+	if err != nil {
+		return errors.Wrapf(err, "fail to store ip range in store")
+	}
+	return nil
+}
+
+func ordinalFromIP4(ip net.IP, mask net.IPMask) uint {
+	var (
+		ordinal uint = 0
+		rank    uint = 1
+	)
+	// inv mask
+	for i := range mask {
+		mask[i] = mask[i] ^ 0xff
+	}
+	ip = ip.Mask(mask)
+	for i := len(ip) - 1; i >= 0; i-- {
+		ordinal += uint(ip[i]) * rank
+		rank++
+	}
+	return ordinal
 }
 
 // Adds the ordinal IP to the current array

@@ -12,6 +12,9 @@ services:
     environment:
       GO_ENV: development
       ETCD_URL: "http://localhost:22379"
+      HTTP_TLS_CERT: "/go/src/github.com/Scalingo/sand/dev-ssl/server.pem"
+      HTTP_TLS_KEY: "/go/src/github.com/Scalingo/sand/dev-ssl/server-key.pem"
+      HTTP_TLS_CA: "/go/src/github.com/Scalingo/sand/dev-ssl/ca.pem"
     ports:
       - 9999:9999
     command: reflex -r '\.go$$' -s -- sh -c 'go install -race github.com/Scalingo/sand/cmd/sand-agent && /go/bin/sand-agent'

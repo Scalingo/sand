@@ -54,6 +54,7 @@ func GenerateMocks(ctx context.Context) error {
 		{Package: "network", Interface: "Repository"},
 		{Package: "network/netmanager", Interface: "NetManager"},
 		{Package: "network/overlay", Interface: "NetworkEndpointListener"},
+		{Package: "client/sand", Interface: "Client"},
 	}
 
 	for _, mock := range mocks {

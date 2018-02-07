@@ -37,7 +37,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockRepository) Create(arg0 context.Context, arg1 params.CreateNetworkParams) (types.Network, error) {
+func (m *MockRepository) Create(arg0 context.Context, arg1 params.NetworkCreate) (types.Network, error) {
 	ret := m.ctrl.Call(m, "Create", arg0, arg1)
 	ret0, _ := ret[0].(types.Network)
 	ret1, _ := ret[1].(error)

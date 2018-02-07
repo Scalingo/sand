@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -15,7 +16,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	w.Header().Set("Content-Type", "application/json")
 	ctx := r.Context()
 
-	var params params.CreateEndpointParams
+	var params params.EndpointCreate
 	err := json.NewDecoder(r.Body).Decode(&params)
 	if err != nil {
 		w.WriteHeader(400)
@@ -60,7 +61,10 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	}
 
 	log.Info("endpoint created")
-	err = json.NewEncoder(w).Encode(&endpoint)
+	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(&httpresp.EndpointCreate{
+		Endpoint: endpoint,
+	})
 	if err != nil {
 		log.WithError(err).Error("fail to encode JSON")
 	}

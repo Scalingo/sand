@@ -14,12 +14,13 @@ const (
 )
 
 type Repository interface {
-	Create(context.Context, types.Network, params.CreateEndpointParams) (types.Endpoint, error)
+	List(context.Context, map[string]string) ([]types.Endpoint, error)
+	Create(context.Context, types.Network, params.EndpointCreate) (types.Endpoint, error)
 	Ensure(context.Context, types.Network, types.Endpoint) (types.Endpoint, error)
-	// Delete(ctx context.Context, network types.Network) error
+	Delete(ctx context.Context, id string) error
 
 	// If the endpoint has already been attach to the network in the kv store
-	Exists(context.Context, types.Network, string) (types.Endpoint, bool, error)
+	Exists(context.Context, string) (types.Endpoint, bool, error)
 }
 
 type repository struct {

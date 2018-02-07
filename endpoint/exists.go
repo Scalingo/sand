@@ -2,28 +2,24 @@ package endpoint
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 )
 
-func (r *repository) Exists(ctx context.Context, n types.Network, nspath string) (types.Endpoint, bool, error) {
-	var endpoints []types.Endpoint
-	err := r.store.Get(ctx, fmt.Sprintf("%s/%s/%s/", types.EndpointStoragePrefix, r.config.PublicHostname, n.ID), true, &endpoints)
+func (r *repository) Exists(ctx context.Context, id string) (types.Endpoint, bool, error) {
+	endpoint := types.Endpoint{
+		Hostname: r.config.PublicHostname,
+		ID:       id,
+	}
+	err := r.store.Get(ctx, endpoint.StorageKey(), false, &endpoint)
 	if err == store.ErrNotFound {
-		return types.Endpoint{}, false, nil
+		return endpoint, false, nil
 	}
 	if err != nil {
-		return types.Endpoint{}, false, errors.Wrapf(err, "fail to get network %s endpoints", n)
+		return endpoint, false, errors.Wrapf(err, "fail to get endpoint %s", id)
 	}
 
-	for _, endpoint := range endpoints {
-		if endpoint.TargetNetnsPath == nspath {
-			return endpoint, true, nil
-		}
-	}
-
-	return types.Endpoint{}, false, nil
+	return endpoint, true, nil
 }

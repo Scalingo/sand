@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"strings"
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/config"
@@ -17,6 +18,7 @@ var ErrNotFound = errors.New("not found")
 
 type Store interface {
 	Get(ctx context.Context, key string, recursive bool, data interface{}) error
+	GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data interface{}) error
 	Set(ctx context.Context, key string, data interface{}) error
 	Delete(ctx context.Context, key string) error
 	Watch(ctx context.Context, key string) (Watcher, error)
@@ -30,7 +32,7 @@ func New(c *config.Config) Store {
 	return &store{config: c}
 }
 
-func (s *store) Get(ctx context.Context, key string, recursive bool, data interface{}) error {
+func (s *store) get(ctx context.Context, key string, data interface{}, opts []clientv3.OpOption) error {
 	log := logger.Get(ctx).WithField("scope", "store")
 	key = s.Key(key)
 	c, closer, err := s.newEtcdClient()
@@ -38,10 +40,6 @@ func (s *store) Get(ctx context.Context, key string, recursive bool, data interf
 		return errors.Wrap(err, "fail to build etcd client")
 	}
 	defer closer.Close()
-	opts := []clientv3.OpOption{}
-	if recursive {
-		opts = append(opts, clientv3.WithPrefix())
-	}
 	res, err := c.Get(ctx, key, opts...)
 	if err != nil {
 		return errors.Wrapf(err, "fail to read key %v", key)
@@ -66,6 +64,25 @@ func (s *store) Get(ctx context.Context, key string, recursive bool, data interf
 		content = append(content, ']')
 	}
 	return json.NewDecoder(bytes.NewReader(content)).Decode(&data)
+}
+
+func (s *store) GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data interface{}) error {
+	ctx = logger.ToCtx(ctx, logger.Get(ctx).WithField("rev", rev))
+	opts := []clientv3.OpOption{
+		clientv3.WithRev(rev),
+	}
+	if recursive {
+		opts = append(opts, clientv3.WithPrefix())
+	}
+	return s.get(ctx, key, data, opts)
+}
+
+func (s *store) Get(ctx context.Context, key string, recursive bool, data interface{}) error {
+	opts := []clientv3.OpOption{}
+	if recursive {
+		opts = append(opts, clientv3.WithPrefix())
+	}
+	return s.get(ctx, key, data, opts)
 }
 
 func (s *store) Set(ctx context.Context, key string, data interface{}) error {
@@ -109,5 +126,8 @@ func (s *store) Delete(ctx context.Context, key string) error {
 }
 
 func (s *store) Key(key string) string {
+	if strings.HasPrefix(key, s.config.EtcdPrefix) {
+		return key
+	}
 	return s.config.EtcdPrefix + key
 }

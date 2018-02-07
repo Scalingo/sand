@@ -2,10 +2,16 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"strings"
+	"sync"
+	"syscall"
 
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-internal-tools/logger"
@@ -15,6 +21,7 @@ import (
 	"github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/Scalingo/sand/store"
+	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/pkg/errors"
@@ -67,9 +74,58 @@ func main() {
 	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
 	r.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
 	r.HandleFunc("/endpoints", ectrl.Create).Methods("POST")
+	r.HandleFunc("/endpoints", ectrl.List).Methods("GET")
+	r.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
 
 	log.WithField("port", c.HttpPort).Info("Listening")
-	http.ListenAndServe(fmt.Sprintf(":%d", c.HttpPort), r)
+	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
+
+	var listener net.Listener
+	if c.HttpTLSCA != "" {
+		listener, err = tlsListener(c, serviceEndpoint)
+	} else {
+		listener, err = net.Listen("tcp", serviceEndpoint)
+	}
+	if err != nil {
+		log.WithError(err).Error("fail to intialize listener")
+		os.Exit(-1)
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := http.Serve(listener, r)
+		if err != nil && !strings.Contains(err.Error(), "use of closed") {
+			log.WithError(err).Error("error after serving HTTP")
+		}
+	}()
+
+	sigs := make(chan os.Signal)
+	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT)
+	s := <-sigs
+	log.WithField("signal", s).Info("signal catched shuting down")
+
+	err = listener.Close()
+	if err != nil {
+		log.WithError(err).Error("fail to close listener")
+	}
+
+	wg.Wait()
+}
+
+func tlsListener(c *config.Config, serviceEndpoint string) (net.Listener, error) {
+	config, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to create tls configuration")
+	}
+
+	listener, err := tls.Listen("tcp", serviceEndpoint, config)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to create tls listener")
+	}
+
+	return listener, nil
 }
 
 func ensureNetworks(ctx context.Context, c *config.Config, listener overlay.NetworkEndpointListener) error {

@@ -2,7 +2,6 @@ package overlay
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"syscall"
 
@@ -32,6 +31,16 @@ func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network
 }
 
 func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, endpoint types.Endpoint) error {
+	ctx = logger.ToCtx(ctx, logger.Get(ctx).WithField("neighbor_action", "add"))
+	return m.endpointNeighAction(ctx, network, endpoint, (*netlink.Handle).NeighSet)
+}
+
+func (m manager) RemoveEndpointNeigh(ctx context.Context, network types.Network, endpoint types.Endpoint) error {
+	ctx = logger.ToCtx(ctx, logger.Get(ctx).WithField("neighbor_action", "delete"))
+	return m.endpointNeighAction(ctx, network, endpoint, (*netlink.Handle).NeighDel)
+}
+
+func (m manager) endpointNeighAction(ctx context.Context, network types.Network, endpoint types.Endpoint, action func(*netlink.Handle, *netlink.Neigh) error) error {
 	log := logger.Get(ctx)
 
 	// No rule to add for endpoint located on the current server
@@ -39,7 +48,7 @@ func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, en
 		return nil
 	}
 
-	log.Info("add endpoint ARP/FDB rules")
+	log.Info("change endpoint ARP/FDB rules")
 
 	nsfd, err := netns.GetFromPath(network.NSHandlePath)
 	if err != nil {
@@ -76,8 +85,8 @@ func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, en
 		State:        netlink.NUD_PERMANENT,
 		LinkIndex:    link.Attrs().Index,
 	}
-	if err := nlh.NeighSet(nlnh); err != nil {
-		return errors.Wrapf(err, "could not add neighbor entry: %+v", nlnh)
+	if err := action(nlh, nlnh); err != nil {
+		return errors.Wrapf(err, "could not modify neighbor entry: %+v", nlnh)
 	}
 
 	nlnh = &netlink.Neigh{
@@ -88,8 +97,8 @@ func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, en
 		Family:       syscall.AF_BRIDGE,
 		Flags:        netlink.NTF_SELF,
 	}
-	if err := nlh.NeighSet(nlnh); err != nil {
-		return fmt.Errorf("could not add neighbor entry:%+v error:%v", nlnh, err)
+	if err := action(nlh, nlnh); err != nil {
+		return errors.Wrapf(err, "could not modify neighbor entry: %+v", nlnh)
 	}
 	return nil
 }

@@ -37,7 +37,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // Create mocks base method
-func (m *MockRepository) Create(arg0 context.Context, arg1 types.Network, arg2 params.CreateEndpointParams) (types.Endpoint, error) {
+func (m *MockRepository) Create(arg0 context.Context, arg1 types.Network, arg2 params.EndpointCreate) (types.Endpoint, error) {
 	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -74,4 +74,17 @@ func (m *MockRepository) Exists(arg0 context.Context, arg1 types.Network, arg2 s
 // Exists indicates an expected call of Exists
 func (mr *MockRepositoryMockRecorder) Exists(arg0, arg1, arg2 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockRepository)(nil).Exists), arg0, arg1, arg2)
+}
+
+// List mocks base method
+func (m *MockRepository) List(arg0 context.Context, arg1 map[string]string) ([]types.Endpoint, error) {
+	ret := m.ctrl.Call(m, "List", arg0, arg1)
+	ret0, _ := ret[0].([]types.Endpoint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List
+func (mr *MockRepositoryMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockRepository)(nil).List), arg0, arg1)
 }

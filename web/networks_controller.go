@@ -1,48 +1,28 @@
 package web
 
 import (
-	"encoding/json"
-	"net/http"
-
-	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/endpoint"
+	"github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
 )
 
 type NetworksController struct {
-	Config   *config.Config
-	Store    store.Store
-	Listener overlay.NetworkEndpointListener
+	Config             *config.Config
+	Store              store.Store
+	Listener           overlay.NetworkEndpointListener
+	EndpointRepository endpoint.Repository
+	NetworkRepository  network.Repository
 }
 
 func NewNetworksController(c *config.Config, listener overlay.NetworkEndpointListener) NetworksController {
-	return NetworksController{Config: c, Store: store.New(c), Listener: listener}
-}
-
-type NetworkList struct {
-	Networks []types.Network `json:"networks"`
-}
-
-func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params map[string]string) error {
-	w.Header().Set("Content-Type", "application/json")
-	ctx := r.Context()
-	log := logger.Get(ctx)
-
-	var res NetworkList
-	err := c.Store.Get(ctx, "/network/", true, &res.Networks)
-	if err == store.ErrNotFound {
-		res.Networks = []types.Network{}
-	} else if err != nil {
-		return errors.Wrapf(err, "fail to query store")
+	store := store.New(c)
+	return NetworksController{
+		Config:             c,
+		Store:              store,
+		Listener:           listener,
+		EndpointRepository: endpoint.NewRepository(c, store),
+		NetworkRepository:  network.NewRepository(c, store, listener),
 	}
-
-	w.WriteHeader(200)
-	err = json.NewEncoder(w).Encode(&res)
-	if err != nil {
-		log.WithError(err).Error("fail to encode JSON")
-	}
-	return nil
 }
