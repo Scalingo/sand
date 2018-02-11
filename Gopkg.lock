@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/Microsoft/go-winio"
+  packages = ["."]
+  revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
+  version = "v0.4.7"
+
+[[projects]]
   name = "github.com/Scalingo/go-etcd-lock"
   packages = ["lock"]
   revision = "60492ce8c163cdd7821ac69588eb4bb6e4d57363"
@@ -20,6 +26,18 @@
   version = "v1.0.2"
 
 [[projects]]
+  name = "github.com/Scalingo/go-plugins-helpers"
+  packages = ["network","sdk"]
+  revision = "aadd7a23cbc131822038d612ad3de387cab15c62"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/Scalingo/go-utils"
+  packages = ["logger"]
+  revision = "eda5fa176199977866cc4716aa5db35175d03b96"
+  version = "v1.1.2"
+
+[[projects]]
   name = "github.com/codegangsta/negroni"
   packages = ["."]
   revision = "5dbbc83f748fc3ad38585842b0aedab546d0ea1e"
@@ -32,16 +50,40 @@
   version = "v3.2.11"
 
 [[projects]]
+  name = "github.com/coreos/go-systemd"
+  packages = ["activation"]
+  revision = "40e2722dffead74698ca12a750f64ef313ddce05"
+  version = "v16"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/docker/docker"
   packages = ["pkg/ioutils","pkg/longpath","pkg/reexec"]
   revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
   version = "v1.13.1"
 
 [[projects]]
+  name = "github.com/docker/go-connections"
+  packages = ["sockets"]
+  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
+  version = "v0.3.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/docker/libnetwork"
   packages = ["ipamutils","netutils","ns","osl","resolvconf","resolvconf/dns","types"]
   revision = "26531e56a76d7334e594098d7cfab88285d9065c"
+
+[[projects]]
+  name = "github.com/golang/mock"
+  packages = ["gomock"]
+  revision = "13f360950a79f5864a972c786a10a50e44b69541"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -68,6 +110,12 @@
   version = "v1.3.0"
 
 [[projects]]
+  name = "github.com/magefile/mage"
+  packages = ["mg","sh","types"]
+  revision = "ab3ca2f6f85577d7ec82e0a6df721147a2e737f9"
+  version = "v2.0.1"
+
+[[projects]]
   name = "github.com/pborman/uuid"
   packages = ["."]
   revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
@@ -80,6 +128,12 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/satori/go.uuid"
   packages = ["."]
   revision = "879c5887cd475cd7864858769793b2ceb0d44feb"
@@ -90,6 +144,18 @@
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
   version = "v1.0.4"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert","require"]
+  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
+  version = "v1.2.1"
+
+[[projects]]
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
 
 [[projects]]
   branch = "master"
@@ -118,7 +184,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","proxy","trace"]
   revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
 
 [[projects]]
@@ -154,6 +220,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ede5afa58c1fcad76c362fae8e000ebc25dacfcd02e9383d8bac9ffd204de022"
+  inputs-digest = "9390fe456bab1ccfecbc9bc7104ae42fd8f281e29c7fc1cc5d992552114e4cfe"
   solver-name = "gps-cdcl"
   solver-version = 1
