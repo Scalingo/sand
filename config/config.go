@@ -28,6 +28,9 @@ type Config struct {
 	HttpTLSKey  string `envconfig:"HTTP_TLS_KEY"`
 	HttpTLSCA   string `envconfig:"HTTP_TLS_CA"`
 
+	EnableDockerPlugin   bool `envconfig:"ENABLE_DOCKER_PLUGIN"`
+	DockerPluginHttpPort int  `default:"9998"`
+
 	EtcdWithTLS   bool
 	EtcdEndpoints []string
 }

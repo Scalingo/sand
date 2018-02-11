@@ -15,10 +15,14 @@ import (
 
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-internal-tools/logger"
+	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
+	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/endpoint"
+	"github.com/Scalingo/sand/integrations/docker"
 	"github.com/Scalingo/sand/network"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/Scalingo/sand/store"
 	apptls "github.com/Scalingo/sand/utils/tls"
@@ -30,7 +34,7 @@ import (
 
 func main() {
 	log := logger.Default()
-	log.SetLevel(logrus.DebugLevel)
+	log.SetLevel(logrus.InfoLevel)
 	ctx := logger.ToCtx(context.Background(), log)
 
 	// If reexec to create network namespace
@@ -56,9 +60,12 @@ func main() {
 	}
 
 	store := store.New(c)
-	peerListener := overlay.NewNetworkEndpointListener(c, store)
+	peerListener := overlay.NewNetworkEndpointListener(ctx, c, store)
 
-	err = ensureNetworks(ctx, c, peerListener)
+	managers := netmanager.NewManagerMap()
+	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
+
+	err = ensureNetworks(ctx, c, managers)
 	if err != nil {
 		log.WithError(err).Error("fail to ensure existing networks")
 		os.Exit(-1)
@@ -67,8 +74,11 @@ func main() {
 	r := handlers.NewRouter(log)
 	r.Use(handlers.ErrorMiddleware)
 
-	nctrl := web.NewNetworksController(c, peerListener)
-	ectrl := web.NewEndpointsController(c, peerListener)
+	endpointRepository := endpoint.NewRepository(c, store, managers)
+	networkRepository := network.NewRepository(c, store, managers)
+
+	nctrl := web.NewNetworksController(c, managers)
+	ectrl := web.NewEndpointsController(c, managers)
 
 	r.HandleFunc("/networks", nctrl.List).Methods("GET")
 	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
@@ -79,6 +89,43 @@ func main() {
 
 	log.WithField("port", c.HttpPort).Info("Listening")
 	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
+
+	wg := &sync.WaitGroup{}
+
+	if c.EnableDockerPlugin {
+		log.Info("enabling docker plugin")
+		dockerRepository := docker.NewRepository(c, store)
+		plugin := docker.NewDockerPlugin(networkRepository, endpointRepository, dockerRepository)
+		handler := dockernetwork.NewHandler(log, plugin)
+
+		var listener net.Listener
+		dockerPluginEndpoint := fmt.Sprintf(":%d", c.DockerPluginHttpPort)
+		if c.HttpTLSCA != "" {
+			listener, err = tlsListener(c, dockerPluginEndpoint)
+		} else {
+			listener, err = net.Listen("tcp", dockerPluginEndpoint)
+		}
+		if err != nil {
+			log.WithError(err).Error("fail to intialize listener")
+			os.Exit(-1)
+		}
+
+		err = docker.WritePluginSpecsOnDisk(ctx, c)
+		if err != nil {
+			log.WithError(err).Error("fail to write plugin spec file on disk")
+			os.Exit(-1)
+		}
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := handler.Serve(listener)
+			if err != nil && !strings.Contains(err.Error(), "use of closed") {
+				log.WithError(err).Error("error after serving HTTP")
+			}
+			log.Info("docker plugin stopped")
+		}()
+	}
 
 	var listener net.Listener
 	if c.HttpTLSCA != "" {
@@ -91,7 +138,6 @@ func main() {
 		os.Exit(-1)
 	}
 
-	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -99,6 +145,7 @@ func main() {
 		if err != nil && !strings.Contains(err.Error(), "use of closed") {
 			log.WithError(err).Error("error after serving HTTP")
 		}
+		log.Info("http API stopped")
 	}()
 
 	sigs := make(chan os.Signal)
@@ -128,66 +175,55 @@ func tlsListener(c *config.Config, serviceEndpoint string) (net.Listener, error)
 	return listener, nil
 }
 
-func ensureNetworks(ctx context.Context, c *config.Config, listener overlay.NetworkEndpointListener) error {
+func ensureNetworks(ctx context.Context, c *config.Config, managers netmanager.ManagerMap) error {
 	log := logger.Get(ctx)
 	ctx = logger.ToCtx(ctx, log)
 
 	log.Info("ensure networks on node")
 
 	s := store.New(c)
-	var networks []types.Network
-	err := s.Get(ctx, fmt.Sprintf("/nodes/%s/networks/", c.PublicHostname), true, &networks)
+	erepo := endpoint.NewRepository(c, s, managers)
+	repo := network.NewRepository(c, s, managers)
+
+	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.PublicHostname})
 	if err == store.ErrNotFound {
 		return nil
 	}
 	if err != nil {
-		return errors.Wrapf(err, "fail to get existing networks on %v", c.PublicHostname)
+		return errors.Wrapf(err, "fail to list endpoints of %v", c.PublicHostname)
 	}
 
-	repo := network.NewRepository(c, s, listener)
-	erepo := endpoint.NewRepository(c, s)
+	for _, endpoint := range endpoints {
+		if !endpoint.Active {
+			continue
+		}
+		log = log.WithFields(logrus.Fields{
+			"endpoint_id": endpoint.ID, "endpoint_netns_path": endpoint.TargetNetnsPath,
+		})
+		log.Info("restoring endpoint")
 
-	for _, network := range networks {
-		log = log.WithField("network_id", network.ID)
-
-		err = s.Get(ctx, network.StorageKey(), false, &network)
+		network, ok, err := repo.Exists(ctx, endpoint.NetworkID)
 		if err != nil {
-			log.WithError(err).Error("fail to get network details")
+			return errors.Wrapf(err, "fail to get network")
+		}
+		if !ok {
+			log.WithError(errors.Errorf("network not found for %v", endpoint))
 			continue
 		}
 
-		log = log.WithField("network_name", network.Name)
-		ctx = logger.ToCtx(ctx, log)
-
-		log.Info("ensuring network is setup")
+		log.Info("ensuring network")
 		err = repo.Ensure(ctx, network)
 		if err != nil {
 			log.WithError(err).Error("fail to ensure network")
 			continue
 		}
 
-		var endpoints []types.Endpoint
-		err = s.Get(ctx, network.EndpointsStorageKey(c.PublicHostname), true, &endpoints)
-		if err == store.ErrNotFound {
-			continue
-		}
+		endpoint, err = erepo.Activate(ctx, network, endpoint, params.EndpointActivate{
+			NSHandlePath: endpoint.TargetNetnsPath,
+		})
 		if err != nil {
-			log.WithError(err).Error("fail to list network endpoints")
+			log.WithError(err).Error("fail to ensure endpoint")
 			continue
-		}
-
-		log.Info("insuring network endpoints are setup")
-		for _, endpoint := range endpoints {
-			log = log.WithFields(logrus.Fields{
-				"endpoint_id": endpoint.ID, "endpoint_netns_path": endpoint.TargetNetnsPath,
-			})
-			log.Info("restoring endpoint")
-			ctx = logger.ToCtx(ctx, log)
-			endpoint, err = erepo.Ensure(ctx, network, endpoint)
-			if err != nil {
-				log.WithError(err).Error("fail to ensure endpoint")
-				continue
-			}
 		}
 	}
 	return nil

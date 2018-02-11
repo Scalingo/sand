@@ -24,17 +24,23 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	}
 
 	log := logger.Get(ctx).WithFields(logrus.Fields{
-		"target_netns": params.NSHandlePath,
-		"network_id":   params.NetworkID,
+		"network_id": params.NetworkID,
 	})
 
-	if params.NSHandlePath == "" {
-		w.WriteHeader(400)
-		return errors.New("missing ns_handle_path")
-	}
-	if _, err := os.Stat(params.NSHandlePath); err != nil {
-		w.WriteHeader(400)
-		return errors.Errorf("ns_handle_path '%s' is invalid: %v", params.NSHandlePath, err)
+	if params.Activate {
+		log = logger.Get(ctx).WithFields(logrus.Fields{
+			"activate":     params.Activate,
+			"target_netns": params.ActivateParams.NSHandlePath,
+		})
+
+		if params.ActivateParams.NSHandlePath == "" {
+			w.WriteHeader(400)
+			return errors.New("missing ns_handle_path")
+		}
+		if _, err := os.Stat(params.ActivateParams.NSHandlePath); err != nil {
+			w.WriteHeader(400)
+			return errors.Errorf("ns_handle_path '%s' is invalid: %v", params.ActivateParams.NSHandlePath, err)
+		}
 	}
 
 	network, ok, err := c.NetworkRepository.Exists(ctx, params.NetworkID)
@@ -54,6 +60,9 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	log = log.WithField("network_name", network.Name)
 	log.Info("creating endpoint")
 	ctx = logger.ToCtx(ctx, log)
+
+	params.ActivateParams.SetAddr = true
+	params.ActivateParams.MoveVeth = true
 
 	endpoint, err := c.EndpointRepository.Create(ctx, network, params)
 	if err != nil {

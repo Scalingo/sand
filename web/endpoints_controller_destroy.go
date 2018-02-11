@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/sand/endpoint"
 	"github.com/pkg/errors"
 )
 
@@ -12,7 +13,7 @@ func (c EndpointsController) Destroy(w http.ResponseWriter, r *http.Request, p m
 	ctx := r.Context()
 	log := logger.Get(ctx)
 
-	endpoint, ok, err := c.EndpointRepository.Exists(ctx, p["id"])
+	e, ok, err := c.EndpointRepository.Exists(ctx, p["id"])
 	if err != nil {
 		return errors.Wrapf(err, "fail to get endpoint %v", p["id"])
 	}
@@ -21,26 +22,23 @@ func (c EndpointsController) Destroy(w http.ResponseWriter, r *http.Request, p m
 		return nil
 	}
 
-	log = log.WithField("endpoint_id", endpoint.ID)
+	log = log.WithField("endpoint_id", e.ID)
 	ctx = logger.ToCtx(ctx, log)
 
-	network, ok, err := c.NetworkRepository.Exists(ctx, endpoint.NetworkID)
+	network, ok, err := c.NetworkRepository.Exists(ctx, e.NetworkID)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get network %v", endpoint.NetworkID)
+		return errors.Wrapf(err, "fail to get network %v", e.NetworkID)
 	}
 	if !ok {
-		return errors.Wrapf(err, "endpoint %v has unreferenced network ID %v", endpoint, endpoint.NetworkID)
+		return errors.Wrapf(err, "endpoint %v has unreferenced network ID %v", e, e.NetworkID)
 	}
 
 	log = log.WithField("network_id", network.ID)
 	ctx = logger.ToCtx(ctx, log)
 
-	err = c.NetworkRepository.DeleteEndpoint(ctx, network, endpoint)
-	if err != nil {
-		return errors.Wrapf(err, "fail to delete endpoint %v of network %v", network, endpoint)
-	}
-
-	err = c.EndpointRepository.Delete(ctx, p["id"])
+	err = c.EndpointRepository.Delete(ctx, network, e, endpoint.DeleteOpts{
+		ForceDeactivation: true,
+	})
 	if err != nil {
 		return errors.Wrapf(err, "fail to destroy endpoint")
 	}

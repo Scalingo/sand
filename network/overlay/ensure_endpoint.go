@@ -3,10 +3,10 @@ package overlay
 import (
 	"context"
 	"net"
-	"strings"
 	"syscall"
 
 	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netlink"
 	"github.com/Scalingo/sand/netutils"
@@ -17,18 +17,36 @@ import (
 
 type overlayEndpoint struct {
 	endpoint    types.Endpoint
+	hostnsfd    netns.NsHandle
 	targetnsfd  netns.NsHandle
 	overlaynsfd netns.NsHandle
+	hostnlh     netlink.Handler
 	targetnlh   netlink.Handler
 	overlaynlh  netlink.Handler
 }
 
-func EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.Endpoint) (types.Endpoint, error) {
-	targetnsfd, err := netns.GetFromPath(endpoint.TargetNetnsPath)
+func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.Endpoint, params params.EndpointActivate) (types.Endpoint, error) {
+	hostnsfd, err := netns.Get()
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to get target namespace handler: %s", endpoint.TargetNetnsPath)
+		return endpoint, errors.Wrapf(err, "fail to get host namespace handler")
 	}
-	defer targetnsfd.Close()
+	defer hostnsfd.Close()
+
+	var targetnsfd netns.NsHandle
+	if !params.MoveVeth {
+		targetnsfd = hostnsfd
+	} else {
+		targetnsfd, err = netns.GetFromPath(endpoint.TargetNetnsPath)
+		if err != nil {
+			return endpoint, errors.Wrapf(err, "fail to get target namespace handler: %s", endpoint.TargetNetnsPath)
+		}
+		defer targetnsfd.Close()
+	}
+
+	hostnlh, err := netlink.NewHandleAt(hostnsfd, syscall.NETLINK_ROUTE)
+	if err != nil {
+		return endpoint, errors.Wrapf(err, "fail to get host namespace handler")
+	}
 
 	targetnlh, err := netlink.NewHandleAt(targetnsfd, syscall.NETLINK_ROUTE)
 	if err != nil {
@@ -48,13 +66,15 @@ func EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.E
 
 	overlayEndpoint := overlayEndpoint{
 		endpoint:    endpoint,
+		hostnsfd:    hostnsfd,
 		targetnsfd:  targetnsfd,
 		overlaynsfd: overlaynsfd,
+		hostnlh:     hostnlh,
 		targetnlh:   targetnlh,
 		overlaynlh:  overlaynlh,
 	}
 
-	vethOverlay, vethTarget, err := overlayEndpoint.ensureVethPair(ctx)
+	vethOverlay, vethTarget, err := overlayEndpoint.ensureVethPair(ctx, params)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to create veth pair")
 	}
@@ -80,33 +100,35 @@ func EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.E
 		return endpoint, errors.Wrapf(err, "fail to set MTU to 1450 on %s", vethTarget.Attrs().Name)
 	}
 
-	err = targetnlh.LinkSetUp(vethTarget)
-	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to set link up %s in target", vethTarget.Attrs().Name)
-	}
-
-	addr, err := netutils.ParseAddr(endpoint.TargetVethIP)
-	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to parse %s IP address", endpoint.TargetVethIP)
-	}
-
-	addrs, err := targetnlh.AddrList(vethTarget, nl.FAMILY_V4)
-	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to list addresses of target %v", vethTarget.Attrs().Name)
-	}
-
-	exist := false
-	for _, a := range addrs {
-		if a.IP.String() == addr.IP.String() {
-			exist = true
-			break
-		}
-	}
-
-	if !exist {
-		err = targetnlh.AddrAdd(vethTarget, addr)
+	if params.SetAddr {
+		err = targetnlh.LinkSetUp(vethTarget)
 		if err != nil {
-			return endpoint, errors.Wrapf(err, "fail to add %s on target veth %v", endpoint.TargetVethIP, vethTarget.Attrs().Name)
+			return endpoint, errors.Wrapf(err, "fail to set link up %s in target", vethTarget.Attrs().Name)
+		}
+
+		addr, err := netutils.ParseAddr(endpoint.TargetVethIP)
+		if err != nil {
+			return endpoint, errors.Wrapf(err, "fail to parse %s IP address", endpoint.TargetVethIP)
+		}
+
+		addrs, err := targetnlh.AddrList(vethTarget, nl.FAMILY_V4)
+		if err != nil {
+			return endpoint, errors.Wrapf(err, "fail to list addresses of target %v", vethTarget.Attrs().Name)
+		}
+
+		exist := false
+		for _, a := range addrs {
+			if a.IP.String() == addr.IP.String() {
+				exist = true
+				break
+			}
+		}
+
+		if !exist {
+			err = targetnlh.AddrAdd(vethTarget, addr)
+			if err != nil {
+				return endpoint, errors.Wrapf(err, "fail to add %s on target veth %v", endpoint.TargetVethIP, vethTarget.Attrs().Name)
+			}
 		}
 	}
 
@@ -122,7 +144,7 @@ func EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.E
 	return endpoint, nil
 }
 
-func (e overlayEndpoint) ensureVethPair(ctx context.Context) (netlink.Link, netlink.Link, error) {
+func (e overlayEndpoint) ensureVethPair(ctx context.Context, params params.EndpointActivate) (netlink.Link, netlink.Link, error) {
 	log := logger.Get(ctx)
 	if e.endpoint.OverlayVethName != "" {
 		overlayLink, ok, err := e.isOverlayVethPresent(ctx)
@@ -145,37 +167,41 @@ func (e overlayEndpoint) ensureVethPair(ctx context.Context) (netlink.Link, netl
 			}
 		}
 	}
-	return e.createVethPair(ctx)
+	return e.createVethPair(ctx, params)
 }
 
 func (e overlayEndpoint) isOverlayVethPresent(ctx context.Context) (netlink.Link, bool, error) {
 	link, err := e.overlaynlh.LinkByName(e.endpoint.OverlayVethName)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			return nil, false, nil
-		}
+	if _, ok := err.(netlink.LinkNotFoundError); ok {
+		return nil, false, nil
+	} else if err != nil {
 		return nil, false, errors.Wrapf(err, "fail to get link %s", e.endpoint.OverlayVethName)
 	}
 	return link, true, nil
 }
 
+// isTargetVethPresent is a little more tricky as docker#libnetwork like to rename interfaces
+// So interfaces should be listed anc MAC compared in ordered to know if it is present or not
 func (e overlayEndpoint) isTargetVethPresent(ctx context.Context) (netlink.Link, bool, error) {
-	link, err := e.targetnlh.LinkByName(e.endpoint.TargetVethName)
+	links, err := e.targetnlh.LinkList()
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			return nil, false, nil
-		}
-		return nil, false, errors.Wrapf(err, "fail to get link %s", e.endpoint.TargetVethName)
+		return nil, false, errors.Wrapf(err, "fail to list links of target namespace")
 	}
-	return link, true, nil
+	for _, l := range links {
+		if l.Attrs().HardwareAddr.String() == e.endpoint.TargetVethMAC {
+			return l, true, nil
+		}
+	}
+
+	return nil, false, nil
 }
 
-func (e overlayEndpoint) createVethPair(ctx context.Context) (netlink.Link, netlink.Link, error) {
-	vethOverlayName, err := netutils.GenerateIfaceName(e.overlaynlh, "veth", 4)
+func (e overlayEndpoint) createVethPair(ctx context.Context, params params.EndpointActivate) (netlink.Link, netlink.Link, error) {
+	vethOverlayName, err := netutils.GenerateIfaceName(e.hostnlh, "sand", 4)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to generate veth-overlay name")
 	}
-	vethTargetName, err := netutils.GenerateIfaceName(e.overlaynlh, "veth", 4)
+	vethTargetName, err := netutils.GenerateIfaceName(e.hostnlh, "sand", 4)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to generate veth-target name")
 	}
@@ -189,49 +215,46 @@ func (e overlayEndpoint) createVethPair(ctx context.Context) (netlink.Link, netl
 		LinkAttrs: netlink.LinkAttrs{Name: vethOverlayName, TxQLen: 0},
 		PeerName:  vethTargetName,
 	}
-	if err := e.overlaynlh.LinkAdd(veth); err != nil {
+	if err := e.hostnlh.LinkAdd(veth); err != nil {
 		return nil, nil, errors.Wrapf(err, "error creating veth pair")
 	}
 
-	vethOverlay, err := e.overlaynlh.LinkByName(vethOverlayName)
+	vethOverlay, err := e.hostnlh.LinkByName(vethOverlayName)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to find %s", vethOverlayName)
 	}
 
-	vethTarget, err := e.overlaynlh.LinkByName(vethTargetName)
+	err = e.hostnlh.LinkSetNsFd(vethOverlay, int(e.overlaynsfd))
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "fail to switch namespace for overlay veth")
+	}
+
+	vethTarget, err := e.hostnlh.LinkByName(vethTargetName)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to get %s", vethTargetName)
 	}
 
-	err = e.overlaynlh.LinkSetNsFd(vethTarget, int(e.targetnsfd))
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "fail to swtch namespace for target veth")
-	}
-
 	// Force interface down to avoid 'device busy' error
-	err = e.targetnlh.LinkSetDown(vethTarget)
+	err = e.hostnlh.LinkSetDown(vethTarget)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to set down target interface %v", vethTargetName)
 	}
 
-	err = e.targetnlh.LinkSetHardwareAddr(vethTarget, mac)
+	err = e.hostnlh.LinkSetHardwareAddr(vethTarget, mac)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to set mac '%s' on target interface '%v'", mac, vethTargetName)
 	}
 
-	inTargetName, err := netutils.GenerateIfaceName(e.targetnlh, "in", 4)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "fail to generate in### name for target interface")
-	}
+	if params.MoveVeth {
+		err = e.hostnlh.LinkSetNsFd(vethTarget, int(e.targetnsfd))
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "fail to switch namespace for target veth")
+		}
 
-	err = e.targetnlh.LinkSetName(vethTarget, inTargetName)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "fail to rename %s to %s", vethTargetName, inTargetName)
-	}
-
-	vethTarget, err = e.targetnlh.LinkByName(inTargetName)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "fail to get %s link", inTargetName)
+		vethTarget, err = e.targetnlh.LinkByName(vethTargetName)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "fail to get target veth in target ns")
+		}
 	}
 
 	return vethOverlay, vethTarget, nil

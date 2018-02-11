@@ -22,10 +22,11 @@ type Endpoint struct {
 	TargetVethName  string    `json:"target_veth_name"`
 	TargetVethMAC   string    `json:"target_veth_mac"`
 	TargetVethIP    string    `json:"target_veth_ip"`
+	Active          bool      `json:"active"`
 }
 
 func (e Endpoint) String() string {
-	return fmt.Sprintf("Endpoint[%s|%s|Network(%s)]", e.ID, e.TargetNetnsPath, e.NetworkID)
+	return fmt.Sprintf("Endpoint[%s|%s|Network(%s)|Active(%v)]", e.ID, e.TargetNetnsPath, e.NetworkID, e.Active)
 }
 
 func (e Endpoint) StorageKey() string {

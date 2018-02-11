@@ -13,6 +13,7 @@ type Bridge = netlink.Bridge
 type Neigh = netlink.Neigh
 type Veth = netlink.Veth
 type LinkAttrs = netlink.LinkAttrs
+type LinkNotFoundError = netlink.LinkNotFoundError
 
 type Handler interface {
 	AddrList(Link, int) ([]netlink.Addr, error)

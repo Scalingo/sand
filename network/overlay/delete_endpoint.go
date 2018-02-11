@@ -2,39 +2,45 @@ package overlay
 
 import (
 	"context"
-	"syscall"
 
 	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/netutils"
 	"github.com/pkg/errors"
-	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 )
 
 func (m manager) DeleteEndpoint(ctx context.Context, n types.Network, e types.Endpoint) error {
-	nsfd, err := netns.GetFromPath(e.TargetNetnsPath)
+	overlaynsfd, err := netns.GetFromPath(n.NSHandlePath)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get namespace handler")
 	}
-	defer nsfd.Close()
+	defer overlaynsfd.Close()
 
-	nlh, err := netlink.NewHandleAt(nsfd, syscall.NETLINK_ROUTE)
+	err = netutils.DeleteInterfaceIfExists(ctx, overlaynsfd, e.OverlayVethName)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get netlink handler of netns")
+		return errors.Wrapf(err, "fail to delete interface on targetns")
 	}
 
-	link, err := nlh.LinkByName(e.TargetVethName)
+	hostfd, err := netns.Get()
 	if err != nil {
-		return errors.Wrapf(err, "fail to get veth interface in container %v", e.TargetVethName)
+		return errors.Wrapf(err, "fail to get host namespace handler")
+	}
+	defer hostfd.Close()
+
+	err = netutils.DeleteInterfaceIfExists(ctx, hostfd, e.TargetVethName)
+	if err != nil {
+		return errors.Wrapf(err, "fail to delete interface on host")
 	}
 
-	err = nlh.LinkSetDown(link)
+	targetfd, err := netns.GetFromPath(e.TargetNetnsPath)
 	if err != nil {
-		return errors.Wrapf(err, "fail to shutdown link %v", e.TargetVethName)
+		return errors.Wrapf(err, "fail to get host namespace handler")
 	}
+	defer targetfd.Close()
 
-	err = nlh.LinkDel(link)
+	err = netutils.DeleteInterfaceIfExists(ctx, targetfd, e.TargetVethName)
 	if err != nil {
-		return errors.Wrapf(err, "fail to remove link %v", e.TargetVethName)
+		return errors.Wrapf(err, "fail to delete interface on targetns")
 	}
 
 	return nil

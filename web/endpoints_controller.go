@@ -4,7 +4,7 @@ import (
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/endpoint"
 	"github.com/Scalingo/sand/network"
-	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
 )
 
@@ -15,11 +15,11 @@ type EndpointsController struct {
 	NetworkRepository  network.Repository
 }
 
-func NewEndpointsController(c *config.Config, listener overlay.NetworkEndpointListener) EndpointsController {
+func NewEndpointsController(c *config.Config, managers netmanager.ManagerMap) EndpointsController {
 	store := store.New(c)
 	return EndpointsController{
 		Config: c, Store: store,
-		EndpointRepository: endpoint.NewRepository(c, store),
-		NetworkRepository:  network.NewRepository(c, store, listener),
+		EndpointRepository: endpoint.NewRepository(c, store, managers),
+		NetworkRepository:  network.NewRepository(c, store, managers),
 	}
 }
