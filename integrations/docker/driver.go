@@ -60,6 +60,8 @@ func (p *DockerPlugin) CreateNetwork(ctx context.Context, req *network.CreateNet
 
 		if len(req.IPv4Data) > 0 && req.IPv4Data[0].Pool != "0.0.0.0/0" {
 			cnp.IPRange = req.IPv4Data[0].Pool
+		} else if r, ok := opts["sand-ip-range"].(string); ok {
+			cnp.IPRange = r
 		}
 
 		network, err = p.networkRepository.Create(ctx, cnp)
