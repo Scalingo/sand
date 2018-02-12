@@ -21,7 +21,7 @@ var (
 	uuidRegexp = regexp.MustCompile("(?i)^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$")
 )
 
-func (c *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
+func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	log := logger.Get(ctx).WithField("network_name", params.Name)
 
 	if params.Type == "" {
@@ -45,13 +45,13 @@ func (c *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 		iprange = params.IPRange
 	}
 
-	allocator := ipallocator.New(c.config, c.store, uuid, ipallocator.WithIPRange(iprange))
-	ip, mask, err := allocator.AllocateIP(ctx, ipallocator.AllocateIPOpts{})
+	ip, err := r.allocator.AllocateIP(ctx, uuid, ipallocator.AllocateIPOpts{
+		AddressRange: iprange,
+	})
 	if err != nil {
 		return types.Network{}, errors.Wrapf(err, "fail to allocate gateway IP")
 	}
-
-	log.Infof("gateway IP allocated: %s/%d", ip, mask)
+	log.Infof("gateway IP allocated: %s", ip)
 
 	if params.Name == "" {
 		params.Name = fmt.Sprintf("net-sc-%s", uuid)
@@ -60,16 +60,16 @@ func (c *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	network := types.Network{
 		ID:        uuid,
 		IPRange:   iprange,
-		Gateway:   fmt.Sprintf("%s/%d", ip.String(), mask),
+		Gateway:   ip,
 		CreatedAt: time.Now(),
 		Name:      params.Name,
 		Type:      params.Type,
 		NSHandlePath: filepath.Join(
-			c.config.NetnsPath, fmt.Sprintf("%s%s", c.config.NetnsPrefix, uuid),
+			r.config.NetnsPath, fmt.Sprintf("%s%s", r.config.NetnsPrefix, uuid),
 		),
 	}
 
-	vniGen := overlay.NewVNIGenerator(ctx, c.config, c.store)
+	vniGen := overlay.NewVNIGenerator(ctx, r.config, r.store)
 
 	switch network.Type {
 	case types.OverlayNetworkType:
@@ -88,7 +88,7 @@ func (c *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 		return network, errors.New("invalid network type for init")
 	}
 
-	err = c.store.Set(ctx, network.StorageKey(), &network)
+	err = r.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
 		return network, errors.Wrapf(err, "fail to get network %s from store", network)
 	}

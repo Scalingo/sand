@@ -2,10 +2,8 @@ package endpoint
 
 import (
 	"context"
-	"net"
 
 	"github.com/Scalingo/sand/api/types"
-	"github.com/Scalingo/sand/ipallocator"
 	"github.com/pkg/errors"
 )
 
@@ -31,16 +29,9 @@ func (r *repository) Delete(ctx context.Context, n types.Network, e types.Endpoi
 		return ErrActivated
 	}
 
-	allocator := ipallocator.New(r.config, r.store, n.ID, ipallocator.WithIPRange(n.IPRange))
-
-	ip, _, err := net.ParseCIDR(e.TargetVethIP)
+	err = r.allocator.ReleaseIP(ctx, n.ID, e.TargetVethIP)
 	if err != nil {
-		return errors.Wrapf(err, "fail to parse IP from endpoint")
-	}
-
-	err = allocator.ReleaseIP(ctx, ip)
-	if err != nil {
-		return errors.Wrapf(err, "fail to release IP for endpoint")
+		return errors.Wrapf(err, "fail to release IP for endpoint %v", e.TargetVethIP)
 	}
 
 	err = r.store.Delete(ctx, e.StorageKey())

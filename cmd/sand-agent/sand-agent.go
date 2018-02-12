@@ -13,6 +13,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-internal-tools/logger"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
@@ -20,7 +21,9 @@ import (
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/endpoint"
+	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/integrations/docker"
+	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
@@ -38,7 +41,7 @@ func main() {
 	ctx := logger.ToCtx(context.Background(), log)
 
 	// If reexec to create network namespace
-	if filepath.Base(os.Args[0]) != "sand" {
+	if filepath.Base(os.Args[0]) != "sand-agent" {
 		log.WithField("args", os.Args).Info("reexec")
 	}
 	ok := reexec.Init()
@@ -65,21 +68,28 @@ func main() {
 	managers := netmanager.NewManagerMap()
 	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
 
-	err = ensureNetworks(ctx, c, managers)
+	etcdClient, err := etcd.NewClient(c)
+	if err != nil {
+		log.WithError(err).Error("fail to initialize etcd client")
+		os.Exit(-1)
+	}
+	locker := lock.NewEtcdLocker(etcdClient)
+	ipAllocator := ipallocator.New(c, store, locker)
+
+	endpointRepository := endpoint.NewRepository(c, store, ipAllocator, managers)
+	networkRepository := network.NewRepository(c, store, ipAllocator, managers)
+
+	err = ensureNetworks(ctx, c, networkRepository, endpointRepository)
 	if err != nil {
 		log.WithError(err).Error("fail to ensure existing networks")
 		os.Exit(-1)
 	}
 
+	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository)
+	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository)
+
 	r := handlers.NewRouter(log)
 	r.Use(handlers.ErrorMiddleware)
-
-	endpointRepository := endpoint.NewRepository(c, store, managers)
-	networkRepository := network.NewRepository(c, store, managers)
-
-	nctrl := web.NewNetworksController(c, managers)
-	ectrl := web.NewEndpointsController(c, managers)
-
 	r.HandleFunc("/networks", nctrl.List).Methods("GET")
 	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
 	r.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
@@ -175,15 +185,11 @@ func tlsListener(c *config.Config, serviceEndpoint string) (net.Listener, error)
 	return listener, nil
 }
 
-func ensureNetworks(ctx context.Context, c *config.Config, managers netmanager.ManagerMap) error {
+func ensureNetworks(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) error {
 	log := logger.Get(ctx)
 	ctx = logger.ToCtx(ctx, log)
 
 	log.Info("ensure networks on node")
-
-	s := store.New(c)
-	erepo := endpoint.NewRepository(c, s, managers)
-	repo := network.NewRepository(c, s, managers)
 
 	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.PublicHostname})
 	if err == store.ErrNotFound {

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"sync"
 
+	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/store"
@@ -14,182 +16,214 @@ import (
 )
 
 const (
-	IPAllocatorPrefix = "/ipalloc"
-	DefaultIPRange    = "10.0.0.0/24"
+	lockDuration          = 20
+	IPAllocatorPrefix     = "/ipalloc"
+	IPAllocatorLockPrefix = "/ipalloc-lock"
+	DefaultAddressRange   = "10.0.0.0/24"
 )
 
-type AllocatorOpt func(*allocator)
+type allocation struct {
+	ID           string         `json:"id"`
+	AddressRange string         `json:"address_range"`
+	AddressCount uint           `json:"address_count"`
+	BitSet       *bitset.BitSet `json:"bit_set"`
+}
 
-func WithIPRange(r string) AllocatorOpt {
-	return func(a *allocator) {
-		a.ipRange = r
-	}
+func (a allocation) storageKey() string {
+	return fmt.Sprintf("%s/%s", IPAllocatorPrefix, a.ID)
 }
 
 type AllocateIPOpts struct {
+	AddressRange string
 	// If set, will try to allocate this precise IP, error if already taken
 	Address string
 }
 
 type IPAllocator interface {
-	AllocateIP(ctx context.Context, opts AllocateIPOpts) (net.IP, uint, error)
-	ReleaseIP(ctx context.Context, ip net.IP) error
+	AllocateIP(ctx context.Context, id string, opts AllocateIPOpts) (string, error)
+	ReleaseIP(ctx context.Context, id string, address string) error
 }
 
 type allocator struct {
-	config        *config.Config
-	store         store.Store
-	id            string
-	ipRange       string
-	ipNet         *net.IPNet
-	addressAmount uint
-	mask          uint
-	err           error
+	config      *config.Config
+	store       store.Store
+	locker      lock.Locker
+	m           *sync.Mutex
+	allocations map[string]allocation
 }
 
-func New(config *config.Config, store store.Store, id string, opts ...AllocatorOpt) IPAllocator {
-	a := &allocator{config: config, store: store, id: id}
-	for _, opt := range opts {
-		opt(a)
+func New(config *config.Config, store store.Store, locker lock.Locker) *allocator {
+	return &allocator{
+		config: config, store: store,
+		locker:      locker,
+		m:           &sync.Mutex{},
+		allocations: make(map[string]allocation),
 	}
-	if a.ipRange == "" {
-		a.ipRange = DefaultIPRange
-	}
+}
 
-	_, ipnet, err := net.ParseCIDR(a.ipRange)
+func (a *allocator) lockStorageKey(id string) string {
+	return fmt.Sprintf("%s/%s", IPAllocatorLockPrefix, id)
+}
+
+func (a *allocator) AllocateIP(ctx context.Context, id string, opts AllocateIPOpts) (allocatedAddress string, err error) {
+	lock, err := a.locker.WaitAcquire(a.lockStorageKey(id), lockDuration)
 	if err != nil {
-		a.err = errors.Wrapf(err, "fail to parse ip range '%v'", a.ipRange)
-		return a
+		return "", errors.Wrapf(err, "fail to lock IP allocation")
 	}
-	a.ipNet = ipnet
+	defer func() {
+		derr := lock.Release()
+		if derr != nil {
+			err = errors.Wrapf(derr, "fail to release lock (err is %v)", err)
+		}
+	}()
 
-	mask, size := a.ipNet.Mask.Size()
-	if mask == 0 {
-		a.err = errors.Errorf("invalid mask in ip range '%v'", a.ipRange)
-		return a
+	allocation, err := a.findOrCreateAllocation(ctx, id, opts)
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to find or create allocation")
 	}
 
-	a.mask = uint(mask)
+	allocatedAddress = opts.Address
+	if allocatedAddress != "" {
+		// Modifies allocation.BitSet
+		err = allocation.allocatePredefinedIP(ctx, allocatedAddress)
+	} else {
+		allocatedAddress, err = allocation.allocateNextAvailableIP(ctx)
+	}
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to allocate IP")
+	}
 
-	a.addressAmount = uint(math.Pow(2.0, float64(size-mask)))
-	return a
+	err = a.store.Set(ctx, allocation.storageKey(), &allocation)
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to save updated allocation %v", allocation)
+	}
+
+	return allocatedAddress, err
 }
 
-func (a *allocator) StorageKey() string {
-	return fmt.Sprintf("%s/%s", IPAllocatorPrefix, a.id)
-}
+func (a *allocator) findOrCreateAllocation(ctx context.Context, id string, opts AllocateIPOpts) (allocation, error) {
+	var (
+		err   error
+		alloc = allocation{
+			ID: id,
+		}
+	)
 
-func (a *allocator) AllocateIP(ctx context.Context, opts AllocateIPOpts) (net.IP, uint, error) {
-	if a.err != nil {
-		return nil, 0, errors.Wrapf(a.err, "invalid allocator")
+	log := logger.Get(ctx).WithField("allocation_id", id)
+	log.Info("allocating IP")
+
+	_, addressNet, err := net.ParseCIDR(opts.AddressRange)
+	if err != nil {
+		return alloc, errors.Wrapf(err, "invalid iprange %v", opts.AddressRange)
 	}
 
-	if opts.Address != "" {
-		return a.allocatePredefinedIP(ctx, opts.Address)
+	mask, bits := addressNet.Mask.Size()
+	// 0.0.0.0/24 -> mask = 24, bits = 32
+	// 2^8 -> 256 addresses
+	addressCount := uint(math.Pow(2.0, float64(bits-mask)))
+
+	err = a.store.Get(ctx, alloc.storageKey(), false, &alloc)
+	if err == store.ErrNotFound {
+		alloc.AddressRange = opts.AddressRange
+		alloc.AddressCount = addressCount
+		// Network and Broadcast addresses are reserved
+		alloc.BitSet = bitset.New(alloc.AddressCount).Set(0).Set(addressCount - 1)
+		return alloc, nil
+	}
+	if err != nil {
+		return alloc, errors.Wrapf(err, "fail to get allocation from storage")
 	}
 
-	return a.allocateNextAvailableIP(ctx)
+	if alloc.AddressRange != opts.AddressRange {
+		return alloc, errors.Errorf("invalid IP range %v, allocation already exists with range %v", opts.AddressRange, alloc.AddressRange)
+	}
+
+	return alloc, nil
 }
 
-func (a *allocator) allocatePredefinedIP(ctx context.Context, address string) (net.IP, uint, error) {
+func (a allocation) allocatePredefinedIP(ctx context.Context, address string) error {
 	log := logger.Get(ctx)
 
 	addrIP, addressIpnet, err := net.ParseCIDR(address)
 	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fail to parse predefined address ip range '%v'", address)
+		return errors.Wrapf(err, "fail to parse predefined address ip range '%v'", address)
 	}
 
-	if addressIpnet.Network() != a.ipNet.Network() {
-		return nil, 0, errors.Wrapf(err, "predefined address is not in the same ip range: %v != %v", addressIpnet.Network(), a.ipNet.Network())
-	}
-
-	r, err := a.getBitset(ctx)
-	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fail to get bitset")
+	if addressIpnet.Network() != a.AddressRange {
+		return errors.Wrapf(err, "predefined address is not in the same ip range: %v != %v", addressIpnet.Network(), a.AddressRange)
 	}
 
 	ordinal := ordinalFromIP4(addrIP, addressIpnet.Mask)
-	if r.Test(ordinal) {
-		return nil, 0, errors.Wrapf(err, "ip is already allocated")
+	if a.BitSet.Test(ordinal) {
+		return errors.Wrapf(err, "ip is already allocated")
 	}
+	a.BitSet.Set(ordinal)
 
-	r.Set(ordinal)
-	log.WithField("ip", addrIP).WithField("ip-range", a.ipRange).Info("allocate predefined IP")
+	log.WithField("ip", addrIP).WithField("ip-range", a.AddressRange).Info("allocated predefined IP")
 
-	err = a.store.Set(ctx, a.StorageKey(), &r)
-	if err != nil {
-		return addrIP, 0, errors.Wrapf(err, "fail to store ip range in store")
-	}
-
-	return addrIP, a.mask, nil
+	return nil
 }
 
-func (a *allocator) getBitset(ctx context.Context) (*bitset.BitSet, error) {
-	var r *bitset.BitSet
-	err := a.store.Get(ctx, a.StorageKey(), false, &r)
-	if err == store.ErrNotFound {
-		r = bitset.New(a.addressAmount)
-		// Network and Broadcast addresses
-		r.Set(0).Set(r.Len() - 1)
-	} else if err != nil {
-		return nil, errors.Wrapf(err, "fail to get ip range from store")
-	}
-	if r.Len() != a.addressAmount {
-		return nil, errors.Errorf("range stored does not fit required range for allocator %v != %v", r.Len(), a.addressAmount)
-	}
-	return r, nil
-}
-
-func (a *allocator) allocateNextAvailableIP(ctx context.Context) (net.IP, uint, error) {
+func (a allocation) allocateNextAvailableIP(ctx context.Context) (string, error) {
 	log := logger.Get(ctx)
-	r, err := a.getBitset(ctx)
-	if err != nil {
-		return nil, 0, errors.Wrapf(err, "fail to get bitset")
-	}
 
 	i := uint(0)
-	for ; i < a.addressAmount; i++ {
-		if !r.Test(i) {
-			r.Set(i)
+	for ; i < a.AddressCount; i++ {
+		if !a.BitSet.Test(i) {
+			a.BitSet.Set(i)
 			break
 		}
 	}
 
-	ip := a.ipNet.IP
+	ip, ipnet, err := net.ParseCIDR(a.AddressRange)
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to parse allocation address range %v", a.AddressRange)
+	}
 	addIntToIP(ip, uint64(i))
 
-	log.WithField("ip", ip).WithField("ip-range", a.ipRange).Info("allocate IP")
+	log.WithField("ip", ip).WithField("ip-range", a.AddressRange).Info("allocated IP")
 
-	err = a.store.Set(ctx, a.StorageKey(), &r)
-	if err != nil {
-		return ip, 0, errors.Wrapf(err, "fail to store ip range in store")
-	}
-
-	return ip, a.mask, nil
+	ones, _ := ipnet.Mask.Size()
+	return fmt.Sprintf("%s/%d", ip.String(), ones), nil
 }
 
-func (a *allocator) ReleaseIP(ctx context.Context, ip net.IP) error {
+func (a *allocator) ReleaseIP(ctx context.Context, id string, ipcidr string) (err error) {
 	log := logger.Get(ctx)
 
-	var r *bitset.BitSet
-	err := a.store.Get(ctx, a.StorageKey(), false, &r)
+	lock, err := a.locker.WaitAcquire(a.lockStorageKey(id), lockDuration)
+	if err != nil {
+		return errors.Wrapf(err, "fail to lock IP release")
+	}
+	defer func() {
+		derr := lock.Release()
+		if derr != nil {
+			err = errors.Wrapf(err, "fail to release lock when releasing IP (err is %v)", err)
+		}
+	}()
+
+	alloc := allocation{ID: id}
+	err = a.store.Get(ctx, alloc.storageKey(), false, &alloc)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get ip range from store")
 	}
 
-	_, network, err := net.ParseCIDR(a.ipRange)
+	ip, _, err := net.ParseCIDR(ipcidr)
 	if err != nil {
-		return errors.Wrapf(err, "fail to parse iprange of allocator %v", a.ipRange)
+		return errors.Wrapf(err, "fail to parse IP CIDR %v", ipcidr)
 	}
 
-	log = log.WithField("ip", ip).WithField("ip-range", a.ipRange)
+	_, network, err := net.ParseCIDR(alloc.AddressRange)
+	if err != nil {
+		return errors.Wrapf(err, "fail to parse iprange of allocation %v", alloc.AddressRange)
+	}
+
+	log = log.WithField("ip", ip).WithField("ip-range", alloc.AddressRange)
 	i := ordinalFromIP4(ip, network.Mask)
 	log.WithField("ordinal", i).Debug("IP ordinal")
-	r.Clear(i)
-
+	alloc.BitSet.Clear(i)
 	log.Info("release IP")
 
-	err = a.store.Set(ctx, a.StorageKey(), &r)
+	err = a.store.Set(ctx, alloc.storageKey(), &alloc)
 	if err != nil {
 		return errors.Wrapf(err, "fail to store ip range in store")
 	}

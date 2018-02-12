@@ -16,17 +16,19 @@ import (
 func (r *repository) Create(ctx context.Context, n types.Network, params params.EndpointCreate) (types.Endpoint, error) {
 	var endpoint types.Endpoint
 
-	allocator := ipallocator.New(r.config, r.store, n.ID, ipallocator.WithIPRange(n.IPRange))
-
 	ipOpts := ipallocator.AllocateIPOpts{
-		Address: params.IPv4Address,
+		Address:      params.IPv4Address,
+		AddressRange: n.IPRange,
 	}
-	ip, mask, err := allocator.AllocateIP(ctx, ipOpts)
+	ip, err := r.allocator.AllocateIP(ctx, n.ID, ipOpts)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to allocate IP for endpoint")
 	}
 
-	macAddress := ipv4ToMac(ip)
+	macAddress, err := ipv4ToMac(ip)
+	if err != nil {
+		return endpoint, errors.Wrapf(err, "fail to get MAC address from IP")
+	}
 	if params.MacAddress != "" {
 		macAddress = params.MacAddress
 	}
@@ -37,7 +39,7 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 		HostIP:        r.config.PublicIP,
 		NetworkID:     n.ID,
 		CreatedAt:     time.Now(),
-		TargetVethIP:  fmt.Sprintf("%s/%d", ip.String(), mask),
+		TargetVethIP:  ip,
 		TargetVethMAC: macAddress,
 	}
 
@@ -61,7 +63,11 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 	return endpoint, nil
 }
 
-func ipv4ToMac(ip net.IP) string {
+func ipv4ToMac(ipstr string) (string, error) {
+	ip, _, err := net.ParseCIDR(ipstr)
 	ip = ip.To4()
-	return fmt.Sprintf("02:42:%02x:%02x:%02x:%02x", ip[0], ip[1], ip[2], ip[3])
+	if err != nil {
+		return "", errors.Wrapf(err, "invalid CIDR %v", ipstr)
+	}
+	return fmt.Sprintf("02:84:%02x:%02x:%02x:%02x", ip[0], ip[1], ip[2], ip[3]), nil
 }

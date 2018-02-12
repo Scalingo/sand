@@ -6,6 +6,7 @@ import (
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
 )
@@ -23,13 +24,14 @@ type Repository interface {
 }
 
 type repository struct {
-	config   *config.Config
-	store    store.Store
-	managers netmanager.ManagerMap
+	config    *config.Config
+	store     store.Store
+	allocator ipallocator.IPAllocator
+	managers  netmanager.ManagerMap
 }
 
-func NewRepository(config *config.Config, store store.Store, managers netmanager.ManagerMap) Repository {
+func NewRepository(config *config.Config, store store.Store, a ipallocator.IPAllocator, managers netmanager.ManagerMap) Repository {
 	return &repository{
-		config: config, store: store, managers: managers,
+		config: config, store: store, managers: managers, allocator: a,
 	}
 }
