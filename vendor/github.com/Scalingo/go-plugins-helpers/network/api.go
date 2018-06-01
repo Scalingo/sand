@@ -222,6 +222,12 @@ func NewHandler(logger logrus.FieldLogger, driver Driver) *Handler {
 	return h
 }
 
+// ConfigureHandler adds routes to the sdk.Handler to handle the network plugin API
+func ConfigureHandler(sdkhandler sdk.Handler, driver Driver) {
+	h := &Handler{driver, sdkhandler}
+	h.initMux()
+}
+
 func (h *Handler) initMux() {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		res, err := h.driver.GetCapabilities(r.Context())
