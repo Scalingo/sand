@@ -74,7 +74,7 @@ func TestListener_Add(t *testing.T) {
 			config, err := config.Build()
 			require.NoError(t, err)
 
-			listener := NewNetworkEndpointListener(config, store)
+			listener := NewNetworkEndpointListener(context.Background(), config, store)
 			network := types.Network{ID: "1"}
 
 			if c.ExpectStore != nil {

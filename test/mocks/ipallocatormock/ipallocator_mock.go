@@ -6,9 +6,9 @@ package ipallocatormock
 
 import (
 	context "context"
-	net "net"
 	reflect "reflect"
 
+	ipallocator "github.com/Scalingo/sand/ipallocator"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -36,15 +36,51 @@ func (m *MockIPAllocator) EXPECT() *MockIPAllocatorMockRecorder {
 }
 
 // AllocateIP mocks base method
-func (m *MockIPAllocator) AllocateIP(arg0 context.Context) (net.IP, uint, error) {
-	ret := m.ctrl.Call(m, "AllocateIP", arg0)
-	ret0, _ := ret[0].(net.IP)
-	ret1, _ := ret[1].(uint)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+func (m *MockIPAllocator) AllocateIP(arg0 context.Context, arg1 string, arg2 ipallocator.AllocateIPOpts) (string, error) {
+	ret := m.ctrl.Call(m, "AllocateIP", arg0, arg1, arg2)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // AllocateIP indicates an expected call of AllocateIP
-func (mr *MockIPAllocatorMockRecorder) AllocateIP(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateIP", reflect.TypeOf((*MockIPAllocator)(nil).AllocateIP), arg0)
+func (mr *MockIPAllocatorMockRecorder) AllocateIP(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateIP", reflect.TypeOf((*MockIPAllocator)(nil).AllocateIP), arg0, arg1, arg2)
+}
+
+// InitializePool mocks base method
+func (m *MockIPAllocator) InitializePool(arg0 context.Context, arg1, arg2 string) (ipallocator.RangeAddresser, error) {
+	ret := m.ctrl.Call(m, "InitializePool", arg0, arg1, arg2)
+	ret0, _ := ret[0].(ipallocator.RangeAddresser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InitializePool indicates an expected call of InitializePool
+func (mr *MockIPAllocatorMockRecorder) InitializePool(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializePool", reflect.TypeOf((*MockIPAllocator)(nil).InitializePool), arg0, arg1, arg2)
+}
+
+// ReleaseIP mocks base method
+func (m *MockIPAllocator) ReleaseIP(arg0 context.Context, arg1, arg2 string) error {
+	ret := m.ctrl.Call(m, "ReleaseIP", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReleaseIP indicates an expected call of ReleaseIP
+func (mr *MockIPAllocatorMockRecorder) ReleaseIP(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleaseIP", reflect.TypeOf((*MockIPAllocator)(nil).ReleaseIP), arg0, arg1, arg2)
+}
+
+// ReleasePool mocks base method
+func (m *MockIPAllocator) ReleasePool(arg0 context.Context, arg1 string) error {
+	ret := m.ctrl.Call(m, "ReleasePool", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReleasePool indicates an expected call of ReleasePool
+func (mr *MockIPAllocatorMockRecorder) ReleasePool(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleasePool", reflect.TypeOf((*MockIPAllocator)(nil).ReleasePool), arg0, arg1)
 }

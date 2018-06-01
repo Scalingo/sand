@@ -11,7 +11,6 @@ import (
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/test/mocks/network/netmanagermock"
-	"github.com/Scalingo/sand/test/mocks/network/overlaymock"
 	"github.com/Scalingo/sand/test/mocks/storemock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -26,6 +25,9 @@ func TestRepository_Ensure(t *testing.T) {
 				require.Len(t, eps, 1)
 				require.Equal(t, eps[0].ID, "ep-1")
 			}).Return(err)
+			if err == nil {
+				m.EXPECT().ListenNetworkChange(gomock.Any(), n).Return(nil)
+			}
 		}
 	}
 
@@ -35,7 +37,6 @@ func TestRepository_Ensure(t *testing.T) {
 		Error            string
 		ExpectNetManager func(*testing.T, *netmanagermock.MockNetManager, types.Network)
 		ExpectStore      func(*testing.T, *storemock.MockStore, types.Network)
-		ExpectListener   func(*overlaymock.MockNetworkEndpointListener, netmanager.NetManager, types.Network)
 	}{
 		{
 			Name: "network with unknown type should return an error",
@@ -74,22 +75,6 @@ func TestRepository_Ensure(t *testing.T) {
 			},
 			Error: "fail to add neighbors",
 		}, {
-			Name:             "overlay: it should return an error if the network listener fail to add new network",
-			ExpectNetManager: expectNetManager(nil),
-			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
-				m.EXPECT().Get(
-					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
-				).Do(
-					func(ctx context.Context, key string, recursive bool, data interface{}) {
-						reflect.ValueOf(data).Elem().Set(reflect.ValueOf([]types.Endpoint{{ID: "ep-1"}}))
-					},
-				).Return(nil)
-			},
-			ExpectListener: func(m *overlaymock.MockNetworkEndpointListener, nm netmanager.NetManager, n types.Network) {
-				m.EXPECT().Add(gomock.Any(), nm, n).Return(errors.New("fail to add endpoint listener"))
-			},
-			Error: "fail to add endpoint listener",
-		}, {
 			Name:             "overlay: it should add entries in the store",
 			ExpectNetManager: expectNetManager(nil),
 			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
@@ -111,9 +96,6 @@ func TestRepository_Ensure(t *testing.T) {
 					}).Return(nil)
 				}
 			},
-			ExpectListener: func(m *overlaymock.MockNetworkEndpointListener, nm netmanager.NetManager, n types.Network) {
-				m.EXPECT().Add(gomock.Any(), nm, n).Return(nil)
-			},
 		},
 	}
 
@@ -127,18 +109,15 @@ func TestRepository_Ensure(t *testing.T) {
 
 			require.NoError(t, err)
 
-			listener := overlaymock.NewMockNetworkEndpointListener(ctrl)
 			omanager := netmanagermock.NewMockNetManager(ctrl)
-			managers := map[types.NetworkType]netmanager.NetManager{
-				types.OverlayNetworkType: omanager,
-			}
+			managers := netmanager.NewManagerMap()
+			managers.Set(types.OverlayNetworkType, omanager)
 			store := storemock.NewMockStore(ctrl)
 
 			r := repository{
 				config:   config,
 				store:    store,
 				managers: managers,
-				listener: listener,
 			}
 
 			network := types.Network{ID: "1", Type: types.OverlayNetworkType}
@@ -152,10 +131,6 @@ func TestRepository_Ensure(t *testing.T) {
 
 			if c.ExpectStore != nil {
 				c.ExpectStore(t, store, network)
-			}
-
-			if c.ExpectListener != nil {
-				c.ExpectListener(listener, omanager, network)
 			}
 
 			err = r.Ensure(context.Background(), network)

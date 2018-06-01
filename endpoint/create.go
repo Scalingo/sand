@@ -8,7 +8,6 @@ import (
 
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/Scalingo/sand/ipallocator"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 )
@@ -16,16 +15,7 @@ import (
 func (r *repository) Create(ctx context.Context, n types.Network, params params.EndpointCreate) (types.Endpoint, error) {
 	var endpoint types.Endpoint
 
-	ipOpts := ipallocator.AllocateIPOpts{
-		Address:      params.IPv4Address,
-		AddressRange: n.IPRange,
-	}
-	ip, err := r.allocator.AllocateIP(ctx, n.ID, ipOpts)
-	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to allocate IP for endpoint")
-	}
-
-	macAddress, err := ipv4ToMac(ip)
+	macAddress, err := ipv4ToMac(params.IPv4Address)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get MAC address from IP")
 	}
@@ -39,7 +29,7 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 		HostIP:        r.config.PublicIP,
 		NetworkID:     n.ID,
 		CreatedAt:     time.Now(),
-		TargetVethIP:  ip,
+		TargetVethIP:  params.IPv4Address,
 		TargetVethMAC: macAddress,
 	}
 

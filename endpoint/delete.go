@@ -29,11 +29,6 @@ func (r *repository) Delete(ctx context.Context, n types.Network, e types.Endpoi
 		return ErrActivated
 	}
 
-	err = r.allocator.ReleaseIP(ctx, n.ID, e.TargetVethIP)
-	if err != nil {
-		return errors.Wrapf(err, "fail to release IP for endpoint %v", e.TargetVethIP)
-	}
-
 	err = r.store.Delete(ctx, e.StorageKey())
 	if err != nil {
 		return errors.Wrapf(err, "fail to delete endpoint storage key")

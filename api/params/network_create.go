@@ -9,4 +9,5 @@ type NetworkCreate struct {
 	Name    string            `json:"name"`
 	Type    types.NetworkType `json:"type"`
 	IPRange string            `json:"ip_range"`
+	Gateway string            `json:"gateway"`
 }

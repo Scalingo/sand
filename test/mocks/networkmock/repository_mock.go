@@ -86,3 +86,16 @@ func (m *MockRepository) Exists(arg0 context.Context, arg1 string) (types.Networ
 func (mr *MockRepositoryMockRecorder) Exists(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockRepository)(nil).Exists), arg0, arg1)
 }
+
+// List mocks base method
+func (m *MockRepository) List(arg0 context.Context) ([]types.Network, error) {
+	ret := m.ctrl.Call(m, "List", arg0)
+	ret0, _ := ret[0].([]types.Network)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List
+func (mr *MockRepositoryMockRecorder) List(arg0 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockRepository)(nil).List), arg0)
+}

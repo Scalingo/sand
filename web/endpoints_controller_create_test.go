@@ -34,24 +34,10 @@ func TestEndpointsController_Create(t *testing.T) {
 			Status: 400,
 			Error:  "invalid JSON",
 		}, {
-			Name:   "missing ns_handle_path should return 400",
-			Path:   "/endpoints",
-			Method: "POST",
-			Body:   `{"network_id": "1"}`,
-			Status: 400,
-			Error:  "missing ns_handle_path",
-		}, {
-			Name:   "un-stat-able ns_handle_path should return 400",
-			Path:   "/endpoints",
-			Method: "POST",
-			Body:   `{"network_id": "1", "ns_handle_path": "/tmp/random-1234567890"}`,
-			Status: 400,
-			Error:  "no such file or directory",
-		}, {
 			Name:   "unexisting network id should return 404",
 			Path:   "/endpoints",
 			Method: "POST",
-			Body:   `{"network_id": "1", "ns_handle_path": "/proc/self/ns/net"}`,
+			Body:   `{"network_id": "1"}`,
 			Status: 404,
 			Error:  "not found",
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
@@ -61,7 +47,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			Name:   "error finding network should return error",
 			Path:   "/endpoints",
 			Method: "POST",
-			Body:   `{"network_id": "1", "ns_handle_path": "/proc/self/ns/net"}`,
+			Body:   `{"network_id": "1"}`,
 			Error:  "network repo error",
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				r.EXPECT().Exists(gomock.Any(), "1").Return(types.Network{}, false, errors.New("network repo error"))
@@ -70,7 +56,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			Name:   "error if network ensure fails",
 			Path:   "/endpoints",
 			Method: "POST",
-			Body:   `{"network_id": "1", "ns_handle_path": "/proc/self/ns/net"}`,
+			Body:   `{"network_id": "1"}`,
 			Error:  "fail to ensure network",
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
@@ -81,7 +67,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			Name:   "error if endpoint creation fails",
 			Path:   "/endpoints",
 			Method: "POST",
-			Body:   `{"network_id": "1", "ns_handle_path": "/proc/self/ns/net"}`,
+			Body:   `{"network_id": "1", "activate": true, "activate_params": { "ns_handle_path": "/proc/self/ns/net"}}`,
 			Error:  "fail to create endpoint",
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
@@ -90,7 +76,15 @@ func TestEndpointsController_Create(t *testing.T) {
 			},
 			ExpectEndpointRepository: func(r *endpointmock.MockRepository) {
 				network := types.Network{ID: "1"}
-				params := params.EndpointCreate{NetworkID: network.ID, NSHandlePath: "/proc/self/ns/net"}
+				params := params.EndpointCreate{
+					NetworkID: network.ID,
+					Activate:  true,
+					ActivateParams: params.EndpointActivate{
+						NSHandlePath: "/proc/self/ns/net",
+						MoveVeth:     true,
+						SetAddr:      true,
+					},
+				}
 				r.EXPECT().Create(gomock.Any(), network, params).Return(types.Endpoint{}, errors.New("fail to create endpoint"))
 			},
 		},

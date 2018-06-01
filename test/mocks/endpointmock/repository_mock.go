@@ -10,6 +10,7 @@ import (
 
 	params "github.com/Scalingo/sand/api/params"
 	types "github.com/Scalingo/sand/api/types"
+	endpoint "github.com/Scalingo/sand/endpoint"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -36,6 +37,19 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// Activate mocks base method
+func (m *MockRepository) Activate(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint, arg3 params.EndpointActivate) (types.Endpoint, error) {
+	ret := m.ctrl.Call(m, "Activate", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(types.Endpoint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Activate indicates an expected call of Activate
+func (mr *MockRepositoryMockRecorder) Activate(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Activate", reflect.TypeOf((*MockRepository)(nil).Activate), arg0, arg1, arg2, arg3)
+}
+
 // Create mocks base method
 func (m *MockRepository) Create(arg0 context.Context, arg1 types.Network, arg2 params.EndpointCreate) (types.Endpoint, error) {
 	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
@@ -49,22 +63,34 @@ func (mr *MockRepositoryMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), arg0, arg1, arg2)
 }
 
-// Ensure mocks base method
-func (m *MockRepository) Ensure(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) (types.Endpoint, error) {
-	ret := m.ctrl.Call(m, "Ensure", arg0, arg1, arg2)
+// Deactivate mocks base method
+func (m *MockRepository) Deactivate(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) (types.Endpoint, error) {
+	ret := m.ctrl.Call(m, "Deactivate", arg0, arg1, arg2)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Ensure indicates an expected call of Ensure
-func (mr *MockRepositoryMockRecorder) Ensure(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ensure", reflect.TypeOf((*MockRepository)(nil).Ensure), arg0, arg1, arg2)
+// Deactivate indicates an expected call of Deactivate
+func (mr *MockRepositoryMockRecorder) Deactivate(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deactivate", reflect.TypeOf((*MockRepository)(nil).Deactivate), arg0, arg1, arg2)
+}
+
+// Delete mocks base method
+func (m *MockRepository) Delete(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint, arg3 endpoint.DeleteOpts) error {
+	ret := m.ctrl.Call(m, "Delete", arg0, arg1, arg2, arg3)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (mr *MockRepositoryMockRecorder) Delete(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), arg0, arg1, arg2, arg3)
 }
 
 // Exists mocks base method
-func (m *MockRepository) Exists(arg0 context.Context, arg1 types.Network, arg2 string) (types.Endpoint, bool, error) {
-	ret := m.ctrl.Call(m, "Exists", arg0, arg1, arg2)
+func (m *MockRepository) Exists(arg0 context.Context, arg1 string) (types.Endpoint, bool, error) {
+	ret := m.ctrl.Call(m, "Exists", arg0, arg1)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(bool)
 	ret2, _ := ret[2].(error)
@@ -72,8 +98,8 @@ func (m *MockRepository) Exists(arg0 context.Context, arg1 types.Network, arg2 s
 }
 
 // Exists indicates an expected call of Exists
-func (mr *MockRepositoryMockRecorder) Exists(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockRepository)(nil).Exists), arg0, arg1, arg2)
+func (mr *MockRepositoryMockRecorder) Exists(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockRepository)(nil).Exists), arg0, arg1)
 }
 
 // List mocks base method

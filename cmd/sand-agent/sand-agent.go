@@ -16,7 +16,9 @@ import (
 	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-handlers"
 	"github.com/Scalingo/go-internal-tools/logger"
+	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
+	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
@@ -76,8 +78,8 @@ func main() {
 	locker := lock.NewEtcdLocker(etcdClient)
 	ipAllocator := ipallocator.New(c, store, locker)
 
-	endpointRepository := endpoint.NewRepository(c, store, ipAllocator, managers)
-	networkRepository := network.NewRepository(c, store, ipAllocator, managers)
+	endpointRepository := endpoint.NewRepository(c, store, managers)
+	networkRepository := network.NewRepository(c, store, managers)
 
 	err = ensureNetworks(ctx, c, networkRepository, endpointRepository)
 	if err != nil {
@@ -105,8 +107,13 @@ func main() {
 	if c.EnableDockerPlugin {
 		log.Info("enabling docker plugin")
 		dockerRepository := docker.NewRepository(c, store)
-		plugin := docker.NewDockerPlugin(networkRepository, endpointRepository, dockerRepository)
-		handler := dockernetwork.NewHandler(log, plugin)
+		plugin := docker.NewDockerPlugin(
+			c, networkRepository, endpointRepository, dockerRepository, ipAllocator,
+		)
+		manifest := `{"Implements": ["NetworkDriver", "IpamDriver"]}`
+		handler := dockersdk.NewHandler(log, manifest)
+		dockernetwork.ConfigureHandler(handler, plugin.DockerNetworkPlugin)
+		dockeripam.ConfigureHandler(handler, plugin.DockerIPAMPlugin)
 
 		var listener net.Listener
 		dockerPluginEndpoint := fmt.Sprintf(":%d", c.DockerPluginHttpPort)

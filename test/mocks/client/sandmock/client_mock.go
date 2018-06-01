@@ -49,6 +49,18 @@ func (mr *MockClientMockRecorder) EndpointCreate(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndpointCreate", reflect.TypeOf((*MockClient)(nil).EndpointCreate), arg0, arg1)
 }
 
+// EndpointDelete mocks base method
+func (m *MockClient) EndpointDelete(arg0 context.Context, arg1 string) error {
+	ret := m.ctrl.Call(m, "EndpointDelete", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// EndpointDelete indicates an expected call of EndpointDelete
+func (mr *MockClientMockRecorder) EndpointDelete(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndpointDelete", reflect.TypeOf((*MockClient)(nil).EndpointDelete), arg0, arg1)
+}
+
 // EndpointsList mocks base method
 func (m *MockClient) EndpointsList(arg0 context.Context, arg1 params.EndpointsList) ([]types.Endpoint, error) {
 	ret := m.ctrl.Call(m, "EndpointsList", arg0, arg1)
@@ -76,15 +88,15 @@ func (mr *MockClientMockRecorder) NetworkCreate(arg0, arg1 interface{}) *gomock.
 }
 
 // NetworkDelete mocks base method
-func (m *MockClient) NetworkDelete(arg0 context.Context) error {
-	ret := m.ctrl.Call(m, "NetworkDelete", arg0)
+func (m *MockClient) NetworkDelete(arg0 context.Context, arg1 string) error {
+	ret := m.ctrl.Call(m, "NetworkDelete", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // NetworkDelete indicates an expected call of NetworkDelete
-func (mr *MockClientMockRecorder) NetworkDelete(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkDelete", reflect.TypeOf((*MockClient)(nil).NetworkDelete), arg0)
+func (mr *MockClientMockRecorder) NetworkDelete(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkDelete", reflect.TypeOf((*MockClient)(nil).NetworkDelete), arg0, arg1)
 }
 
 // NetworksList mocks base method

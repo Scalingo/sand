@@ -9,6 +9,8 @@ type NetworkType string
 
 const (
 	OverlayNetworkType NetworkType = "overlay"
+	DefaultIPRange                 = "10.0.0.0/24"
+	DefaultGateway                 = "10.0.0.1/24"
 )
 
 type Network struct {

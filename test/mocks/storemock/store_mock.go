@@ -59,6 +59,18 @@ func (mr *MockStoreMockRecorder) Get(arg0, arg1, arg2, arg3 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0, arg1, arg2, arg3)
 }
 
+// GetWithRevision mocks base method
+func (m *MockStore) GetWithRevision(arg0 context.Context, arg1 string, arg2 int64, arg3 bool, arg4 interface{}) error {
+	ret := m.ctrl.Call(m, "GetWithRevision", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// GetWithRevision indicates an expected call of GetWithRevision
+func (mr *MockStoreMockRecorder) GetWithRevision(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithRevision", reflect.TypeOf((*MockStore)(nil).GetWithRevision), arg0, arg1, arg2, arg3, arg4)
+}
+
 // Set mocks base method
 func (m *MockStore) Set(arg0 context.Context, arg1 string, arg2 interface{}) error {
 	ret := m.ctrl.Call(m, "Set", arg0, arg1, arg2)

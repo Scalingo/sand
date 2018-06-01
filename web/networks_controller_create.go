@@ -7,6 +7,7 @@ import (
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/api/types"
 
 	"github.com/pkg/errors"
 )
@@ -20,6 +21,11 @@ func (c NetworksController) Create(w http.ResponseWriter, r *http.Request, p map
 	err := json.NewDecoder(r.Body).Decode(&cnp)
 	if err != nil {
 		return errors.Wrap(err, "invalid JSON")
+	}
+
+	if cnp.IPRange == "" || cnp.Gateway == "" {
+		cnp.IPRange = types.DefaultIPRange
+		cnp.Gateway = types.DefaultGateway
 	}
 
 	network, err := c.NetworkRepository.Create(ctx, cnp)
