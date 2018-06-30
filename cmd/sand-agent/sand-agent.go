@@ -87,8 +87,8 @@ func main() {
 		os.Exit(-1)
 	}
 
-	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository)
-	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository)
+	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
+	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository, ipAllocator)
 
 	r := handlers.NewRouter(log)
 	r.Use(handlers.ErrorMiddleware)

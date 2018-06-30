@@ -14,13 +14,14 @@ func (a *App) NetworkCreate(c *cli.Context) error {
 		return err
 	}
 	network, err := client.NetworkCreate(context.Background(), params.NetworkCreate{
-		Name: c.String("name"),
+		Name:    c.String("name"),
+		IPRange: c.String("ip-range"),
 	})
 	if err != nil {
 		return err
 	}
 	fmt.Println("New network created:")
-	fmt.Printf("* id=%s name=%s type=%s vni=%d\n", network.ID, network.Name, network.Type, network.VxLANVNI)
+	fmt.Printf("* id=%s name=%s type=%s ip-range=%s, vni=%d\n", network.ID, network.Name, network.Type, network.IPRange, network.VxLANVNI)
 	return nil
 }
 

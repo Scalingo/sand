@@ -24,8 +24,9 @@ func (a *App) EndpointCreate(c *cli.Context) error {
 		return err
 	}
 	endpoint, err := client.EndpointCreate(context.Background(), params.EndpointCreate{
-		NetworkID: c.String("network"),
-		Activate:  true,
+		NetworkID:   c.String("network"),
+		IPv4Address: c.String("ip"),
+		Activate:    true,
 		ActivateParams: params.EndpointActivate{
 			NSHandlePath: c.String("ns"),
 		},

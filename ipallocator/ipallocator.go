@@ -12,6 +12,7 @@ import (
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/netutils"
 	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 	"github.com/willf/bitset"
@@ -207,7 +208,7 @@ func (a allocation) allocateNextAvailableIP(ctx context.Context) (string, error)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to parse allocation address range %v", a.AddressRange)
 	}
-	addIntToIP(ip, uint64(i))
+	netutils.AddIntToIP(ip, uint64(i))
 
 	log.WithField("ip", ip).WithField("ip-range", a.AddressRange).Infof("allocated IP (bitset %d)", i)
 
@@ -304,13 +305,4 @@ func ordinalFromIP4(ip net.IP, mask net.IPMask) uint {
 		rank++
 	}
 	return ordinal
-}
-
-// Adds the ordinal IP to the current array
-// 192.168.0.0 + 53 => 192.168.0.53
-func addIntToIP(array []byte, ordinal uint64) {
-	for i := len(array) - 1; i >= 0; i-- {
-		array[i] |= (byte)(ordinal & 0xff)
-		ordinal >>= 8
-	}
 }

@@ -67,6 +67,7 @@ func main() {
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "network,n", Usage: "network id to use"},
 				cli.StringFlag{Name: "ns", Usage: "path to the namespace file handle"},
+				cli.StringFlag{Name: "ip", Usage: "use a precise IP instead of a generated one (optional)"},
 			},
 		}, {
 			Name:   "endpoint-delete",

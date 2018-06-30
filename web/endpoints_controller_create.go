@@ -8,6 +8,7 @@ import (
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/ipallocator"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -51,6 +52,14 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 		w.WriteHeader(404)
 		return errors.New("not found")
 	}
+
+	allocatedIP, err := c.IPAllocator.AllocateIP(ctx, params.NetworkID, ipallocator.AllocateIPOpts{
+		Address: params.IPv4Address,
+	})
+	if err != nil {
+		return errors.Wrapf(err, "fail to allocate IP in pool ip=%v network=%v", params.IPv4Address, network)
+	}
+	params.IPv4Address = allocatedIP
 
 	err = c.NetworkRepository.Ensure(ctx, network)
 	if err != nil {
