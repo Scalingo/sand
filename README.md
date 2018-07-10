@@ -141,6 +141,24 @@ sand-agent-cli endpoint-delete --endpoint id
    --version, -v      print the version
 ```
 
+## Docker Integration
+
+Start with the environment variable `ENABLE_DOCKER_PLUGIN=true`
+
+It will use the port **9998** by default to communicate with Docker. Change
+`DOCKER_PLUGIN_HTTP_PORT` to customize it.
+
+```
+# On each server which should be part of a network
+# the sand-id SHOULD be defined, as it should be common to all nodes running the network
+# and docker is not returning the internal ID, so the knowledge has to be external from docker
+$ docker network create --driver sand --ipam-opt sand-id=<uuid> --opt sand-id=<uuid> [--opt sans-name=<name>] <name>
+
+# Start a container in the sand network defined in the docker network
+$ docker run --network <name> ubuntu:latest bash
+
+```
+
 ## Testing
 
 * Single node with `docker-compose`, just run `docker-compose up` and you can
@@ -149,10 +167,5 @@ start using SAND.
 * Multinodes using `vagrant`, just run `vagrant up` to start two nodes with
 Docker installed and SAND code mounted in them.
 
-## TODO
-
-* Binding to use as [remote
-plugin](https://github.com/docker/libnetwork/blob/master/docs/remote.md) for
-the libnetwork.
 * More tests and mocking of `netlink` commands
 
