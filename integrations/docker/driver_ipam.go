@@ -2,13 +2,13 @@ package docker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Scalingo/go-plugins-helpers/ipam"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 )
 
 type dockerIPAMPlugin struct {
@@ -31,14 +31,18 @@ func (p *dockerIPAMPlugin) GetDefaultAddressSpaces(context.Context) (*ipam.Addre
 func (p *dockerIPAMPlugin) RequestPool(ctx context.Context, req *ipam.RequestPoolRequest) (*ipam.RequestPoolResponse, error) {
 	log := logger.Get(ctx)
 
-	uuid := uuid.NewV4()
-	allocation, err := p.allocator.InitializePool(ctx, uuid.String(), req.Pool)
+	poolID := req.Options["sand-id"]
+	if poolID == "" {
+		return nil, errors.New("IPAM option sand-id is mandatory")
+	}
+
+	allocation, err := p.allocator.InitializePool(ctx, poolID, req.Pool)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to initialize IP pool")
 	}
-	log.Info("pool created")
+	log.Info("pool initialized")
 	res := ipam.RequestPoolResponse{
-		PoolID: uuid.String(),
+		PoolID: poolID,
 		Pool:   allocation.GetAddressRange(),
 		Data:   map[string]string{},
 	}
