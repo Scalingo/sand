@@ -2,7 +2,6 @@ package docker
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Scalingo/go-plugins-helpers/ipam"
 	"github.com/Scalingo/go-utils/logger"
