@@ -55,6 +55,14 @@ func main() {
 				cli.StringFlag{Name: "network,n", Usage: "ID of the network to delete"},
 			},
 		}, {
+			Name:   "network-connect",
+			Action: app.NetworkConnect,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "network,n", Usage: "ID of the network to connect to"},
+				cli.StringFlag{Name: "ip", Usage: "IP to reach in the network"},
+				cli.StringFlag{Name: "port", Usage: "Port to reach in the network"},
+			},
+		}, {
 			Name:   "endpoint-list",
 			Action: app.EndpointsList,
 			Flags: []cli.Flag{

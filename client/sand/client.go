@@ -2,6 +2,7 @@ package sand
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 type Client interface {
 	NetworksList(context.Context) ([]types.Network, error)
 	NetworkCreate(context.Context, params.NetworkCreate) (types.Network, error)
+	NetworkShow(context.Context, string) (types.Network, error)
+	NetworkConnect(context.Context, string, params.NetworkConnect) (net.Conn, error)
 	NetworkDelete(context.Context, string) error
 	EndpointCreate(context.Context, params.EndpointCreate) (types.Endpoint, error)
 	EndpointsList(context.Context, params.EndpointsList) ([]types.Endpoint, error)
