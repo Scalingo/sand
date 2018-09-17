@@ -26,7 +26,9 @@ services:
       GO_ENV: testing
     command: "tail -F /dev/null"
   etcd:
+    volumes:
+      - ./docker/etcd:/data/etcd
     image: quay.io/coreos/etcd:v3.2.11
-    command: etcd --name etcd-cluster --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://172.17.0.1:22379
+    command: etcd --name etcd-cluster --data-dir /data/etcd --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://172.17.0.1:22379
     ports:
       - 22379:2379
