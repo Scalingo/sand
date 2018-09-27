@@ -64,7 +64,7 @@ var (
 
 type Opt func(c *client)
 
-func NewClient(opts ...Opt) (*client, error) {
+func NewClient(opts ...Opt) *client {
 	c := &client{
 		url: "http://localhost:9999",
 	}
@@ -84,7 +84,7 @@ func NewClient(opts ...Opt) (*client, error) {
 			TLSClientConfig: c.tlsConfig,
 		}
 	}
-	return c, nil
+	return c
 }
 
 func WithURL(url string) Opt {

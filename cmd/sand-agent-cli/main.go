@@ -110,5 +110,5 @@ func (a *App) sandClient(c *cli.Context) (sand.Client, error) {
 		}
 		opts = append(opts, sand.WithTlsConfig(config))
 	}
-	return sand.NewClient(opts...)
+	return sand.NewClient(opts...), nil
 }
