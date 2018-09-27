@@ -51,11 +51,12 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 	go func() {
 		defer wg.Done()
 		defer conn.Close()
+		log.Info("remote connection opened to the SAND network")
 		_, err := io.Copy(localConn, conn)
 		if err != io.EOF && err != nil {
 			log.WithError(err).Error("fail to copy data from remote network to local socket")
 		}
-		log.Info("remote network connection closed")
+		log.Info("remote connection closed to the SAND network")
 	}()
 
 	go func() {
