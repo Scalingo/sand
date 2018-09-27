@@ -1,4 +1,5 @@
 .vagrant
+docker/
 /sand-agent
 /cmd/sand-agent/sand-agent
 /cmd/sand-agent-cli/sand-agent-cli
