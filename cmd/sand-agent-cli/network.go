@@ -25,6 +25,21 @@ func (a *App) NetworkCreate(c *cli.Context) error {
 	return nil
 }
 
+func (a *App) NetworkShow(c *cli.Context) error {
+	client, err := a.sandClient(c)
+	if err != nil {
+		return err
+	}
+
+	network, err := client.NetworkShow(context.Background(), c.String("network"))
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("[%s] %s (%s VNI: %d)\n", network.ID, network.Name, network.Type, network.VxLANVNI)
+	return nil
+}
+
 func (a *App) NetworksList(c *cli.Context) error {
 	client, err := a.sandClient(c)
 	if err != nil {

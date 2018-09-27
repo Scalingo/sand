@@ -23,7 +23,7 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 
 	url, err := url.Parse(c.url)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to parse URL", c.url)
+		return nil, errors.Wrapf(err, "fail to parse URL '%s'", c.url)
 	}
 	dial, err := net.Dial("tcp", url.Host)
 	if err != nil {
@@ -35,8 +35,8 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 		host := strings.Split(url.Host, ":")[0]
 		config := *c.tlsConfig
 		config.ServerName = host
-		tls_conn := tls.Client(dial, &config)
-		conn = httputil.NewClientConn(tls_conn, nil)
+		tlsConn := tls.Client(dial, &config)
+		conn = httputil.NewClientConn(tlsConn, nil)
 	} else {
 		conn = httputil.NewClientConn(dial, nil)
 	}

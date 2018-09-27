@@ -40,14 +40,20 @@ func main() {
 	}
 	app.cli.Commands = cli.Commands{
 		{
-			Name:   "network-list",
-			Action: app.NetworksList,
-		}, {
 			Name:   "network-create",
 			Action: app.NetworkCreate,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "name", Usage: "name of the network to create"},
 			},
+		}, {
+			Name:   "network-show",
+			Action: app.NetworkShow,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "network,n", Usage: "ID of the network to display"},
+			},
+		}, {
+			Name:   "network-list",
+			Action: app.NetworksList,
 		}, {
 			Name:   "network-delete",
 			Action: app.NetworkDelete,
