@@ -33,9 +33,9 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 	var conn *httputil.ClientConn
 	if url.Scheme == "https" {
 		host := strings.Split(url.Host, ":")[0]
-		config := *c.tlsConfig
+		config := copyTLSConfig(c.tlsConfig)
 		config.ServerName = host
-		tlsConn := tls.Client(dial, &config)
+		tlsConn := tls.Client(dial, config)
 		conn = httputil.NewClientConn(tlsConn, nil)
 	} else {
 		conn = httputil.NewClientConn(dial, nil)
@@ -51,4 +51,29 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 
 	socket, _ := conn.Hijack()
 	return socket, nil
+}
+
+// We can't copy a tls.Config with a simple assignment (i.e. `config := *tls.Config) as go vet
+// returns the error: "assignment copies lock value to config: crypto/tls.Config contains sync.Once
+// contains sync.Mutex"
+func copyTLSConfig(c *tls.Config) *tls.Config {
+	return &tls.Config{
+		Certificates:             c.Certificates,
+		NameToCertificate:        c.NameToCertificate,
+		GetCertificate:           c.GetCertificate,
+		RootCAs:                  c.RootCAs,
+		NextProtos:               c.NextProtos,
+		ServerName:               c.ServerName,
+		ClientAuth:               c.ClientAuth,
+		ClientCAs:                c.ClientCAs,
+		InsecureSkipVerify:       c.InsecureSkipVerify,
+		CipherSuites:             c.CipherSuites,
+		PreferServerCipherSuites: c.PreferServerCipherSuites,
+		SessionTicketsDisabled:   c.SessionTicketsDisabled,
+		SessionTicketKey:         c.SessionTicketKey,
+		ClientSessionCache:       c.ClientSessionCache,
+		MinVersion:               c.MinVersion,
+		MaxVersion:               c.MaxVersion,
+		CurvePreferences:         c.CurvePreferences,
+	}
 }
