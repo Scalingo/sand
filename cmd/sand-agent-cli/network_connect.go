@@ -20,8 +20,8 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 		return err
 	}
 
-	if c.String("network") == "" {
-		return errors.New("--network flag is mandatory")
+	if c.String("network") == "" || c.String("ip") == "" || c.String("port") == "" {
+		return errors.New("network, ip and port flags are mandatory")
 	}
 
 	conn, err := client.NetworkConnect(context.Background(), c.String("network"), params.NetworkConnect{
@@ -54,7 +54,7 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 		log.Info("remote connection opened to the SAND network")
 		_, err := io.Copy(localConn, conn)
 		if err != io.EOF && err != nil {
-			log.WithError(err).Error("fail to copy data from remote network to local socket")
+			log.WithError(err).Error("fail to copy data from local socket to remote network")
 		}
 		log.Info("remote connection closed to the SAND network")
 	}()
