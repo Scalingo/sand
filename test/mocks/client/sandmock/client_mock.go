@@ -6,6 +6,7 @@ package sandmock
 
 import (
 	context "context"
+	net "net"
 	reflect "reflect"
 
 	params "github.com/Scalingo/sand/api/params"
@@ -74,6 +75,19 @@ func (mr *MockClientMockRecorder) EndpointsList(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndpointsList", reflect.TypeOf((*MockClient)(nil).EndpointsList), arg0, arg1)
 }
 
+// NetworkConnect mocks base method
+func (m *MockClient) NetworkConnect(arg0 context.Context, arg1 string, arg2 params.NetworkConnect) (net.Conn, error) {
+	ret := m.ctrl.Call(m, "NetworkConnect", arg0, arg1, arg2)
+	ret0, _ := ret[0].(net.Conn)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NetworkConnect indicates an expected call of NetworkConnect
+func (mr *MockClientMockRecorder) NetworkConnect(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkConnect", reflect.TypeOf((*MockClient)(nil).NetworkConnect), arg0, arg1, arg2)
+}
+
 // NetworkCreate mocks base method
 func (m *MockClient) NetworkCreate(arg0 context.Context, arg1 params.NetworkCreate) (types.Network, error) {
 	ret := m.ctrl.Call(m, "NetworkCreate", arg0, arg1)
@@ -97,6 +111,19 @@ func (m *MockClient) NetworkDelete(arg0 context.Context, arg1 string) error {
 // NetworkDelete indicates an expected call of NetworkDelete
 func (mr *MockClientMockRecorder) NetworkDelete(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkDelete", reflect.TypeOf((*MockClient)(nil).NetworkDelete), arg0, arg1)
+}
+
+// NetworkShow mocks base method
+func (m *MockClient) NetworkShow(arg0 context.Context, arg1 string) (types.Network, error) {
+	ret := m.ctrl.Call(m, "NetworkShow", arg0, arg1)
+	ret0, _ := ret[0].(types.Network)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NetworkShow indicates an expected call of NetworkShow
+func (mr *MockClientMockRecorder) NetworkShow(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkShow", reflect.TypeOf((*MockClient)(nil).NetworkShow), arg0, arg1)
 }
 
 // NetworksList mocks base method
