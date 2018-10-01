@@ -31,6 +31,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, para
 	if err != nil {
 		return errors.Wrapf(err, "fail to hijack http connection")
 	}
+	defer socket.Close()
 
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
@@ -42,6 +43,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, para
 	if err != nil {
 		return errors.Wrapf(err, "fail to get file from tcp connection")
 	}
+	defer socketFile.Close()
 
 	cmd := &exec.Cmd{
 		Path:       reexec.Self(),
