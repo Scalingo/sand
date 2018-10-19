@@ -48,22 +48,32 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
+	closed := false
 	go func() {
-		defer wg.Done()
-		defer conn.Close()
+		defer func() {
+			closed = true
+			wg.Done()
+			localConn.Close()
+			conn.Close()
+		}()
 		log.Info("remote connection opened to the SAND network")
 		_, err := io.Copy(localConn, conn)
-		if err != io.EOF && err != nil {
+		if err != io.EOF && err != nil && !closed {
 			log.WithError(err).Error("fail to copy data from local socket to remote network")
 		}
 		log.Info("remote connection closed to the SAND network")
 	}()
 
 	go func() {
-		defer wg.Done()
-		defer localConn.Close()
+		defer func() {
+			closed = true
+			wg.Done()
+			localConn.Close()
+			conn.Close()
+		}()
+
 		_, err := io.Copy(conn, localConn)
-		if err != io.EOF && err != nil {
+		if err != io.EOF && err != nil && !closed {
 			log.WithError(err).Error("fail to copy data from remote network to local socket")
 		}
 		log.Infof("local connection on %v closed", listener.Addr())
