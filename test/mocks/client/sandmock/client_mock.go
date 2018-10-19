@@ -7,6 +7,7 @@ package sandmock
 import (
 	context "context"
 	net "net"
+	http "net/http"
 	reflect "reflect"
 
 	params "github.com/Scalingo/sand/api/params"
@@ -137,4 +138,16 @@ func (m *MockClient) NetworksList(arg0 context.Context) ([]types.Network, error)
 // NetworksList indicates an expected call of NetworksList
 func (mr *MockClientMockRecorder) NetworksList(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworksList", reflect.TypeOf((*MockClient)(nil).NetworksList), arg0)
+}
+
+// NewHTTPRoundTripper mocks base method
+func (m *MockClient) NewHTTPRoundTripper(arg0 context.Context, arg1 string) http.RoundTripper {
+	ret := m.ctrl.Call(m, "NewHTTPRoundTripper", arg0, arg1)
+	ret0, _ := ret[0].(http.RoundTripper)
+	return ret0
+}
+
+// NewHTTPRoundTripper indicates an expected call of NewHTTPRoundTripper
+func (mr *MockClientMockRecorder) NewHTTPRoundTripper(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewHTTPRoundTripper", reflect.TypeOf((*MockClient)(nil).NewHTTPRoundTripper), arg0, arg1)
 }

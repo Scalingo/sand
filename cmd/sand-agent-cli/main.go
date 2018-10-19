@@ -73,7 +73,7 @@ func main() {
 			Action: app.Curl,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "network,n", Usage: "ID of the network to connect to"},
-				cli.StringFlag{Name: "method,m", Usage: "HTTP method to user", Value: "GET"},
+				cli.StringFlag{Name: "method,X", Usage: "HTTP method to user", Value: "GET"},
 				cli.StringSliceFlag{Name: "header,H", Usage: "HTTP header"},
 			},
 		}, {
