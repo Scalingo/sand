@@ -69,6 +69,14 @@ func main() {
 				cli.StringFlag{Name: "port", Usage: "Port to reach in the network"},
 			},
 		}, {
+			Name:   "curl",
+			Action: app.Curl,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "network,n", Usage: "ID of the network to connect to"},
+				cli.StringFlag{Name: "method,m", Usage: "HTTP method to user", Value: "GET"},
+				cli.StringSliceFlag{Name: "header,H", Usage: "HTTP header"},
+			},
+		}, {
 			Name:   "endpoint-list",
 			Action: app.EndpointsList,
 			Flags: []cli.Flag{
