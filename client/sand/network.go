@@ -13,6 +13,27 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (c *client) NetworkShow(ctx context.Context, id string) (types.Network, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/networks/%s", c.url, id), nil)
+	if err != nil {
+		return types.Network{}, errors.Wrapf(err, "fail to create http request")
+	}
+	req = req.WithContext(ctx)
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return types.Network{}, errors.Wrapf(err, "fail to execute GET /networks/%s", id)
+	}
+	defer res.Body.Close()
+
+	var r httpresp.NetworkShow
+	err = json.NewDecoder(res.Body).Decode(&r)
+	if err != nil {
+		return types.Network{}, errors.Wrapf(err, "fail to unserialize JSON")
+	}
+
+	return r.Network, nil
+}
+
 func (c *client) NetworksList(ctx context.Context) ([]types.Network, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/networks", c.url), nil)
 	if err != nil {

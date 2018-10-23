@@ -40,19 +40,41 @@ func main() {
 	}
 	app.cli.Commands = cli.Commands{
 		{
-			Name:   "network-list",
-			Action: app.NetworksList,
-		}, {
 			Name:   "network-create",
 			Action: app.NetworkCreate,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "name", Usage: "name of the network to create"},
 			},
 		}, {
+			Name:   "network-show",
+			Action: app.NetworkShow,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "network,n", Usage: "ID of the network to display"},
+			},
+		}, {
+			Name:   "network-list",
+			Action: app.NetworksList,
+		}, {
 			Name:   "network-delete",
 			Action: app.NetworkDelete,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "network,n", Usage: "ID of the network to delete"},
+			},
+		}, {
+			Name:   "network-connect",
+			Action: app.NetworkConnect,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "network,n", Usage: "ID of the network to connect to"},
+				cli.StringFlag{Name: "ip", Usage: "IP to reach in the network"},
+				cli.StringFlag{Name: "port", Usage: "Port to reach in the network"},
+			},
+		}, {
+			Name:   "curl",
+			Action: app.Curl,
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "network,n", Usage: "ID of the network to connect to"},
+				cli.StringFlag{Name: "method,X", Usage: "HTTP method to user", Value: "GET"},
+				cli.StringSliceFlag{Name: "header,H", Usage: "HTTP header"},
 			},
 		}, {
 			Name:   "endpoint-list",
@@ -96,5 +118,5 @@ func (a *App) sandClient(c *cli.Context) (sand.Client, error) {
 		}
 		opts = append(opts, sand.WithTlsConfig(config))
 	}
-	return sand.NewClient(opts...)
+	return sand.NewClient(opts...), nil
 }

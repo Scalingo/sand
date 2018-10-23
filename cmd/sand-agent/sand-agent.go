@@ -94,7 +94,9 @@ func main() {
 	r.Use(handlers.ErrorMiddleware)
 	r.HandleFunc("/networks", nctrl.List).Methods("GET")
 	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
+	r.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
 	r.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
+	r.HandleFunc("/networks/{id}", nctrl.Connect).Methods("CONNECT")
 	r.HandleFunc("/endpoints", ectrl.Create).Methods("POST")
 	r.HandleFunc("/endpoints", ectrl.List).Methods("GET")
 	r.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
@@ -233,6 +235,8 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 
 		endpoint, err = erepo.Activate(ctx, network, endpoint, params.EndpointActivate{
 			NSHandlePath: endpoint.TargetNetnsPath,
+			SetAddr:      true,
+			MoveVeth:     true,
 		})
 		if err != nil {
 			log.WithError(err).Error("fail to ensure endpoint")

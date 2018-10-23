@@ -2,6 +2,7 @@ package sand
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 
@@ -17,10 +18,13 @@ import (
 type Client interface {
 	NetworksList(context.Context) ([]types.Network, error)
 	NetworkCreate(context.Context, params.NetworkCreate) (types.Network, error)
+	NetworkShow(context.Context, string) (types.Network, error)
+	NetworkConnect(context.Context, string, params.NetworkConnect) (net.Conn, error)
 	NetworkDelete(context.Context, string) error
 	EndpointCreate(context.Context, params.EndpointCreate) (types.Endpoint, error)
 	EndpointsList(context.Context, params.EndpointsList) ([]types.Endpoint, error)
 	EndpointDelete(context.Context, string) error
+	NewHTTPRoundTripper(ctx context.Context, id string) http.RoundTripper
 }
 
 type httpClient struct {
@@ -61,7 +65,7 @@ var (
 
 type Opt func(c *client)
 
-func NewClient(opts ...Opt) (*client, error) {
+func NewClient(opts ...Opt) *client {
 	c := &client{
 		url: "http://localhost:9999",
 	}
@@ -81,7 +85,7 @@ func NewClient(opts ...Opt) (*client, error) {
 			TLSClientConfig: c.tlsConfig,
 		}
 	}
-	return c, nil
+	return c
 }
 
 func WithURL(url string) Opt {
