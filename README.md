@@ -68,13 +68,13 @@ go get github.com/Scalingo/sand/cmd/sand-agent-cli
 
 ### HTTP TLS authentication
 
-If all three are defined, server will serving HTTPS instead of HTTP with client
+If all three are defined, server will serve HTTPS instead of HTTP with client
 certificate authentication will be enabled, refusing requests from unauthorized
 clients.
 
 * `HTTP_TLS_CERT` Path to the server certificate sent by the server
 * `HTTP_TLS_KEY` Path to the private key authenticating the server certificate
-* `HTTP_TLS_CA` Path to the CA used by ETCD client certificates
+* `HTTP_TLS_CA` Path to the CA used by SAND client certificates
 
 ## References
 
