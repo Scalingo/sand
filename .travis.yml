@@ -1,21 +1,25 @@
 language: go
 
+go:
+  - "1.x"
+
 before_install:
   - go get github.com/mitchellh/gox
 
 script:
-  - go get -t -v ./...
   - go test ./...
-  - gox -os="linux" -arch="amd64 386"
+  - gox -os="linux" -arch="amd64 386" -output="dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./cmd/...
 
 deploy:
   provider: releases
   skip_cleanup: true
-  api_key:
-    secure: SEk3X/jZNr5IOfMhFzLZfQd3tEjNnWUX+BNdcnRdjbaZ0OWbQEE/p/9SwZUYTpU3+M4XQeHFPaxqZO5WilVLm4lnGR7XiIpuuWoozpQPUxOXJIDJlaykCTwk6IVre5We4lTQVwZm16PTvjgtvOC3boXLa7Xm1rRA6JrqUmOUXhVo3YKZr6U08TY2Y19sjNcFvq4HAgJ19/hj+1UgMXjXL4QInmEiAA/9/xstWsNPD371lmjMr+ipcM0a3vELlu59NLhd2Tw9QIVhURAI49qFDkZ6V2sSmFdoTdxADGscGkZBHXIBOthoaxP8FRbX5Onb9PvRiscdIAFKwqPvoEmsGWtbJ6EWCpBkQU4A7SBTq4IOYtEg7UZvWaWmwO2yJCyYF0l75ZsXGHx/Bx9U43Jy8d6kgZXk5ddHW08o9+aWkyb6ertWWJKAApK3FVTZoxje+8bzpY0iLbVWfZglDGKh49wZbsWQ808ULCTEG3EuZ0WuyMzAmwCWTdt0mWUMJrzPbomb8s/HCoOIM3zyx26kaxiaRRxYehL23JaukxIsXihffxRWngPfdxouUji3rMjDGgRvf/RKdOMUcpYQL3J/5D9e0spe9Nl7D1O072KZm/VBt801HMMke4hBuqsSBgRoNJxDA+j1W4Fx0VXe5Ao75ze90U9Yr7fG+9G4YPqraEo=
-  file:
-    - sand_linux_amd64
-    - sand_linux_386
   on:
     tags: true
     repo: Scalingo/sand
+  file:
+    - "./dist/sand-agent-cli_linux_386"
+    - "./dist/sand-agent-cli_linux_amd64"
+    - "./dist/sand-agent_linux_386"
+    - "./dist/sand-agent_linux_amd64"
+  api_key:
+    secure: SEk3X/jZNr5IOfMhFzLZfQd3tEjNnWUX+BNdcnRdjbaZ0OWbQEE/p/9SwZUYTpU3+M4XQeHFPaxqZO5WilVLm4lnGR7XiIpuuWoozpQPUxOXJIDJlaykCTwk6IVre5We4lTQVwZm16PTvjgtvOC3boXLa7Xm1rRA6JrqUmOUXhVo3YKZr6U08TY2Y19sjNcFvq4HAgJ19/hj+1UgMXjXL4QInmEiAA/9/xstWsNPD371lmjMr+ipcM0a3vELlu59NLhd2Tw9QIVhURAI49qFDkZ6V2sSmFdoTdxADGscGkZBHXIBOthoaxP8FRbX5Onb9PvRiscdIAFKwqPvoEmsGWtbJ6EWCpBkQU4A7SBTq4IOYtEg7UZvWaWmwO2yJCyYF0l75ZsXGHx/Bx9U43Jy8d6kgZXk5ddHW08o9+aWkyb6ertWWJKAApK3FVTZoxje+8bzpY0iLbVWfZglDGKh49wZbsWQ808ULCTEG3EuZ0WuyMzAmwCWTdt0mWUMJrzPbomb8s/HCoOIM3zyx26kaxiaRRxYehL23JaukxIsXihffxRWngPfdxouUji3rMjDGgRvf/RKdOMUcpYQL3J/5D9e0spe9Nl7D1O072KZm/VBt801HMMke4hBuqsSBgRoNJxDA+j1W4Fx0VXe5Ao75ze90U9Yr7fG+9G4YPqraEo=
