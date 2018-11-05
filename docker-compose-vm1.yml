@@ -12,7 +12,7 @@ services:
       - /etc/docker/plugins:/etc/docker/plugins:shared
     environment:
       GO_ENV: development
-      ETCD_URL: "http://192.168.254.2:2379"
+      ETCD_HOSTS: "http://192.168.254.2:2379"
       PUBLIC_IP: "192.168.254.2"
       ENABLE_DOCKER_PLUGIN: "true"
     ports:

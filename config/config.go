@@ -1,9 +1,9 @@
 package config
 
 import (
-	"net/url"
 	"os"
-	"strings"
+
+	etcdutils "github.com/Scalingo/go-utils/etcd"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/pkg/errors"
@@ -18,11 +18,11 @@ type Config struct {
 	PublicHostname string
 	PublicIP       string `envconfig:"PUBLIC_IP"`
 
-	EtcdPrefix  string `default:"/sc-net"`
-	EtcdURL     string `envconfig:"ETCD_URL" default:"http://127.0.0.1:2379"`
-	EtcdTLSCert string `envconfig:"ETCD_TLS_CERT"`
-	EtcdTLSKey  string `envconfig:"ETCD_TLS_KEY"`
-	EtcdTLSCA   string `envconfig:"ETCD_TLS_CA"`
+	EtcdPrefix    string `default:"/sc-net"`
+	EtcdHosts     string `envconfig:"ETCD_HOSTS" default:"http://127.0.0.1:2379"`
+	EtcdTLSCACert string `envconfig:"ETCD_CACERT"`
+	EtcdTLSKey    string `envconfig:"ETCD_TLS_KEY"`
+	EtcdTLSCert   string `envconfig:"ETCD_TLS_CERT"`
 
 	HttpTLSCert string `envconfig:"HTTP_TLS_CERT"`
 	HttpTLSKey  string `envconfig:"HTTP_TLS_KEY"`
@@ -30,9 +30,6 @@ type Config struct {
 
 	EnableDockerPlugin   bool `envconfig:"ENABLE_DOCKER_PLUGIN"`
 	DockerPluginHttpPort int  `default:"9998"`
-
-	EtcdWithTLS   bool
-	EtcdEndpoints []string
 }
 
 func Build() (*Config, error) {
@@ -56,28 +53,9 @@ func Build() (*Config, error) {
 }
 
 func (c *Config) checkEtcdConfig() error {
-	url, err := url.Parse(c.EtcdURL)
+	_, err := etcdutils.ConfigFromEnv()
 	if err != nil {
-		return errors.Wrapf(err, "not a valid URL: %s", c.EtcdURL)
-	}
-	c.EtcdEndpoints = strings.Split(url.Host, ",")
-
-	if url.Scheme == "https" {
-		c.EtcdWithTLS = true
-		_, err := os.Stat(c.EtcdTLSCert)
-		if err != nil {
-			return errors.Wrap(err, "invalid etcd TLS cert")
-		}
-
-		_, err = os.Stat(c.EtcdTLSKey)
-		if err != nil {
-			return errors.Wrap(err, "invalid etcd TLS cert")
-		}
-
-		_, err = os.Stat(c.EtcdTLSCA)
-		if err != nil {
-			return errors.Wrap(err, "invalid etcd TLS cert")
-		}
+		return errors.Wrap(err, "fail to get etcd config from environment")
 	}
 
 	return nil
