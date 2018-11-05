@@ -60,11 +60,11 @@ go get github.com/Scalingo/sand/cmd/sand-agent-cli
 > Note that at least ETCD v3 is required to run SAND
 
 * `ETCD_PREFIX` default: `/sc-net`, configuration of SAND is stored in ETCD, this is the prefix used by the keys
-* `ETCD_URL` default: `http://127.0.0.1:2379`, URL of the etcd instance/instances, ie. `https://10.0.0.1:2379,10.0.0.2:2379,10.0.0.3:2379`
+* `ETCD_HOSTS` default: `http://127.0.0.1:2379`, URL of the etcd instance/instances, ie. `https://10.0.0.1:2379,10.0.0.2:2379,10.0.0.3:2379`
 
 * `ETCD_TLS_CERT` Path to the client certificate to reach ETCD
 * `ETCD_TLS_KEY` Path to the private key authenticating the client certificate
-* `ETCD_TLS_CA` Path to the CA used by ETCD server certificate
+* `ETCD_CACERT` Path to the CA used by ETCD server certificate
 
 ### HTTP TLS authentication
 
