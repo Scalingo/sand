@@ -19,7 +19,7 @@ func (s *store) Watch(ctx context.Context, prefix string) (Watcher, error) {
 	log := logger.Get(ctx)
 	prefix = s.Key(prefix)
 
-	client, err := etcd.NewClient(s.config)
+	client, err := etcd.NewClient()
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to create etcd client")
 	}

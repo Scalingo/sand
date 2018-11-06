@@ -32,7 +32,7 @@ func New(c *config.Config, s store.Store, name string, field string, prefix stri
 }
 
 func (m *manager) Lock(ctx context.Context) error {
-	client, err := etcd.NewClient(m.config)
+	client, err := etcd.NewClient()
 	if err != nil {
 		return errors.Wrapf(err, "fail to get etcd client")
 	}

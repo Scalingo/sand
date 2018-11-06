@@ -9,7 +9,7 @@ import (
 )
 
 func (s *store) newEtcdClient() (clientv3.KV, io.Closer, error) {
-	c, err := etcd.NewClient(s.config)
+	c, err := etcd.NewClient()
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to get etcd client from config")
 	}

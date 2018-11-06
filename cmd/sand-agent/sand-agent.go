@@ -70,7 +70,7 @@ func main() {
 	managers := netmanager.NewManagerMap()
 	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
 
-	etcdClient, err := etcd.NewClient(c)
+	etcdClient, err := etcd.NewClient()
 	if err != nil {
 		log.WithError(err).Error("fail to initialize etcd client")
 		os.Exit(-1)
