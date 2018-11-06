@@ -8,7 +8,9 @@ import (
 
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/test/mocks/endpointmock"
+	"github.com/Scalingo/sand/test/mocks/ipallocatormock"
 	"github.com/Scalingo/sand/test/mocks/networkmock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +27,7 @@ func TestEndpointsController_Create(t *testing.T) {
 		Error                    string
 		ExpectNetworkRepository  func(*networkmock.MockRepository)
 		ExpectEndpointRepository func(*endpointmock.MockRepository)
+		ExpectIPAllocator        func(*ipallocatormock.MockIPAllocator)
 	}{
 		{
 			Name:   "invalid JSON should return 400",
@@ -58,6 +61,11 @@ func TestEndpointsController_Create(t *testing.T) {
 			Method: "POST",
 			Body:   `{"network_id": "1"}`,
 			Error:  "fail to ensure network",
+			ExpectIPAllocator: func(m *ipallocatormock.MockIPAllocator) {
+				m.EXPECT().AllocateIP(gomock.Any(), "1", ipallocator.AllocateIPOpts{
+					Address: "",
+				})
+			},
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
 				r.EXPECT().Exists(gomock.Any(), "1").Return(network, true, nil)
@@ -69,6 +77,11 @@ func TestEndpointsController_Create(t *testing.T) {
 			Method: "POST",
 			Body:   `{"network_id": "1", "activate": true, "activate_params": { "ns_handle_path": "/proc/self/ns/net"}}`,
 			Error:  "fail to create endpoint",
+			ExpectIPAllocator: func(m *ipallocatormock.MockIPAllocator) {
+				m.EXPECT().AllocateIP(gomock.Any(), "1", ipallocator.AllocateIPOpts{
+					Address: "",
+				})
+			},
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
 				r.EXPECT().Exists(gomock.Any(), "1").Return(network, true, nil)
@@ -97,9 +110,12 @@ func TestEndpointsController_Create(t *testing.T) {
 
 			networkRepo := networkmock.NewMockRepository(ctrl)
 			endpointRepo := endpointmock.NewMockRepository(ctrl)
+			ipallocator := ipallocatormock.NewMockIPAllocator(ctrl)
 
 			controller := EndpointsController{
-				EndpointRepository: endpointRepo, NetworkRepository: networkRepo,
+				EndpointRepository: endpointRepo,
+				NetworkRepository:  networkRepo,
+				IPAllocator:        ipallocator,
 			}
 
 			if c.ExpectNetworkRepository != nil {
@@ -108,6 +124,10 @@ func TestEndpointsController_Create(t *testing.T) {
 
 			if c.ExpectEndpointRepository != nil {
 				c.ExpectEndpointRepository(endpointRepo)
+			}
+
+			if c.ExpectIPAllocator != nil {
+				c.ExpectIPAllocator(ipallocator)
 			}
 
 			body := strings.NewReader(c.Body)

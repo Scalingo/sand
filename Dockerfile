@@ -1,4 +1,4 @@
-FROM golang:1.9.1
+FROM golang:1.11
 
 RUN go get github.com/cespare/reflex
 ADD . /go/src/github.com/Scalingo/sand

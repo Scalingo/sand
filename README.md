@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Scalingo/sand.svg?branch=master)](https://travis-ci.org/Scalingo/sand)
+
 # SAND Network Daemon
 
 SAND is simple API designed to create overlay networks based on **VxLAN** in an
