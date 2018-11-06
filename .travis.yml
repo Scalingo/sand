@@ -8,7 +8,9 @@ before_install:
 
 script:
   - go test ./...
-  - gox -os="linux" -arch="amd64 386" -output="dist/{{.Dir}}_{{.OS}}_{{.Arch}}" ./cmd/...
+  - gox -os="linux" -arch="amd64 386" -output="dist/sand-$TRAVIS_TAG-{{.OS}}-{{.Arch}}/{{.Dir}}" ./cmd/...
+  - tar -C dist -czvf "dist/sand-$TRAVIS_TAG-linux-386.tar.gz" "sand-$TRAVIS_TAG-linux-386"
+  - tar -C dist -czvf "dist/sand-$TRAVIS_TAG-linux-amd64.tar.gz" "sand-$TRAVIS_TAG-linux-amd64"
 
 deploy:
   provider: releases
@@ -16,10 +18,8 @@ deploy:
   on:
     tags: true
     repo: Scalingo/sand
+  file_glob: true
   file:
-    - "./dist/sand-agent-cli_linux_386"
-    - "./dist/sand-agent-cli_linux_amd64"
-    - "./dist/sand-agent_linux_386"
-    - "./dist/sand-agent_linux_amd64"
+    - "dist/*.tar.gz"
   api_key:
     secure: SEk3X/jZNr5IOfMhFzLZfQd3tEjNnWUX+BNdcnRdjbaZ0OWbQEE/p/9SwZUYTpU3+M4XQeHFPaxqZO5WilVLm4lnGR7XiIpuuWoozpQPUxOXJIDJlaykCTwk6IVre5We4lTQVwZm16PTvjgtvOC3boXLa7Xm1rRA6JrqUmOUXhVo3YKZr6U08TY2Y19sjNcFvq4HAgJ19/hj+1UgMXjXL4QInmEiAA/9/xstWsNPD371lmjMr+ipcM0a3vELlu59NLhd2Tw9QIVhURAI49qFDkZ6V2sSmFdoTdxADGscGkZBHXIBOthoaxP8FRbX5Onb9PvRiscdIAFKwqPvoEmsGWtbJ6EWCpBkQU4A7SBTq4IOYtEg7UZvWaWmwO2yJCyYF0l75ZsXGHx/Bx9U43Jy8d6kgZXk5ddHW08o9+aWkyb6ertWWJKAApK3FVTZoxje+8bzpY0iLbVWfZglDGKh49wZbsWQ808ULCTEG3EuZ0WuyMzAmwCWTdt0mWUMJrzPbomb8s/HCoOIM3zyx26kaxiaRRxYehL23JaukxIsXihffxRWngPfdxouUji3rMjDGgRvf/RKdOMUcpYQL3J/5D9e0spe9Nl7D1O072KZm/VBt801HMMke4hBuqsSBgRoNJxDA+j1W4Fx0VXe5Ao75ze90U9Yr7fG+9G4YPqraEo=
