@@ -239,8 +239,18 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 			MoveVeth:     true,
 		})
 		if err != nil {
-			log.WithError(err).Error("fail to ensure endpoint")
-			continue
+			// if we can't activate the endpoint because the netns path doesn't exist anymore, we
+			// just deactivate it. Otherwise we raise an error.
+			if strings.Contains(err.Error(), "no such file or directory") {
+				endpoint, err = erepo.Deactivate(ctx, network, endpoint)
+				if err != nil {
+					log.WithError(err).Error("fail to deactivate endpoint")
+					continue
+				}
+			} else {
+				log.WithError(err).Error("fail to ensure endpoint")
+				continue
+			}
 		}
 	}
 	return nil
