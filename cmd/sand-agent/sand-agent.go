@@ -209,7 +209,10 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 	}
 
 	for _, endpoint := range endpoints {
+		log = log.WithField("endpoint_id", endpoint.ID)
+		ctx = logger.ToCtx(ctx, log)
 		if !endpoint.Active {
+			log.Debug("skip inactive endpoint")
 			continue
 		}
 		log = log.WithFields(logrus.Fields{
