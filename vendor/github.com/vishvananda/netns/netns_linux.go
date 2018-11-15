@@ -60,7 +60,7 @@ func New() (ns NsHandle, err error) {
 	return Get()
 }
 
-// Get gets a handle to the current threads network namespace.
+// Get gets a handle to the current thread network namespace.
 func Get() (NsHandle, error) {
 	return GetFromThread(os.Getpid(), syscall.Gettid())
 }

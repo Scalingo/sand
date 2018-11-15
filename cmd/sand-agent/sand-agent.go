@@ -198,7 +198,7 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 	log := logger.Get(ctx)
 	ctx = logger.ToCtx(ctx, log)
 
-	log.Info("ensure networks on node")
+	log.Info("Ensure networks on node")
 
 	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.PublicHostname})
 	if err == store.ErrNotFound {
@@ -209,7 +209,10 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 	}
 
 	for _, endpoint := range endpoints {
+		log = log.WithField("endpoint_id", endpoint.ID)
+		ctx = logger.ToCtx(ctx, log)
 		if !endpoint.Active {
+			log.Debug("skip inactive endpoint")
 			continue
 		}
 		log = log.WithFields(logrus.Fields{
@@ -239,8 +242,18 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 			MoveVeth:     true,
 		})
 		if err != nil {
-			log.WithError(err).Error("fail to ensure endpoint")
-			continue
+			// if we can't activate the endpoint because the netns path doesn't exist anymore, we
+			// just deactivate it. Otherwise we raise an error.
+			if os.IsNotExist(errors.Cause(err)) {
+				endpoint, err = erepo.Deactivate(ctx, network, endpoint)
+				if err != nil {
+					log.WithError(err).Error("fail to deactivate endpoint")
+					continue
+				}
+			} else {
+				log.WithError(err).Error("fail to ensure endpoint")
+				continue
+			}
 		}
 	}
 	return nil
