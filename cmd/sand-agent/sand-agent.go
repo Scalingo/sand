@@ -198,7 +198,7 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 	log := logger.Get(ctx)
 	ctx = logger.ToCtx(ctx, log)
 
-	log.Info("ensure networks on node")
+	log.Info("Ensure networks on node")
 
 	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.PublicHostname})
 	if err == store.ErrNotFound {
