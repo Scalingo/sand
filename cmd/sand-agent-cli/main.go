@@ -59,6 +59,7 @@ func main() {
 			Action: app.NetworkDelete,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "network,n", Usage: "ID of the network to delete"},
+				cli.BoolFlag{Name: "recursive,r", Usage: "Also delete the endpoints"},
 			},
 		}, {
 			Name:   "network-connect",
