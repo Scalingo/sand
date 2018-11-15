@@ -79,6 +79,7 @@ func (a *App) NetworkDelete(c *cli.Context) error {
 			if err != nil {
 				return err
 			}
+			fmt.Printf("Endpoint '%s' deleted.\n", endpoint.ID)
 		}
 	}
 
