@@ -2,12 +2,13 @@ package overlay
 
 import (
 	"context"
-	"strings"
+	"os"
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netutils"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netns"
 )
 
@@ -27,7 +28,7 @@ func (m manager) DeleteEndpoint(ctx context.Context, n types.Network, e types.En
 
 	hostfd, err := netns.Get()
 	if err != nil {
-		return errors.Wrapf(err, "fail to get current threads network namespace")
+		return errors.Wrapf(err, "fail to get current thread network namespace")
 	}
 	defer hostfd.Close()
 
@@ -39,10 +40,13 @@ func (m manager) DeleteEndpoint(ctx context.Context, n types.Network, e types.En
 	targetfd, err := netns.GetFromPath(e.TargetNetnsPath)
 	if err != nil {
 		err := errors.Wrapf(err, "fail to get host namespace handle from path")
-		if !strings.Contains(err.Error(), "no such file or directory") {
+		if os.IsNotExist(errors.Cause(err)) {
 			return err
 		}
-		log.WithField("endpoint_netns_path", e.TargetNetnsPath).WithError(err).Error("ignore error")
+		log.WithFields(logrus.Fields{
+			"error":               err,
+			"endpoint_netns_path": e.TargetNetnsPath,
+		}).Info("ignore error")
 	}
 	defer targetfd.Close()
 

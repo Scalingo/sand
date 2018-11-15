@@ -28,7 +28,7 @@ type overlayEndpoint struct {
 func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endpoint types.Endpoint, params params.EndpointActivate) (types.Endpoint, error) {
 	hostnsfd, err := netns.Get()
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to get current threads network namespace")
+		return endpoint, errors.Wrapf(err, "fail to get current thread network namespace")
 	}
 	defer hostnsfd.Close()
 
