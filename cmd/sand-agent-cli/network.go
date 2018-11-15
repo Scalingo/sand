@@ -61,12 +61,29 @@ func (a *App) NetworksList(c *cli.Context) error {
 }
 
 func (a *App) NetworkDelete(c *cli.Context) error {
+	ctx := context.Background()
 	client, err := a.sandClient(c)
 	if err != nil {
 		return err
 	}
 
-	err = client.NetworkDelete(context.Background(), c.String("network"))
+	if c.Bool("recursive") {
+		endpoints, err := client.EndpointsList(ctx, params.EndpointsList{
+			NetworkID: c.String("network"),
+		})
+		if err != nil {
+			return err
+		}
+		for _, endpoint := range endpoints {
+			err := client.EndpointDelete(ctx, endpoint.ID)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Endpoint '%s' deleted.\n", endpoint.ID)
+		}
+	}
+
+	err = client.NetworkDelete(ctx, c.String("network"))
 	if err != nil {
 		return err
 	}
