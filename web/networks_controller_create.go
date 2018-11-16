@@ -25,15 +25,14 @@ func (c NetworksController) Create(w http.ResponseWriter, r *http.Request, p map
 		return errors.Wrap(err, "invalid JSON")
 	}
 
-	if cnp.IPRange == "" || cnp.Gateway == "" {
-		cnp.IPRange = types.DefaultIPRange
-		cnp.Gateway = types.DefaultGateway
-	}
 	if cnp.IPRange != "" && cnp.Gateway == "" {
 		cnp.Gateway, err = netutils.DefaultGateway(cnp.IPRange)
 		if err != nil {
 			return errors.Wrapf(err, "fail to get default gateway for iprange=%v", cnp.IPRange)
 		}
+	} else if cnp.IPRange == "" && cnp.Gateway == "" {
+		cnp.IPRange = types.DefaultIPRange
+		cnp.Gateway = types.DefaultGateway
 	}
 
 	network, err := c.NetworkRepository.Create(ctx, cnp)
