@@ -1,3 +1,7 @@
+## v0.4.4 - 16 November 2018
+
+* Fix custom ip gateway definition, add CIDR
+
 ## v0.4.3 - 16 November 2018
 
 * Fix custom ip range on POST /networks

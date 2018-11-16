@@ -1,18 +1,19 @@
 package netutils
 
 import (
+	"fmt"
 	"net"
 
 	"gopkg.in/errgo.v1"
 )
 
 func DefaultGateway(cidr string) (string, error) {
-	ip, _, err := net.ParseCIDR(cidr)
+	ip, netip, err := net.ParseCIDR(cidr)
 	if err != nil {
 		return "", errgo.Notef(err, "invalid CIDR")
 	}
 	AddIntToIP(ip, 1)
-	return ip.String(), nil
+	return ToCIDR(ip, netip.Mask), nil
 }
 
 // Adds the ordinal IP to the current array
@@ -22,4 +23,9 @@ func AddIntToIP(array []byte, ordinal uint64) {
 		array[i] |= (byte)(ordinal & 0xff)
 		ordinal >>= 8
 	}
+}
+
+func ToCIDR(ip net.IP, mask net.IPMask) string {
+	ones, _ := mask.Size()
+	return fmt.Sprintf("%s/%d", ip.String(), ones)
 }
