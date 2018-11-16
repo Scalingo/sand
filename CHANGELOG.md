@@ -1,3 +1,7 @@
+## v0.4.3 - 16 November 2018
+
+* Fix custom ip range on POST /networks
+
 ## v0.2 - 12 February 2018
 
 * Docker Libnetwork remote plugin v1
