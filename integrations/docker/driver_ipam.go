@@ -7,11 +7,13 @@ import (
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
+	"github.com/Scalingo/sand/network"
 	"github.com/pkg/errors"
 )
 
 type dockerIPAMPlugin struct {
-	allocator ipallocator.IPAllocator
+	allocator         ipallocator.IPAllocator
+	networkRepository network.Repository
 }
 
 func (p *dockerIPAMPlugin) GetCapabilities(context.Context) (*ipam.CapabilitiesResponse, error) {
@@ -30,18 +32,26 @@ func (p *dockerIPAMPlugin) GetDefaultAddressSpaces(context.Context) (*ipam.Addre
 func (p *dockerIPAMPlugin) RequestPool(ctx context.Context, req *ipam.RequestPoolRequest) (*ipam.RequestPoolResponse, error) {
 	log := logger.Get(ctx)
 
-	poolID := req.Options["sand-id"]
-	if poolID == "" {
+	id := req.Options["sand-id"]
+	if id == "" {
 		return nil, errors.New("IPAM option sand-id is mandatory")
 	}
 
-	allocation, err := p.allocator.InitializePool(ctx, poolID, req.Pool)
+	_, ok, err := p.networkRepository.Exists(ctx, id)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to get network %v", id)
+	}
+	if !ok {
+		return nil, errors.Errorf("SAND network %v does not exist", id)
+	}
+
+	allocation, err := p.allocator.InitializePool(ctx, id, req.Pool)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to initialize IP pool")
 	}
 	log.Info("pool initialized")
 	res := ipam.RequestPoolResponse{
-		PoolID: poolID,
+		PoolID: id,
 		Pool:   allocation.GetAddressRange(),
 		Data:   map[string]string{},
 	}

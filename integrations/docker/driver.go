@@ -20,7 +20,8 @@ func NewDockerPlugin(c *config.Config, nr sandnetwork.Repository, er endpoint.Re
 			dockerPluginRepository: r,
 		},
 		DockerIPAMPlugin: &dockerIPAMPlugin{
-			allocator: a,
+			allocator:         a,
+			networkRepository: nr,
 		},
 	}
 }
