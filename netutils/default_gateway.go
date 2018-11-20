@@ -12,17 +12,21 @@ func DefaultGateway(cidr string) (string, error) {
 	if err != nil {
 		return "", errgo.Notef(err, "invalid CIDR")
 	}
-	AddIntToIP(ip, 1)
+	ip = AddIntToIP(ip, 1)
 	return ToCIDR(ip, netip.Mask), nil
 }
 
 // Adds the ordinal IP to the current array
 // 192.168.0.0 + 53 => 192.168.0.53
-func AddIntToIP(array []byte, ordinal uint64) {
-	for i := len(array) - 1; i >= 0; i-- {
-		array[i] |= (byte)(ordinal & 0xff)
-		ordinal >>= 8
-	}
+func AddIntToIP(ip net.IP, ordinal uint64) net.IP {
+	ip = ip.To4()
+	v := uint64(ip[0])<<24 + uint64(ip[1])<<16 + uint64(ip[2])<<8 + uint64(ip[3])
+	v += ordinal
+	v3 := byte(v & 0xFF)
+	v2 := byte((v >> 8) & 0xFF)
+	v1 := byte((v >> 16) & 0xFF)
+	v0 := byte((v >> 24) & 0xFF)
+	return net.IPv4(v0, v1, v2, v3)
 }
 
 func ToCIDR(ip net.IP, mask net.IPMask) string {

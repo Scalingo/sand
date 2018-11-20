@@ -208,7 +208,7 @@ func (a allocation) allocateNextAvailableIP(ctx context.Context) (string, error)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to parse allocation address range %v", a.AddressRange)
 	}
-	netutils.AddIntToIP(ip, uint64(i))
+	ip = netutils.AddIntToIP(ip, uint64(i))
 
 	log.WithField("ip", ip).WithField("ip-range", a.AddressRange).Infof("allocated IP (bitset %d)", i)
 

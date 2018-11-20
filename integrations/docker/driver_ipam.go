@@ -37,7 +37,7 @@ func (p *dockerIPAMPlugin) RequestPool(ctx context.Context, req *ipam.RequestPoo
 		return nil, errors.New("IPAM option sand-id is mandatory")
 	}
 
-	_, ok, err := p.networkRepository.Exists(ctx, id)
+	network, ok, err := p.networkRepository.Exists(ctx, id)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to get network %v", id)
 	}
@@ -45,14 +45,10 @@ func (p *dockerIPAMPlugin) RequestPool(ctx context.Context, req *ipam.RequestPoo
 		return nil, errors.Errorf("SAND network %v does not exist", id)
 	}
 
-	allocation, err := p.allocator.InitializePool(ctx, id, req.Pool)
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to initialize IP pool")
-	}
 	log.Info("pool initialized")
 	res := ipam.RequestPoolResponse{
 		PoolID: id,
-		Pool:   allocation.GetAddressRange(),
+		Pool:   network.IPRange,
 		Data:   map[string]string{},
 	}
 	return &res, nil
@@ -66,6 +62,21 @@ func (p *dockerIPAMPlugin) ReleasePool(ctx context.Context, req *ipam.ReleasePoo
 func (p *dockerIPAMPlugin) RequestAddress(ctx context.Context, req *ipam.RequestAddressRequest) (*ipam.RequestAddressResponse, error) {
 	log := logger.Get(ctx)
 	log = log.WithField("pool_id", req.PoolID)
+
+	if req.Options["RequestAddressType"] == "com.docker.network.gateway" {
+		id := req.PoolID
+		network, ok, err := p.networkRepository.Exists(ctx, id)
+		if err != nil {
+			return nil, errors.Wrapf(err, "fail to get network %v", id)
+		}
+		if !ok {
+			return nil, errors.Errorf("SAND network %v does not exist", id)
+		}
+
+		return &ipam.RequestAddressResponse{
+			Address: network.Gateway,
+		}, nil
+	}
 
 	ip, err := p.allocator.AllocateIP(ctx, req.PoolID, ipallocator.AllocateIPOpts{
 		Address: req.Address,
