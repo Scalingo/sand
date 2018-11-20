@@ -49,6 +49,18 @@ func (mr *MockRepositoryMockRecorder) Create(arg0, arg1 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), arg0, arg1)
 }
 
+// Deactivate mocks base method
+func (m *MockRepository) Deactivate(arg0 context.Context, arg1 types.Network) error {
+	ret := m.ctrl.Call(m, "Deactivate", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Deactivate indicates an expected call of Deactivate
+func (mr *MockRepositoryMockRecorder) Deactivate(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deactivate", reflect.TypeOf((*MockRepository)(nil).Deactivate), arg0, arg1)
+}
+
 // Delete mocks base method
 func (m *MockRepository) Delete(arg0 context.Context, arg1 types.Network) error {
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)

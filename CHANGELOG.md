@@ -1,4 +1,4 @@
-## v0.5.5 - 20 November 2018
+## v0.4.5 - 20 November 2018
 
 * Fix graceful restart of sand API and sand Docker integration API
 * Correctly handle resource deprovisioning

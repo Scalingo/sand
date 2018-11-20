@@ -48,6 +48,18 @@ func (mr *MockNetManagerMockRecorder) AddEndpointNeigh(arg0, arg1, arg2 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddEndpointNeigh", reflect.TypeOf((*MockNetManager)(nil).AddEndpointNeigh), arg0, arg1, arg2)
 }
 
+// Deactivate mocks base method
+func (m *MockNetManager) Deactivate(arg0 context.Context, arg1 types.Network) error {
+	ret := m.ctrl.Call(m, "Deactivate", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Deactivate indicates an expected call of Deactivate
+func (mr *MockNetManagerMockRecorder) Deactivate(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deactivate", reflect.TypeOf((*MockNetManager)(nil).Deactivate), arg0, arg1)
+}
+
 // DeleteEndpoint mocks base method
 func (m *MockNetManager) DeleteEndpoint(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) error {
 	ret := m.ctrl.Call(m, "DeleteEndpoint", arg0, arg1, arg2)
