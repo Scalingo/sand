@@ -10,7 +10,6 @@ import (
 
 	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/netutils"
 	"github.com/Scalingo/sand/store"
@@ -46,7 +45,6 @@ type RangeAddresser interface {
 }
 
 type IPAllocator interface {
-	InitializePool(ctx context.Context, id string, addressRange string) (RangeAddresser, error)
 	AllocateIP(ctx context.Context, id string, opts AllocateIPOpts) (string, error)
 	ReleaseIP(ctx context.Context, id string, address string) error
 	ReleasePool(ctx context.Context, id string) error
@@ -75,23 +73,6 @@ func (a *allocation) GetAddressRange() string {
 
 func (a *allocator) lockStorageKey(id string) string {
 	return fmt.Sprintf("%s/%s", IPAllocatorLockPrefix, id)
-}
-
-func (a *allocator) InitializePool(ctx context.Context, id string, addressRange string) (RangeAddresser, error) {
-	if addressRange == "" {
-		addressRange = types.DefaultIPRange
-	}
-	allocation, err := a.findOrCreateAllocation(ctx, id, AllocateIPOpts{AddressRange: addressRange})
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create allocation")
-	}
-
-	err = a.store.Set(ctx, allocation.storageKey(), &allocation)
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to save updated allocation %v", allocation)
-	}
-
-	return &allocation, nil
 }
 
 func (a *allocator) AllocateIP(ctx context.Context, id string, opts AllocateIPOpts) (allocatedAddress string, err error) {
