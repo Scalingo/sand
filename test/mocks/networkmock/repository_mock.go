@@ -10,6 +10,7 @@ import (
 
 	params "github.com/Scalingo/sand/api/params"
 	types "github.com/Scalingo/sand/api/types"
+	ipallocator "github.com/Scalingo/sand/ipallocator"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -62,15 +63,15 @@ func (mr *MockRepositoryMockRecorder) Deactivate(arg0, arg1 interface{}) *gomock
 }
 
 // Delete mocks base method
-func (m *MockRepository) Delete(arg0 context.Context, arg1 types.Network) error {
-	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
+func (m *MockRepository) Delete(arg0 context.Context, arg1 types.Network, arg2 ipallocator.IPAllocator) error {
+	ret := m.ctrl.Call(m, "Delete", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockRepositoryMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), arg0, arg1)
+func (mr *MockRepositoryMockRecorder) Delete(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), arg0, arg1, arg2)
 }
 
 // Ensure mocks base method

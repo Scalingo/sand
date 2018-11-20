@@ -48,19 +48,6 @@ func (mr *MockIPAllocatorMockRecorder) AllocateIP(arg0, arg1, arg2 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateIP", reflect.TypeOf((*MockIPAllocator)(nil).AllocateIP), arg0, arg1, arg2)
 }
 
-// InitializePool mocks base method
-func (m *MockIPAllocator) InitializePool(arg0 context.Context, arg1, arg2 string) (ipallocator.RangeAddresser, error) {
-	ret := m.ctrl.Call(m, "InitializePool", arg0, arg1, arg2)
-	ret0, _ := ret[0].(ipallocator.RangeAddresser)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// InitializePool indicates an expected call of InitializePool
-func (mr *MockIPAllocatorMockRecorder) InitializePool(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializePool", reflect.TypeOf((*MockIPAllocator)(nil).InitializePool), arg0, arg1, arg2)
-}
-
 // ReleaseIP mocks base method
 func (m *MockIPAllocator) ReleaseIP(arg0 context.Context, arg1, arg2 string) error {
 	ret := m.ctrl.Call(m, "ReleaseIP", arg0, arg1, arg2)
