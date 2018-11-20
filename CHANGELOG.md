@@ -1,3 +1,8 @@
+## v0.5.5 - 20 November 2018
+
+* Fix graceful restart of sand API and sand Docker integration API
+* Correctly handle resource deprovisioning
+
 ## v0.4.4 - 16 November 2018
 
 * Fix custom ip gateway definition, add CIDR

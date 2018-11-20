@@ -9,6 +9,7 @@ import (
 
 type NetManager interface {
 	Ensure(context.Context, types.Network) error
+	Deactivate(context.Context, types.Network) error
 
 	EnsureEndpoint(context.Context, types.Network, types.Endpoint, params.EndpointActivate) (types.Endpoint, error)
 	DeleteEndpoint(context.Context, types.Network, types.Endpoint) error

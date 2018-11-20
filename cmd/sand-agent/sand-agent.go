@@ -2,16 +2,11 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"strings"
 	"sync"
-	"syscall"
 
 	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-handlers"
@@ -19,6 +14,7 @@ import (
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
 	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
+	"github.com/Scalingo/go-utils/graceful"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
@@ -38,8 +34,7 @@ import (
 )
 
 func main() {
-	log := logger.Default()
-	log.SetLevel(logrus.InfoLevel)
+	log := logrus.FieldLogger(logger.Default())
 	ctx := logger.ToCtx(context.Background(), log)
 
 	// If reexec to create network namespace
@@ -107,7 +102,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 
 	if c.EnableDockerPlugin {
-		log.Info("enabling docker plugin")
+		log.WithField("port", c.DockerPluginHttpPort).Info("Enabling docker plugin")
 		dockerRepository := docker.NewRepository(c, store)
 		plugin := docker.NewDockerPlugin(
 			c, networkRepository, endpointRepository, dockerRepository, ipAllocator,
@@ -117,81 +112,62 @@ func main() {
 		dockernetwork.ConfigureHandler(handler, plugin.DockerNetworkPlugin)
 		dockeripam.ConfigureHandler(handler, plugin.DockerIPAMPlugin)
 
-		var listener net.Listener
-		dockerPluginEndpoint := fmt.Sprintf(":%d", c.DockerPluginHttpPort)
-		if c.HttpTLSCA != "" {
-			listener, err = tlsListener(c, dockerPluginEndpoint)
-		} else {
-			listener, err = net.Listen("tcp", dockerPluginEndpoint)
-		}
-		if err != nil {
-			log.WithError(err).Error("fail to intialize listener")
-			os.Exit(-1)
-		}
-
 		err = docker.WritePluginSpecsOnDisk(ctx, c)
 		if err != nil {
 			log.WithError(err).Error("fail to write plugin spec file on disk")
 			os.Exit(-1)
 		}
 
+		dockerPluginEndpoint := fmt.Sprintf(":%d", c.DockerPluginHttpPort)
+
+		logDocker := log.WithField("service", "docker-plugin")
+		ctxDocker := logger.ToCtx(ctx, logDocker)
+
 		wg.Add(1)
 		go func() {
+			var err error
+
 			defer wg.Done()
-			err := handler.Serve(listener)
-			if err != nil && !strings.Contains(err.Error(), "use of closed") {
-				log.WithError(err).Error("error after serving HTTP")
+			if c.HttpTLSCA != "" {
+				err = tlsListener(ctxDocker, c, dockerPluginEndpoint, handler)
+			} else {
+				gracefulService := graceful.NewService()
+				err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, handler)
+			}
+			if err != nil {
+				log.WithError(err).Error("fail to intialize docker plugin listener")
+				os.Exit(-1)
 			}
 			log.Info("docker plugin stopped")
 		}()
 	}
 
-	var listener net.Listener
+	logHandler := log.WithField("service", "sand-api")
+	ctxHandler := logger.ToCtx(ctx, logHandler)
+
 	if c.HttpTLSCA != "" {
-		listener, err = tlsListener(c, serviceEndpoint)
+		err = tlsListener(ctxHandler, c, serviceEndpoint, r)
 	} else {
-		listener, err = net.Listen("tcp", serviceEndpoint)
+		gracefulService := graceful.NewService()
+		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, r)
 	}
 	if err != nil {
-		log.WithError(err).Error("fail to intialize listener")
+		log.WithError(err).Error("fail to listen and serve")
 		os.Exit(-1)
 	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		err := http.Serve(listener, r)
-		if err != nil && !strings.Contains(err.Error(), "use of closed") {
-			log.WithError(err).Error("error after serving HTTP")
-		}
-		log.Info("http API stopped")
-	}()
-
-	sigs := make(chan os.Signal)
-	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT)
-	s := <-sigs
-	log.WithField("signal", s).Info("signal catched shuting down")
-
-	err = listener.Close()
-	if err != nil {
-		log.WithError(err).Error("fail to close listener")
-	}
-
+	log.Info("http API stopped")
 	wg.Wait()
+	log.Info("all APIs stopped, shutting down..")
 }
 
-func tlsListener(c *config.Config, serviceEndpoint string) (net.Listener, error) {
+func tlsListener(ctx context.Context, c *config.Config, serviceEndpoint string, handler http.Handler) error {
 	config, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create tls configuration")
+		return errors.Wrapf(err, "fail to create tls configuration")
 	}
 
-	listener, err := tls.Listen("tcp", serviceEndpoint, config)
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create tls listener")
-	}
-
-	return listener, nil
+	gracefulService := graceful.NewService()
+	return gracefulService.ListenAndServeTLS(ctx, "tcp", serviceEndpoint, handler, config)
 }
 
 func ensureNetworks(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) error {

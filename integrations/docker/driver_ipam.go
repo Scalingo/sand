@@ -49,6 +49,8 @@ func (p *dockerIPAMPlugin) RequestPool(ctx context.Context, req *ipam.RequestPoo
 }
 
 func (p *dockerIPAMPlugin) ReleasePool(ctx context.Context, req *ipam.ReleasePoolRequest) error {
+	log := logger.Get(ctx)
+	log.Info("Releasing IPAM pool")
 	err := p.allocator.ReleasePool(ctx, req.PoolID)
 	if err != nil {
 		return errors.Wrapf(err, "fail to release pool %v", req.PoolID)

@@ -47,8 +47,9 @@ func (p *dockerNetworkPlugin) CreateNetwork(ctx context.Context, req *network.Cr
 	}
 	if !ok {
 		cnp := params.NetworkCreate{
-			ID:   id,
-			Name: name,
+			ID:              id,
+			Name:            name,
+			CreatedByDocker: true,
 		}
 
 		if len(req.IPv4Data) > 0 && req.IPv4Data[0].Pool != "0.0.0.0/0" {
@@ -93,9 +94,18 @@ func (p *dockerNetworkPlugin) DeleteNetwork(ctx context.Context, req *network.De
 		return errors.New("sand network not found")
 	}
 
-	err = p.networkRepository.Delete(ctx, network)
+	err = p.networkRepository.Deactivate(ctx, network)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete sand network %v", dpn.SandNetworkID)
+		return errors.Wrapf(err, "fail to deactivate sand network %v", dpn.SandNetworkID)
+	}
+
+	// If created by docker integration, we want to clean sand data if it's the last
+	// docker network using this integration.
+	if network.CreatedByDocker {
+		err = p.networkRepository.Delete(ctx, network)
+		if err != nil {
+			return errors.Wrapf(err, "fail to delete sand network %v", dpn.SandNetworkID)
+		}
 	}
 
 	err = p.dockerPluginRepository.DeleteNetwork(ctx, dpn)

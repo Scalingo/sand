@@ -42,6 +42,10 @@ func (h Handler) Serve(l net.Listener) error {
 	return server.Serve(l)
 }
 
+func (h Handler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	h.mux.ServeHTTP(res, req)
+}
+
 // ServeTCP makes the handler to listen for request in a given TCP address.
 // It also writes the spec file in the right directory for docker to read.
 // Due to constrains for running Docker in Docker on Windows, data-root directory

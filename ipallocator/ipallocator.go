@@ -264,6 +264,7 @@ func (a *allocator) ReleaseIP(ctx context.Context, id string, ipcidr string) (er
 }
 
 func (a *allocator) ReleasePool(ctx context.Context, id string) (err error) {
+	log := logger.Get(ctx).WithField("allocation_id", id)
 	lock, err := a.locker.WaitAcquire(a.lockStorageKey(id), lockDuration)
 	if err != nil {
 		return errors.Wrapf(err, "fail to lock IP release pool")
@@ -276,16 +277,22 @@ func (a *allocator) ReleasePool(ctx context.Context, id string) (err error) {
 	}()
 
 	alloc := allocation{ID: id}
+	log.Infof("Releasing allocation")
 	err = a.store.Get(ctx, alloc.storageKey(), false, &alloc)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get ip range from store")
 	}
 	if err == store.ErrNotFound {
+		log.Infof("allocation not found %v", alloc)
 		return nil
 	}
-	if alloc.BitSet.Any() {
-		return errors.Wrapf(err, "fail to delete range, IPs are still allocated")
+
+	err = a.store.Delete(ctx, alloc.storageKey())
+	if err != nil {
+		return errors.Wrapf(err, "fail to delete ip range reference")
 	}
+
+	log.Info("Allocation deleted")
 
 	return nil
 }

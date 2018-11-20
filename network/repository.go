@@ -14,6 +14,7 @@ type Repository interface {
 	List(ctx context.Context) ([]types.Network, error)
 	Create(ctx context.Context, params params.NetworkCreate) (types.Network, error)
 	Ensure(ctx context.Context, network types.Network) error
+	Deactivate(ctx context.Context, network types.Network) error
 	Delete(ctx context.Context, network types.Network) error
 	Exists(ctx context.Context, id string) (types.Network, bool, error)
 }

@@ -14,14 +14,15 @@ const (
 )
 
 type Network struct {
-	ID           string      `json:"id"`
-	CreatedAt    time.Time   `json:"created_at"`
-	Name         string      `json:"name"`
-	Type         NetworkType `json:"type"`
-	NSHandlePath string      `json:"ns_handle_path"`
-	VxLANVNI     int         `json:"vxlan_vni"`
-	IPRange      string      `json:"ip_range"`
-	Gateway      string      `json:"gateway"`
+	ID              string      `json:"id"`
+	CreatedAt       time.Time   `json:"created_at"`
+	Name            string      `json:"name"`
+	Type            NetworkType `json:"type"`
+	NSHandlePath    string      `json:"ns_handle_path"`
+	VxLANVNI        int         `json:"vxlan_vni"`
+	IPRange         string      `json:"ip_range"`
+	Gateway         string      `json:"gateway"`
+	CreatedByDocker bool        `json:"created_by_docker"`
 }
 
 func (n Network) StorageKey() string {

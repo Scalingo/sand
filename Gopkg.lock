@@ -34,7 +34,7 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:4d8a7b4e7f21483f7360aab0497a2c5eb327448d215bb366744ecbacb7289500"
+  digest = "1:07a096be569335d0c0beadf5bac98844c75de697430402f198e3532939c63aa2"
   name = "github.com/Scalingo/go-plugins-helpers"
   packages = [
     "ipam",
@@ -42,14 +42,15 @@
     "sdk",
   ]
   pruneopts = "NUT"
-  revision = "6de7917cae82a2ac9fe874d313b33c8312292691"
-  version = "v1.2.1"
+  revision = "f6f8a58027844795d4789c705943c50e3d402820"
+  version = "v1.2.2"
 
 [[projects]]
-  digest = "1:74f012311e5f848a2b4c2467f71b61edbfc3a4a0ec959cdd2817c8170395ad65"
+  digest = "1:6d18cb9bdf9d5ab8cd356e0d042df45624af51a93eb9a03b58ffbff75f6c2483"
   name = "github.com/Scalingo/go-utils"
   packages = [
     "etcd",
+    "graceful",
     "logger",
   ]
   pruneopts = "NUT"
@@ -133,6 +134,14 @@
   ]
   pruneopts = "NUT"
   revision = "26531e56a76d7334e594098d7cfab88285d9065c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:433763f10d88dba9b533a7ea2fe9f5ee11e57e00306eb97a1f6090fd978e8fa1"
+  name = "github.com/facebookgo/grace"
+  packages = ["gracenet"]
+  pruneopts = "NUT"
+  revision = "75cf19382434e82df4dd84953f566b8ad23d6e9e"
 
 [[projects]]
   digest = "1:700c0988d24fac04439828af2aab8e7d1638cea3bc91ff20d2a2befc970ff165"
@@ -415,6 +424,7 @@
     "github.com/Scalingo/go-plugins-helpers/network",
     "github.com/Scalingo/go-plugins-helpers/sdk",
     "github.com/Scalingo/go-utils/etcd",
+    "github.com/Scalingo/go-utils/graceful",
     "github.com/Scalingo/go-utils/logger",
     "github.com/coreos/etcd/clientv3",
     "github.com/coreos/etcd/mvcc/mvccpb",
