@@ -44,16 +44,9 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 		return errors.Wrapf(err, "fail to deactivate network %s", n)
 	}
 
-	err = c.NetworkRepository.Delete(ctx, n)
+	err = c.NetworkRepository.Delete(ctx, n, c.IPAllocator)
 	if err != nil {
 		return errors.Wrapf(err, "fail to delete network %s", n)
-	}
-
-	if !n.CreatedByDocker {
-		err = c.IPAllocator.ReleasePool(ctx, n.ID)
-		if err != nil {
-			return errors.Wrapf(err, "fail to release pool of network %s", n)
-		}
 	}
 
 	w.WriteHeader(204)

@@ -6,11 +6,12 @@ import (
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/store"
 	"github.com/pkg/errors"
 )
 
-func (c *repository) Delete(ctx context.Context, network types.Network) error {
+func (c *repository) Delete(ctx context.Context, network types.Network, a ipallocator.IPAllocator) error {
 	log := logger.Get(ctx)
 
 	var nets []types.Network
@@ -29,6 +30,11 @@ func (c *repository) Delete(ctx context.Context, network types.Network) error {
 		err = c.store.Delete(ctx, network.StorageKey())
 		if err != nil {
 			return errors.Wrapf(err, "fail to delete network %s from store", network)
+		}
+
+		err = a.ReleasePool(ctx, network.ID)
+		if err != nil {
+			return errors.Wrapf(err, "fail to release pool of network %s", network)
 		}
 	} else {
 		log.Infof("Network still on %d hosts, keeping %v definition", len(nets), network)

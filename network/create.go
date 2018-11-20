@@ -39,13 +39,12 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	}
 
 	network := types.Network{
-		CreatedAt:       time.Now(),
-		CreatedByDocker: params.CreatedByDocker,
-		ID:              uuid,
-		IPRange:         params.IPRange,
-		Gateway:         params.Gateway,
-		Name:            params.Name,
-		Type:            params.Type,
+		CreatedAt: time.Now(),
+		ID:        uuid,
+		IPRange:   params.IPRange,
+		Gateway:   params.Gateway,
+		Name:      params.Name,
+		Type:      params.Type,
 		NSHandlePath: filepath.Join(
 			r.config.NetnsPath, fmt.Sprintf("%s%s", r.config.NetnsPrefix, uuid),
 		),

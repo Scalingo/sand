@@ -6,6 +6,7 @@ import (
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
 )
@@ -15,7 +16,7 @@ type Repository interface {
 	Create(ctx context.Context, params params.NetworkCreate) (types.Network, error)
 	Ensure(ctx context.Context, network types.Network) error
 	Deactivate(ctx context.Context, network types.Network) error
-	Delete(ctx context.Context, network types.Network) error
+	Delete(ctx context.Context, network types.Network, a ipallocator.IPAllocator) error
 	Exists(ctx context.Context, id string) (types.Network, bool, error)
 }
 

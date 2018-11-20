@@ -10,8 +10,4 @@ type NetworkCreate struct {
 	Type    types.NetworkType `json:"type"`
 	IPRange string            `json:"ip_range"`
 	Gateway string            `json:"gateway"`
-
-	// Parameter injected by docker integration only
-	// in order to tag the network.
-	CreatedByDocker bool `json:"-"`
 }

@@ -2,11 +2,9 @@ package docker
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Scalingo/go-plugins-helpers/network"
 	"github.com/Scalingo/sand/api/params"
-	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/endpoint"
 	sandnetwork "github.com/Scalingo/sand/network"
 	"github.com/pkg/errors"
@@ -31,11 +29,6 @@ func (p *dockerNetworkPlugin) CreateNetwork(ctx context.Context, req *network.Cr
 		return errors.Errorf("invalid generic options: %+v, not a map[string]interface{}", req.Options["com.docker.network.generic"])
 	}
 
-	name := fmt.Sprintf("docker-%s", req.NetworkID)
-	if n, ok := opts["sand-name"].(string); ok && n != "" {
-		name = fmt.Sprintf("docker-%s", n)
-	}
-
 	id, ok := opts["sand-id"].(string)
 	if !ok {
 		return errors.New("sand-id should be a string")
@@ -46,24 +39,7 @@ func (p *dockerNetworkPlugin) CreateNetwork(ctx context.Context, req *network.Cr
 		return errors.Wrapf(err, "fail to get network %v", id)
 	}
 	if !ok {
-		cnp := params.NetworkCreate{
-			ID:              id,
-			Name:            name,
-			CreatedByDocker: true,
-		}
-
-		if len(req.IPv4Data) > 0 && req.IPv4Data[0].Pool != "0.0.0.0/0" {
-			cnp.IPRange = req.IPv4Data[0].Pool
-			cnp.Gateway = req.IPv4Data[0].Gateway
-		} else {
-			cnp.IPRange = types.DefaultIPRange
-			cnp.Gateway = types.DefaultGateway
-		}
-
-		network, err = p.networkRepository.Create(ctx, cnp)
-		if err != nil {
-			return errors.Wrapf(err, "fail to create network '%v'", cnp.Name)
-		}
+		return errors.Errorf("SAND network %v does not exist", id)
 	}
 
 	err = p.dockerPluginRepository.SaveNetwork(ctx, DockerPluginNetwork{
@@ -97,15 +73,6 @@ func (p *dockerNetworkPlugin) DeleteNetwork(ctx context.Context, req *network.De
 	err = p.networkRepository.Deactivate(ctx, network)
 	if err != nil {
 		return errors.Wrapf(err, "fail to deactivate sand network %v", dpn.SandNetworkID)
-	}
-
-	// If created by docker integration, we want to clean sand data if it's the last
-	// docker network using this integration.
-	if network.CreatedByDocker {
-		err = p.networkRepository.Delete(ctx, network)
-		if err != nil {
-			return errors.Wrapf(err, "fail to delete sand network %v", dpn.SandNetworkID)
-		}
 	}
 
 	err = p.dockerPluginRepository.DeleteNetwork(ctx, dpn)
