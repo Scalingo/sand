@@ -1,3 +1,10 @@
+## v0.5.0 - 20 November 2018
+
+* Networks have to be created and deleted through SAND API, not possible from docker integration
+* Fix "next IP" allocation algorithm
+* Fix docker integration IP allocation pool deletion bug
+* Fix docker integration double gateway issue
+
 ## v0.4.5 - 20 November 2018
 
 * Fix graceful restart of sand API and sand Docker integration API
