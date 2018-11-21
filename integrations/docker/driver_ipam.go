@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"net"
 
 	"github.com/Scalingo/go-plugins-helpers/ipam"
 	"github.com/Scalingo/go-utils/logger"
@@ -92,11 +93,30 @@ func (p *dockerIPAMPlugin) RequestAddress(ctx context.Context, req *ipam.Request
 
 func (p *dockerIPAMPlugin) ReleaseAddress(ctx context.Context, req *ipam.ReleaseAddressRequest) error {
 	log := logger.Get(ctx)
-	log = log.WithField("pool_id", req.PoolID)
+	id := req.PoolID
+	log = log.WithField("pool_id", id)
 
-	err := p.allocator.ReleaseIP(ctx, req.PoolID, req.Address)
+	network, ok, err := p.networkRepository.Exists(ctx, id)
 	if err != nil {
-		return errors.Wrapf(err, "fail to release address in pool %v - %v", req.PoolID, req.Address)
+		return errors.Wrapf(err, "fail to get network %v", id)
+	}
+	if !ok {
+		return errors.Errorf("SAND network %v does not exist", id)
+	}
+
+	ip, _, err := net.ParseCIDR(network.Gateway)
+	if err != nil {
+		return errors.Errorf("SAND network %v gateway is not a valid CIDR", id)
+	}
+
+	if req.Address == ip.String() {
+		log.Info("docker releasing gateway, skipping")
+		return nil
+	}
+
+	err = p.allocator.ReleaseIP(ctx, id, req.Address)
+	if err != nil {
+		return errors.Wrapf(err, "fail to release address in pool %v - %v", id, req.Address)
 	}
 	log.Infof("released address: %v", req.Address)
 	return nil
