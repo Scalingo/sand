@@ -14,22 +14,21 @@ import (
 )
 
 func pipeSocket() {
-	if len(os.Args) != 4 {
-		logrus.Fatalf("%s <ns handle> <ip> <port>", os.Args[0])
+	if len(os.Args) != 5 {
+		logrus.Fatalf("%s <ns handle> <ip> <port> <socket unix path>", os.Args[0])
 	}
-	log := logger.Default().WithFields(logrus.Fields{"ns": os.Args[1], "ip": os.Args[2], "port": os.Args[3]})
+	log := logger.Default().WithFields(logrus.Fields{"ns": os.Args[1], "ip": os.Args[2], "port": os.Args[3], "sock": os.Args[4]})
 	log.Info("piping socket")
 
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	file := os.NewFile(3, "socket")
-	conn, err := net.FileConn(file)
+	conn, err := net.Dial("unix", os.Args[4])
 	if err != nil {
-		log.WithError(err).Error("fail to get connection from opened file descriptor")
+		log.WithError(err).Error("fail to open unix connection")
 		os.Exit(1)
 	}
-	tcpConn := conn.(*net.TCPConn)
+	unixConn := conn.(*net.UnixConn)
 
 	nsfd, err := netns.GetFromPath(os.Args[1])
 	if err != nil {
@@ -45,7 +44,7 @@ func pipeSocket() {
 
 	socket, err := net.Dial("tcp", fmt.Sprintf("%s:%s", os.Args[2], os.Args[3]))
 	if err != nil {
-		tcpConn.Close()
+		unixConn.Close()
 		log.WithError(err).Error("Fail to open TCP connection")
 		os.Exit(-1)
 	}
@@ -55,9 +54,9 @@ func pipeSocket() {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		defer tcpConn.Close()
+		defer unixConn.Close()
 		defer tcpSocket.CloseWrite()
-		_, err := io.Copy(tcpSocket, tcpConn)
+		_, err := io.Copy(tcpSocket, unixConn)
 		if err != nil && err != io.EOF {
 			log.WithError(err).Error("fail to copy stdin to socket")
 		}
@@ -67,8 +66,8 @@ func pipeSocket() {
 	go func() {
 		defer wg.Done()
 		defer tcpSocket.Close()
-		defer tcpConn.CloseWrite()
-		_, err := io.Copy(tcpConn, tcpSocket)
+		defer unixConn.CloseWrite()
+		_, err := io.Copy(unixConn, tcpSocket)
 		if err != nil && err != io.EOF {
 			log.WithError(err).Error("fail to copy socket to stdout")
 		}
