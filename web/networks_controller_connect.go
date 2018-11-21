@@ -2,10 +2,13 @@ package web
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/docker/docker/pkg/reexec"
@@ -48,19 +51,64 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, para
 
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
-	tcpSocket := socket.(*net.TCPConn)
-	socketFile, err := tcpSocket.File()
+	addr, err := getTempFilename()
 	if err != nil {
-		return errors.Wrapf(err, "fail to get file from tcp connection")
+		return errors.Wrapf(err, "fail to get temp file name for unix socket")
 	}
-	defer socketFile.Close()
+
+	// Explanation of the following tricky part
+	// At first we wanted to forward the socket from the HTTP connection directly
+	// to the child process located in the namespace of the sand network, thus
+	// able to reach the final target.
+	//
+	// This method doesn't work as when sand is running with TLS, the connection
+	// is a *tls.Conn and there is no way to transfer such socket in a child
+	// process.
+
+	// So we need to pass through an intermediary IPC system, here a UNIX socket.
+	// Basically the parent process is creating a unix socket server, the child
+	// process in the NS of our target is creating a connection to this socket,
+	// this connection is linking the remote client connection and the internal
+	// sand connection.
+	//
+	// HTTP client <----- inter-process unix conn -----> connection to target in sand network
+	unixSocket, err := net.ListenUnix("unix", &net.UnixAddr{Net: "unix", Name: addr})
+	if err != nil {
+		return errors.Wrapf(err, "fail to open unix socket")
+	}
+	defer unixSocket.Close()
+
+	go func() {
+		clientSocket, err := unixSocket.AcceptUnix()
+		if err != nil {
+			log.WithError(err).Error("fail to accept unix connection")
+			return
+		}
+		log.Info("socket unix connection accepted from child process")
+		defer clientSocket.Close()
+
+		wg := &sync.WaitGroup{}
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			defer clientSocket.CloseRead()
+			io.Copy(clientSocket, socket)
+		}()
+
+		go func() {
+			defer wg.Done()
+			defer clientSocket.CloseWrite()
+			io.Copy(socket, clientSocket)
+		}()
+
+		wg.Wait()
+	}()
 
 	cmd := &exec.Cmd{
-		Path:       reexec.Self(),
-		Args:       append([]string{"sc-netns-pipe-socket"}, network.NSHandlePath, ip, port),
-		Stderr:     os.Stderr,
-		Stdout:     os.Stdout,
-		ExtraFiles: []*os.File{socketFile},
+		Path:   reexec.Self(),
+		Args:   append([]string{"sc-netns-pipe-socket"}, network.NSHandlePath, ip, port, addr),
+		Stderr: os.Stderr,
+		Stdout: os.Stdout,
 	}
 
 	err = cmd.Run()
@@ -69,4 +117,22 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, para
 	}
 
 	return nil
+}
+
+func getTempFilename() (string, error) {
+	f, err := ioutil.TempFile("", "sand-connect-")
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to create temp file")
+	}
+	addr := f.Name()
+
+	err = f.Close()
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to close temp file")
+	}
+	err = os.Remove(addr)
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to remove temp file")
+	}
+	return addr, nil
 }
