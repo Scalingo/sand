@@ -1,3 +1,8 @@
+## v0.5.1 - 21 November 2018
+
+* Do not let docker de-allocate sand network gateway IP
+* Fix network#connect when SAND is serving HTTPS traffic
+
 ## v0.5.0 - 20 November 2018
 
 * Networks have to be created and deleted through SAND API, not possible from docker integration
