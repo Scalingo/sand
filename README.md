@@ -2,9 +2,9 @@
 
 # SAND Network Daemon
 
-SAND is simple API designed to create overlay networks based on **VxLAN** in an
-infrastructure, basing its configuration on
-[**etcd**](https://coreos.com/etcd/)
+SAND is simple API designed to create overlay networks based on
+**[VXLAN](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN)** in an infrastructure, basing its
+configuration on [**etcd**](https://coreos.com/etcd/).
 
 The goal is to create private overlay network to link containers together,
 while being agnostic of the container technology. *Libnetwork* `overlay`
@@ -19,18 +19,18 @@ containers running in one of the overlay networks. All the created overlay
 networks can use the same IP range as they are completely isolated from each
 other. By default each overlay network will get IP address in `10.0.0.0/24`
 
-Creating a network is a no-op operation where a unique VxLAN ID is allocated
+Creating a network is a no-op operation where a unique VXLAN ID is allocated
 and where the network configuration is stored on *etcd*.
 
 When a first endpoint is added to a network, the service will create a
-dedicated network namespace containing the network **VxLAN** on the server
+dedicated network namespace containing the network **VXLAN** on the server
 adding the endpoint. A pair of **veth** interfaces will link the targeted
 namespace and the overlay namespace. All the **veth** interfaces are linked to
-the **VxLAN** with a bridge interface.
+the **VXLAN** with a bridge interface.
 
 At the moment an endpoint is added or removed, all the other hosts having at
 least one endpoint in the same network are adding routes to the newly created
-endpoint modifying `ARP` and `FDB` tables of the **VxLAN** interface.
+endpoint modifying `ARP` and `FDB` tables of the **VXLAN** interface.
 
 ## Installing
 
@@ -53,7 +53,7 @@ go get github.com/Scalingo/sand/cmd/sand-agent-cli
 * `HTTP_PORT` default: `9999`, port bind by the SAND HTTP API
 * `PUBLIC_HOSTNAME` default: `$(hostname)`, endpoints are attached to a
   hostname, an agent won't accept to delete a endpoint if its not owned by its hostname
-* `PUBLIC_IP` IP of the host which will be used in the configuration of VxLAN routing rules
+* `PUBLIC_IP` IP of the host which will be used in the configuration of VXLAN routing rules
 * `ROLLBAR_TOKEN` If token is defined, all errors will be send to [Rollbar](https://rollbar.com/)
 * `GO_ENV` default: `development`, name of the environment, will be forwarded to Rollbar if configured
 
