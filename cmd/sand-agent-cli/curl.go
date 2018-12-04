@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/Scalingo/sand/client/sand"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
@@ -25,8 +27,15 @@ func (a *App) Curl(c *cli.Context) error {
 		return errors.New("URL is mandatory")
 	}
 
+	tlsConfig := tls.Config{}
+	if c.Bool("insecure") {
+		tlsConfig.InsecureSkipVerify = true
+	}
+
 	httpClient := &http.Client{
-		Transport: client.NewHTTPRoundTripper(context.Background(), c.String("network")),
+		Transport: client.NewHTTPRoundTripper(context.Background(), c.String("network"), sand.HTTPRoundTripperOpts{
+			TLSConfig: &tlsConfig,
+		}),
 	}
 
 	var body io.Reader

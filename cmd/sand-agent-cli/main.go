@@ -76,6 +76,7 @@ func main() {
 				cli.StringFlag{Name: "network,n", Usage: "ID of the network to connect to"},
 				cli.StringFlag{Name: "method,X", Usage: "HTTP method to user", Value: "GET"},
 				cli.StringSliceFlag{Name: "header,H", Usage: "HTTP header"},
+				cli.BoolFlag{Name: "insecure,k", Usage: "By default, every SSL connection curl makes is verified to be secure. This option allows curl to proceed and operate even for server connections otherwise considered insecure."},
 			},
 		}, {
 			Name:   "endpoint-list",
