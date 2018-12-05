@@ -1,3 +1,7 @@
+## v0.5.2 - 5 December 2018
+
+* Update Client#NewHTTPRoundTripper, possibility to inject *tls.Config
+
 ## v0.5.1 - 21 November 2018
 
 * Do not let docker de-allocate sand network gateway IP
