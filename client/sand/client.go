@@ -24,7 +24,7 @@ type Client interface {
 	EndpointCreate(context.Context, params.EndpointCreate) (types.Endpoint, error)
 	EndpointsList(context.Context, params.EndpointsList) ([]types.Endpoint, error)
 	EndpointDelete(context.Context, string) error
-	NewHTTPRoundTripper(ctx context.Context, id string) http.RoundTripper
+	NewHTTPRoundTripper(ctx context.Context, id string, opts HTTPRoundTripperOpts) http.RoundTripper
 }
 
 type httpClient struct {

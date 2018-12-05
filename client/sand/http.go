@@ -2,6 +2,7 @@ package sand
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 
 func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address string) (net.Conn, error) {
 	if network != "tcp" {
-		return nil, errors.New("Only TCP connections are supported")
+		return nil, errors.New("only TCP connections are supported")
 	}
 
 	host, port, err := net.SplitHostPort(address)
@@ -25,8 +26,13 @@ func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address 
 	})
 }
 
-func (c *client) NewHTTPRoundTripper(ctx context.Context, id string) http.RoundTripper {
+type HTTPRoundTripperOpts struct {
+	TLSConfig *tls.Config
+}
+
+func (c *client) NewHTTPRoundTripper(ctx context.Context, id string, opts HTTPRoundTripperOpts) http.RoundTripper {
 	return &http.Transport{
+		TLSClientConfig: opts.TLSConfig,
 		Dial: func(n, a string) (net.Conn, error) {
 			return c.rawDialer(ctx, id, n, a)
 		},
