@@ -12,6 +12,7 @@ import (
 
 	params "github.com/Scalingo/sand/api/params"
 	types "github.com/Scalingo/sand/api/types"
+	sand "github.com/Scalingo/sand/client/sand"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -141,13 +142,13 @@ func (mr *MockClientMockRecorder) NetworksList(arg0 interface{}) *gomock.Call {
 }
 
 // NewHTTPRoundTripper mocks base method
-func (m *MockClient) NewHTTPRoundTripper(arg0 context.Context, arg1 string) http.RoundTripper {
-	ret := m.ctrl.Call(m, "NewHTTPRoundTripper", arg0, arg1)
+func (m *MockClient) NewHTTPRoundTripper(arg0 context.Context, arg1 string, arg2 sand.HTTPRoundTripperOpts) http.RoundTripper {
+	ret := m.ctrl.Call(m, "NewHTTPRoundTripper", arg0, arg1, arg2)
 	ret0, _ := ret[0].(http.RoundTripper)
 	return ret0
 }
 
 // NewHTTPRoundTripper indicates an expected call of NewHTTPRoundTripper
-func (mr *MockClientMockRecorder) NewHTTPRoundTripper(arg0, arg1 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewHTTPRoundTripper", reflect.TypeOf((*MockClient)(nil).NewHTTPRoundTripper), arg0, arg1)
+func (mr *MockClientMockRecorder) NewHTTPRoundTripper(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewHTTPRoundTripper", reflect.TypeOf((*MockClient)(nil).NewHTTPRoundTripper), arg0, arg1, arg2)
 }
