@@ -14,12 +14,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-func ForwardConnection(ctx context.Context, src net.Conn, ns, ip, port string) error {
+type Conn interface {
+	Write([]byte) (int, error)
+	Read([]byte) (int, error)
+	Close() error
+	CloseWrite() error
+}
+
+func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port string) error {
 	log := logger.Get(ctx)
 	addr, err := getTempFilename()
 	if err != nil {
 		return errors.Wrapf(err, "fail to get temp file name for unix socket")
 	}
+
+	src := srcSocket.(Conn)
 
 	// Explanation of the following tricky part
 	// At first we wanted to forward the socket from the HTTP connection directly
@@ -56,14 +65,26 @@ func ForwardConnection(ctx context.Context, src net.Conn, ns, ip, port string) e
 		wg.Add(2)
 		go func() {
 			defer wg.Done()
-			defer clientSocket.CloseRead()
-			io.Copy(clientSocket, src)
+			defer clientSocket.CloseWrite()
+			defer src.Close()
+			_, err := io.Copy(clientSocket, src)
+			if err != nil && err != io.EOF {
+				log.WithError(err).Error("fail to copy data from HTTP src connection to unix socket")
+				return
+			}
+			log.Info("end of connection from HTTP src connection to unix socket")
 		}()
 
 		go func() {
 			defer wg.Done()
-			defer clientSocket.CloseWrite()
-			io.Copy(src, clientSocket)
+			defer src.CloseWrite()
+			defer clientSocket.Close()
+			_, err := io.Copy(src, clientSocket)
+			if err != nil && err != io.EOF {
+				log.WithError(err).Error("fail to copy data from unix socket to HTTP src connection")
+				return
+			}
+			log.Info("end of connection from unix socket to HTTP src connection")
 		}()
 
 		wg.Wait()

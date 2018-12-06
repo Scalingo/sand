@@ -71,7 +71,6 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	if err != nil {
 		return errors.Wrapf(err, "fail to hijack http connection")
 	}
-	defer socket.Close()
 
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
@@ -91,16 +90,33 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 
 		config, err := sand.TlsConfig(c.Config.HttpTLSCA, c.Config.HttpTLSCert, c.Config.HttpTLSKey)
 		if err != nil {
+			socket.Close()
 			return errgo.Notef(err, "fail to generate TLS configuration")
 		}
 		options = append(options, sand.WithTlsConfig(config))
 	}
-	url := fmt.Sprintf("%s://%s:%s", scheme, endpoint.Hostname, c.Config.HttpPort)
+	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.HostIP, c.Config.HttpPort)
 	options = append(options, sand.WithURL(url))
 	client := sand.NewClient(options...)
+
+	log.Infof("forwarding connection to %v", url)
 	dstConn, err := client.NetworkConnect(ctx, network.ID, params.NetworkConnect{IP: ip, Port: port})
 	if err != nil {
+		socket.Close()
 		return errors.Wrapf(err, "fail to connect sand %v", url)
+	}
+
+	// The two following conditions should never be wrong, but who knows, the two only
+	// types are *net.TCPConn or *tls.Conn, both fit this interface
+	src, ok := socket.(netutils.Conn)
+	if !ok {
+		socket.Close()
+		return errors.Wrapf(err, "src socket does not implement netutils.Conn")
+	}
+	dst, ok := dstConn.(netutils.Conn)
+	if !ok {
+		socket.Close()
+		return errors.Wrapf(err, "dst socket does not implement netutils.Conn")
 	}
 
 	wg := &sync.WaitGroup{}
@@ -108,13 +124,26 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 
 	go func() {
 		defer wg.Done()
-		io.Copy(dstConn, socket)
+		defer src.Close()
+		defer dst.CloseWrite()
+		_, err := io.Copy(dst, src)
+		if err != nil && err != io.EOF {
+			log.WithError(err).Error("fail to copy data from src socket to next sand agent")
+			return
+		}
+		log.Info("end of connection from client to next sand agent")
 	}()
 
 	go func() {
 		defer wg.Done()
-		defer dstConn.Close()
-		io.Copy(socket, dstConn)
+		defer src.CloseWrite()
+		defer dst.Close()
+		_, err := io.Copy(src, dst)
+		if err != nil && err != io.EOF {
+			log.WithError(err).Error("fail to copy data next sand agent to src")
+			return
+		}
+		log.Info("end of connection from next sand agent to src")
 	}()
 
 	wg.Wait()
