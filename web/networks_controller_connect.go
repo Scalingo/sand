@@ -80,6 +80,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		if err != nil {
 			return errors.Wrapf(err, "fail to hijack and forward connection to %v", localEndpoint)
 		}
+		return nil
 	}
 
 	endpoint := activeEndpoints[0]
