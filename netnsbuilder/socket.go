@@ -58,9 +58,10 @@ func pipeSocket() {
 		defer tcpSocket.CloseWrite()
 		_, err := io.Copy(tcpSocket, unixConn)
 		if err != nil && err != io.EOF {
-			log.WithError(err).Error("fail to copy stdin to socket")
+			log.WithError(err).Error("fail to copy data from unix socket to dst socket")
+			return
 		}
-		log.Info("connection from file descriptor closed")
+		log.Info("end of connection from unix socket to dst socket")
 	}()
 
 	go func() {
@@ -69,9 +70,10 @@ func pipeSocket() {
 		defer unixConn.CloseWrite()
 		_, err := io.Copy(unixConn, tcpSocket)
 		if err != nil && err != io.EOF {
-			log.WithError(err).Error("fail to copy socket to stdout")
+			log.WithError(err).Error("fail to copy data dst socket to unix socket")
+			return
 		}
-		log.Info("connection from ns socket closed")
+		log.Info("end of connection from dst socket to unix socket")
 	}()
 	wg.Wait()
 }

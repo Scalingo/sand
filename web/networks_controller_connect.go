@@ -1,25 +1,27 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net"
 	"net/http"
-	"os"
-	"os/exec"
 	"sync"
 
+	"gopkg.in/errgo.v1"
+
 	"github.com/Scalingo/go-internal-tools/logger"
-	"github.com/docker/docker/pkg/reexec"
+	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/client/sand"
+	"github.com/Scalingo/sand/netutils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, params map[string]string) error {
+func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlparams map[string]string) error {
 	w.Header().Set("Content-Type", "application/json")
 	ctx := r.Context()
-	log := logger.Get(ctx).WithField("network_id", params["id"])
+	log := logger.Get(ctx).WithField("network_id", urlparams["id"])
 
 	ip := r.URL.Query().Get("ip")
 	port := r.URL.Query().Get("port")
@@ -33,12 +35,34 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, para
 		return errors.New("IP and port are mandatory")
 	}
 
-	network, ok, err := c.NetworkRepository.Exists(ctx, params["id"])
+	network, ok, err := c.NetworkRepository.Exists(ctx, urlparams["id"])
 	if err != nil {
 		return errors.Wrapf(err, "fail to query store")
 	} else if !ok {
 		w.WriteHeader(404)
 		return errors.New("network not found")
+	}
+
+	endpoints, err := c.EndpointRepository.List(ctx, map[string]string{"network_id": network.ID})
+	if err != nil {
+		return errors.Wrapf(err, "fail to list endpoints for network %v", network)
+	}
+
+	activeEndpoints := []types.Endpoint{}
+	var localEndpoint types.Endpoint
+	for _, e := range endpoints {
+		if e.Active {
+			activeEndpoints = append(activeEndpoints, e)
+			if e.HostIP == c.Config.PublicIP {
+				localEndpoint = e
+			}
+		}
+	}
+
+	if len(activeEndpoints) == 0 {
+		w.WriteHeader(400)
+		json.NewEncoder(w).Encode(map[string]string{"error": "no active endpoint in network " + network.ID})
+		return nil
 	}
 
 	log.Info("hijacking http connection")
@@ -47,92 +71,82 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, para
 	if err != nil {
 		return errors.Wrapf(err, "fail to hijack http connection")
 	}
-	defer socket.Close()
 
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
-	addr, err := getTempFilename()
-	if err != nil {
-		return errors.Wrapf(err, "fail to get temp file name for unix socket")
+	if localEndpoint.ID != "" {
+		err := netutils.ForwardConnection(ctx, socket, localEndpoint.TargetNetnsPath, ip, port)
+		if err != nil {
+			return errors.Wrapf(err, "fail to hijack and forward connection to %v", localEndpoint)
+		}
+		return nil
 	}
 
-	// Explanation of the following tricky part
-	// At first we wanted to forward the socket from the HTTP connection directly
-	// to the child process located in the namespace of the sand network, thus
-	// able to reach the final target.
-	//
-	// This method doesn't work as when sand is running with TLS, the connection
-	// is a *tls.Conn and there is no way to transfer such socket in a child
-	// process.
+	endpoint := activeEndpoints[0]
+	options := []sand.Opt{}
+	scheme := "http"
+	if c.Config.IsHttpTLSEnabled() {
+		scheme = "https"
 
-	// So we need to pass through an intermediary IPC system, here a UNIX socket.
-	// Basically the parent process is creating a unix socket server, the child
-	// process in the NS of our target is creating a connection to this socket,
-	// this connection is linking the remote client connection and the internal
-	// sand connection.
-	//
-	// HTTP client <----- inter-process unix conn -----> connection to target in sand network
-	unixSocket, err := net.ListenUnix("unix", &net.UnixAddr{Net: "unix", Name: addr})
-	if err != nil {
-		return errors.Wrapf(err, "fail to open unix socket")
+		config, err := sand.TlsConfig(c.Config.HttpTLSCA, c.Config.HttpTLSCert, c.Config.HttpTLSKey)
+		if err != nil {
+			socket.Close()
+			return errgo.Notef(err, "fail to generate TLS configuration")
+		}
+		options = append(options, sand.WithTlsConfig(config))
 	}
-	defer unixSocket.Close()
+	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.HostIP, c.Config.HttpPort)
+	options = append(options, sand.WithURL(url))
+	client := sand.NewClient(options...)
+
+	log.Infof("forwarding connection to %v", url)
+	dstConn, err := client.NetworkConnect(ctx, network.ID, params.NetworkConnect{IP: ip, Port: port})
+	if err != nil {
+		socket.Close()
+		return errors.Wrapf(err, "fail to connect sand %v", url)
+	}
+
+	// The two following conditions should never be wrong, but who knows, the two only
+	// types are *net.TCPConn or *tls.Conn, both fit this interface
+	src, ok := socket.(netutils.Conn)
+	if !ok {
+		socket.Close()
+		return errors.Wrapf(err, "src socket does not implement netutils.Conn")
+	}
+	dst, ok := dstConn.(netutils.Conn)
+	if !ok {
+		socket.Close()
+		return errors.Wrapf(err, "dst socket does not implement netutils.Conn")
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
 
 	go func() {
-		clientSocket, err := unixSocket.AcceptUnix()
-		if err != nil {
-			log.WithError(err).Error("fail to accept unix connection")
+		defer wg.Done()
+		defer src.Close()
+		defer dst.CloseWrite()
+		_, err := io.Copy(dst, src)
+		if err != nil && err != io.EOF {
+			log.WithError(err).Error("fail to copy data from src socket to next sand agent")
 			return
 		}
-		log.Info("socket unix connection accepted from child process")
-		defer clientSocket.Close()
-
-		wg := &sync.WaitGroup{}
-		wg.Add(2)
-		go func() {
-			defer wg.Done()
-			defer clientSocket.CloseRead()
-			io.Copy(clientSocket, socket)
-		}()
-
-		go func() {
-			defer wg.Done()
-			defer clientSocket.CloseWrite()
-			io.Copy(socket, clientSocket)
-		}()
-
-		wg.Wait()
+		log.Info("end of connection from client to next sand agent")
 	}()
 
-	cmd := &exec.Cmd{
-		Path:   reexec.Self(),
-		Args:   append([]string{"sc-netns-pipe-socket"}, network.NSHandlePath, ip, port, addr),
-		Stderr: os.Stderr,
-		Stdout: os.Stdout,
-	}
+	go func() {
+		defer wg.Done()
+		defer src.CloseWrite()
+		defer dst.Close()
+		_, err := io.Copy(src, dst)
+		if err != nil && err != io.EOF {
+			log.WithError(err).Error("fail to copy data next sand agent to src")
+			return
+		}
+		log.Info("end of connection from next sand agent to src")
+	}()
 
-	err = cmd.Run()
-	if err != nil {
-		return errors.Wrapf(err, "fail to pipe socket to %s %s:%s", network.NSHandlePath, ip, port)
-	}
+	wg.Wait()
 
 	return nil
-}
-
-func getTempFilename() (string, error) {
-	f, err := ioutil.TempFile("", "sand-connect-")
-	if err != nil {
-		return "", errors.Wrapf(err, "fail to create temp file")
-	}
-	addr := f.Name()
-
-	err = f.Close()
-	if err != nil {
-		return "", errors.Wrapf(err, "fail to close temp file")
-	}
-	err = os.Remove(addr)
-	if err != nil {
-		return "", errors.Wrapf(err, "fail to remove temp file")
-	}
-	return addr, nil
 }

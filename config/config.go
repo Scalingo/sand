@@ -64,3 +64,7 @@ func (c *Config) checkEtcdConfig() error {
 func (c *Config) CreateDirectories() error {
 	return os.MkdirAll(c.NetnsPath, 0700)
 }
+
+func (c *Config) IsHttpTLSEnabled() bool {
+	return c.HttpTLSCA != "" && c.HttpTLSCert != "" && c.HttpTLSKey != ""
+}

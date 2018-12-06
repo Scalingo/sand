@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// NewConfig generate a *tls.Config, clientAuth should be false to generate client configuration
 func NewConfig(caPath, certPath, keyPath string, clientAuth bool) (*tls.Config, error) {
 	caCertBytes, err := ioutil.ReadFile(caPath)
 	if err != nil {
