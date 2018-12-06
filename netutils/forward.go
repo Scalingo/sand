@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func ForwardConnection(ctx context.Context, socket net.Conn, ns, ip, port string) error {
+func ForwardConnection(ctx context.Context, src net.Conn, ns, ip, port string) error {
 	log := logger.Get(ctx)
 	addr, err := getTempFilename()
 	if err != nil {
@@ -57,13 +57,13 @@ func ForwardConnection(ctx context.Context, socket net.Conn, ns, ip, port string
 		go func() {
 			defer wg.Done()
 			defer clientSocket.CloseRead()
-			io.Copy(clientSocket, socket)
+			io.Copy(clientSocket, src)
 		}()
 
 		go func() {
 			defer wg.Done()
 			defer clientSocket.CloseWrite()
-			io.Copy(socket, clientSocket)
+			io.Copy(src, clientSocket)
 		}()
 
 		wg.Wait()
