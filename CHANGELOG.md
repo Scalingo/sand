@@ -1,3 +1,7 @@
+## v0.5.3 - 6 December 2018
+
+* Fix: network#connect on cross node communication
+
 ## v0.5.2 - 5 December 2018
 
 * Update Client#NewHTTPRoundTripper, possibility to inject *tls.Config
