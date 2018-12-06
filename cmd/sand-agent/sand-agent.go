@@ -128,7 +128,7 @@ func main() {
 			var err error
 
 			defer wg.Done()
-			if c.HttpTLSCA != "" {
+			if c.IsHttpTLSEnabled() {
 				err = tlsListener(ctxDocker, c, dockerPluginEndpoint, handler)
 			} else {
 				gracefulService := graceful.NewService()
@@ -145,7 +145,7 @@ func main() {
 	logHandler := log.WithField("service", "sand-api")
 	ctxHandler := logger.ToCtx(ctx, logHandler)
 
-	if c.HttpTLSCA != "" {
+	if c.IsHttpTLSEnabled() {
 		err = tlsListener(ctxHandler, c, serviceEndpoint, r)
 	} else {
 		gracefulService := graceful.NewService()
