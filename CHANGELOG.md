@@ -1,3 +1,8 @@
+## v0.5.4 - 7 December 2018
+
+* Add `version` command to CLI
+* Add `GET /version` command to Agent
+
 ## v0.5.3 - 6 December 2018
 
 * Fix: network#connect on cross node communication
