@@ -82,11 +82,13 @@ func main() {
 		os.Exit(-1)
 	}
 
+	vctrl := web.NewVersionController(c)
 	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
 	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository, ipAllocator)
 
 	r := handlers.NewRouter(log)
 	r.Use(handlers.ErrorMiddleware)
+	r.HandleFunc("/version", vctrl.Show).Methods("GET")
 	r.HandleFunc("/networks", nctrl.List).Methods("GET")
 	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
 	r.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")

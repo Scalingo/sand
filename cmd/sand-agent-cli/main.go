@@ -8,12 +8,19 @@ import (
 	"github.com/urfave/cli"
 )
 
+var (
+	// Version matches the version of the CLI It is updated dynamically by the
+	// compiler when building a release
+	Version = "v0.6-dev"
+)
+
 type App struct {
 	config Config
 	cli    *cli.App
 }
 
 type Config struct {
+	Version  string
 	ApiURL   string
 	CertFile string
 	KeyFile  string
@@ -22,8 +29,10 @@ type Config struct {
 
 func main() {
 	app := &App{
-		config: Config{},
-		cli:    cli.NewApp(),
+		config: Config{
+			Version: Version,
+		},
+		cli: cli.NewApp(),
 	}
 	app.cli.Flags = []cli.Flag{
 		cli.StringFlag{Name: "api-url", Value: "http://localhost:9999", Usage: "when requests will be sent", EnvVar: "SAND_API_URL"},
@@ -39,6 +48,10 @@ func main() {
 		return nil
 	}
 	app.cli.Commands = cli.Commands{
+		{
+			Name:   "version",
+			Action: app.Version,
+		},
 		{
 			Name:   "network-create",
 			Action: app.NetworkCreate,

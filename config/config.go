@@ -9,9 +9,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+var Version = "v0.6-dev"
+
 type Config struct {
 	RollbarToken   string
 	GoEnv          string `default:"development"`
+	Version        string `ignore:"true"`
 	NetnsPrefix    string `default:"sc-ns-"`
 	NetnsPath      string `default:"/var/run/netns"`
 	HttpPort       int    `default:"9999"`
@@ -48,6 +51,8 @@ func Build() (*Config, error) {
 		}
 		c.PublicHostname = h
 	}
+
+	c.Version = Version
 
 	return &c, nil
 }

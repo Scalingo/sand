@@ -16,6 +16,7 @@ import (
 )
 
 type Client interface {
+	Version(context.Context) (string, error)
 	NetworksList(context.Context) ([]types.Network, error)
 	NetworkCreate(context.Context, params.NetworkCreate) (types.Network, error)
 	NetworkShow(context.Context, string) (types.Network, error)
@@ -32,7 +33,7 @@ type httpClient struct {
 }
 
 func (c httpClient) Do(r *http.Request) (*http.Response, error) {
-	r.Header.Set("User-Agent", "sand v0.1.0")
+	r.Header.Set("User-Agent", "SAND Client")
 	if r.Header.Get("Accept") == "" {
 		r.Header.Set("Accept", "application/json")
 	}
@@ -96,7 +97,9 @@ func WithURL(url string) Opt {
 
 func WithHttpClient(hc *http.Client) Opt {
 	return func(c *client) {
-		c.httpClient = &httpClient{hc}
+		c.httpClient = &httpClient{
+			Client: hc,
+		}
 	}
 }
 
