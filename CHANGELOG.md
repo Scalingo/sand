@@ -1,3 +1,7 @@
+## v0.5.5 - 7 December 2018
+
+* Update of travis configuration
+
 ## v0.5.4 - 7 December 2018
 
 * Add `version` command to CLI
