@@ -168,7 +168,7 @@ $ SAND_ID="320a669f-e465-4806-ab46-f2e6620c4311"
 Then create a Docker network:
 
 ```
-$ docker network create --driver sand --ipam-opt sand-id=$SAND_ID --opt sand-id=$SAND_ID [--opt sand-name=<name>] <name>
+$ docker network create --driver sand --ipam-opt sand-id=$SAND_ID --opt sand-id=$SAND_ID <name>
 ```
 
 Finally, start as many containers as you want in the SAND network defined in the docker network:
