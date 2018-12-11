@@ -150,16 +150,71 @@ Start with the environment variable `ENABLE_DOCKER_PLUGIN=true`
 It will use the port **9998** by default to communicate with Docker. Change
 `DOCKER_PLUGIN_HTTP_PORT` to customize it.
 
-```
-# On each server which should be part of a network
-# the sand-id SHOULD be defined, as it should be common to all nodes running the network
-# and docker is not returning the internal ID, so the knowledge has to be external from docker
-$ docker network create --driver sand --ipam-opt sand-id=<uuid> --opt sand-id=<uuid> [--opt sans-name=<name>] <name>
+### With Docker
 
-# Start a container in the sand network defined in the docker network
-$ docker run --network <name> ubuntu:latest bash
+On each server which should be part of a network
+the sand-id MUST be defined, as it should be common to all nodes running the network
+and docker is not returning the internal ID, so the knowledge has to be external from docker
+
+Create the SAND network with:
 
 ```
+$ sand-agent-cli network-create
+New network created:
+* id=320a669f-e465-4806-ab46-f2e6620c4311 name=net-sc-320a669f-e465-4806-ab46-f2e6620c4311 type=overlay ip-range=10.0.0.0/24, vni=4
+$ SAND_ID="320a669f-e465-4806-ab46-f2e6620c4311"
+```
+
+Then create a Docker network:
+
+```
+$ docker network create --driver sand --ipam-opt sand-id=$SAND_ID --opt sand-id=$SAND_ID [--opt sand-name=<name>] <name>
+```
+
+Finally, start as many containers as you want in the SAND network defined in the docker network:
+
+```
+$ docker run -it --rm --network <name> ubuntu:latest bash
+```
+
+### Test in Development With Docker Compose
+
+Create the SAND network with:
+
+```
+$ sand-agent-cli network-create
+New network created:
+* id=320a669f-e465-4806-ab46-f2e6620c4311 name=net-sc-320a669f-e465-4806-ab46-f2e6620c4311 type=overlay ip-range=10.0.0.0/24, vni=4
+```
+
+The `id=` part is important and is called `SAND_ID` in the remaining of the section.
+
+Your `docker-compose.yml` file MUST use the version 2:
+
+```yml
+version: '2'
+networks:
+  sand-network:
+    driver: sand
+    driver_opts:
+      sand-id: SAND_ID
+    ipam:
+      driver: sand
+      options:
+        sand-id: SAND_ID
+
+services:
+  service-1:
+    ...
+    networks:
+      - sand-network
+
+  service-2:
+    ...
+    networks:
+      - sand-network
+```
+
 
 ## Testing
 
@@ -170,4 +225,3 @@ start using SAND.
 Docker installed and SAND code mounted in them.
 
 * More tests and mocking of `netlink` commands
-
