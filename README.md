@@ -78,6 +78,18 @@ clients.
 * `HTTP_TLS_KEY` Path to the private key authenticating the server certificate
 * `HTTP_TLS_CA` Path to the CA used by SAND client certificates
 
+#### Generating certificates
+
+```
+# Generate a CA valid for 5 years
+openssl genrsa -out ca.key 4096
+openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ca.pem
+
+# Generate a client certificate valid for 2 years
+openssl genrsa -out client.key 4096
+openssl req -new -key client.key -out client.csr
+openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out client.pem -days 730 -sha256
+
 ## References
 
 > `GET` requests accept parameters through URL query parameters
