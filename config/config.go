@@ -18,7 +18,7 @@ type Config struct {
 	NetnsPrefix    string `default:"sc-ns-"`
 	NetnsPath      string `default:"/var/run/netns"`
 	HttpPort       int    `default:"9999"`
-	PublicHostname string
+	PublicHostname string `envconfig:"PUBLIC_HOSTNAME"`
 	PublicIP       string `envconfig:"PUBLIC_IP"`
 
 	EtcdPrefix    string `default:"/sc-net"`
