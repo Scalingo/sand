@@ -14,6 +14,7 @@ services:
       GO_ENV: development
       ETCD_HOSTS: "http://localhost:22379"
       ENABLE_DOCKER_PLUGIN: "true"
+      PUBLIC_HOSTNAME: "dev.172.17.0.1.xip.st-sc.fr"
     ports:
       - 9999:9999
       - 9998:9998
