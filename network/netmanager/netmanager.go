@@ -2,6 +2,7 @@ package netmanager
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
@@ -20,3 +21,5 @@ type NetManager interface {
 
 	ListenNetworkChange(context.Context, types.Network) error
 }
+
+var EndpointAlreadyDisabledErr = errors.New("endpoint already disabled")

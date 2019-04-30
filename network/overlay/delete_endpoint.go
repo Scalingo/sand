@@ -7,6 +7,7 @@ import (
 	"github.com/Scalingo/go-internal-tools/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netutils"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netns"
@@ -16,7 +17,9 @@ func (m manager) DeleteEndpoint(ctx context.Context, n types.Network, e types.En
 	log := logger.Get(ctx)
 
 	overlaynsfd, err := netns.GetFromPath(n.NSHandlePath)
-	if err != nil {
+	if os.IsNotExist(err) {
+		return netmanager.EndpointAlreadyDisabledErr
+	} else if err != nil {
 		return errors.Wrapf(err, "fail to get namespace handler")
 	}
 	defer overlaynsfd.Close()

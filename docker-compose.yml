@@ -24,6 +24,7 @@ services:
      - ./:/go/src/github.com/Scalingo/sand
     environment:
       GO_ENV: testing
+    stop_signal: SIGKILL
     command: "tail -F /dev/null"
   etcd:
     volumes:
