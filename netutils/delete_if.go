@@ -14,6 +14,7 @@ func DeleteInterfaceIfExists(ctx context.Context, nsfd netns.NsHandle, ifname st
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
+	defer nlh.Delete()
 
 	link, err := nlh.LinkByName(ifname)
 	if _, ok := err.(netlink.LinkNotFoundError); ok {

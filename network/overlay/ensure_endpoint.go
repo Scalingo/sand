@@ -47,11 +47,13 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get host namespace handler")
 	}
+	defer hostnlh.Delete()
 
 	targetnlh, err := netlink.NewHandleAt(targetnsfd, syscall.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get target namespace netlink handler")
 	}
+	defer targetnlh.Delete()
 
 	overlaynsfd, err := netns.GetFromPath(network.NSHandlePath)
 	if err != nil {
@@ -63,6 +65,7 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
+	defer overlaynlh.Delete()
 
 	overlayEndpoint := overlayEndpoint{
 		endpoint:    endpoint,
