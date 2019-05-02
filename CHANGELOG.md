@@ -1,3 +1,8 @@
+## v0.5.6 - 2 May 2019
+
+* Fix socket leak, netlink.Handler should be Delete()
+* Fix initialization error when namespace of endpoint does not exist anymore
+
 ## v0.5.5 - 7 December 2018
 
 * Update of travis configuration
