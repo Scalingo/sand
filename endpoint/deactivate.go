@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/pkg/errors"
 )
 
@@ -17,7 +18,7 @@ func (r *repository) Deactivate(ctx context.Context, n types.Network, e types.En
 	}
 
 	err := r.managers.Get(n.Type).DeleteEndpoint(ctx, n, e)
-	if err != nil {
+	if err != nil && err != netmanager.EndpointAlreadyDisabledErr {
 		return e, errors.Wrapf(err, "fail to delete endpoint from overlay network")
 	}
 
