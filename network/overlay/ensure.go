@@ -39,6 +39,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
+	defer nlh.Delete()
 
 	var link netlink.Link
 

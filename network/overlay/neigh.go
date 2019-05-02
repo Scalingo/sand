@@ -60,6 +60,7 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
+	defer nlh.Delete()
 
 	link, err := nlh.LinkByName(VxLANInNSName)
 	if err != nil {
