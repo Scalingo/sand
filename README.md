@@ -89,6 +89,7 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ca.pem
 openssl genrsa -out client.key 4096
 openssl req -new -key client.key -out client.csr
 openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out client.pem -days 730 -sha256
+```
 
 ## References
 
@@ -164,9 +165,9 @@ It will use the port **9998** by default to communicate with Docker. Change
 
 ### With Docker
 
-On each server which should be part of a network
-the sand-id MUST be defined, as it should be common to all nodes running the network
-and docker is not returning the internal ID, so the knowledge has to be external from docker
+On each server which should be part of a network the sand-id MUST be defined, as
+it should be common to all nodes running the network and docker is not returning
+the internal ID, so the knowledge has to be external from Docker.
 
 Create the SAND network with:
 
@@ -183,7 +184,8 @@ Then create a Docker network:
 $ docker network create --driver sand --ipam-opt sand-id=$SAND_ID --opt sand-id=$SAND_ID <name>
 ```
 
-Finally, start as many containers as you want in the SAND network defined in the docker network:
+Finally, start as many containers as you want in the SAND network defined in the
+docker network:
 
 ```
 $ docker run -it --rm --network <name> ubuntu:latest bash
