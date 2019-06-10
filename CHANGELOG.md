@@ -1,3 +1,7 @@
+## v0.5.7 - 10 June 2019
+
+* Fix endpoint deletion in overlay network in case of target namespace does not exist anymore
+
 ## v0.5.6 - 2 May 2019
 
 * Fix socket leak, netlink.Handler should be Delete()
