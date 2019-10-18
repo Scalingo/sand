@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/ipallocator"

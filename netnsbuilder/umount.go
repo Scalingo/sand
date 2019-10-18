@@ -5,7 +5,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/pkg/errors"
 )
 

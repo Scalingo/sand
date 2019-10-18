@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/Scalingo/go-etcd-lock/lock"
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/netutils"
 	"github.com/Scalingo/sand/store"
