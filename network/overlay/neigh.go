@@ -5,7 +5,7 @@ import (
 	"net"
 	"syscall"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

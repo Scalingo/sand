@@ -7,7 +7,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"

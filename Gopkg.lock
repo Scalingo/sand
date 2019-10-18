@@ -26,14 +26,6 @@
   version = "v1.2.3"
 
 [[projects]]
-  digest = "1:ac92a2f76863975fbf17ff1bef033aea2e9d97b9f098318e1aba8ab9aca83cbe"
-  name = "github.com/Scalingo/go-internal-tools"
-  packages = ["logger"]
-  pruneopts = "NUT"
-  revision = "1246c6855fdf659540bd21e5cb3df690e1040c9a"
-  version = "v1.0.2"
-
-[[projects]]
   digest = "1:07a096be569335d0c0beadf5bac98844c75de697430402f198e3532939c63aa2"
   name = "github.com/Scalingo/go-plugins-helpers"
   packages = [
@@ -419,7 +411,6 @@
   input-imports = [
     "github.com/Scalingo/go-etcd-lock/lock",
     "github.com/Scalingo/go-handlers",
-    "github.com/Scalingo/go-internal-tools/logger",
     "github.com/Scalingo/go-plugins-helpers/ipam",
     "github.com/Scalingo/go-plugins-helpers/network",
     "github.com/Scalingo/go-plugins-helpers/sdk",

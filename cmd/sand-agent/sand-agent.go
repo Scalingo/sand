@@ -10,7 +10,7 @@ import (
 
 	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-handlers"
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
 	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"

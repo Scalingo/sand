@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/endpoint"
 	"github.com/pkg/errors"
 )

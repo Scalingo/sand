@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/Scalingo/go-internal-tools/logger"
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
