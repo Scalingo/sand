@@ -59,12 +59,12 @@
   version = "v1.3.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:437927c6259c9d3b76b731e7d7434ec37786ec732452b55beb9ff0c9efcd38f3"
+  digest = "1:1a6f4e51ca8ee40c4054b01e0dfbe805cd0ab9d337733b0726a23b26f2bb9bc6"
   name = "github.com/Soulou/errgo-rollbar"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "9d551cd3bae923dc236ca5f8d951686c7bbcfe94"
+  revision = "77469913cd68bc7aa12d62433bbc565e068a74a9"
+  version = "v0.1.0"
 
 [[projects]]
   digest = "1:bafdddf0e04f4d66c948468a03ecaf30e9cc894c2eed59a89cade22bc4364de8"
