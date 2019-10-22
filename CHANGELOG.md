@@ -1,3 +1,8 @@
+## v0.5.8 - 22 Oct 2019
+
+* Integration project with Rollbar:
+  Errors will be sent to Rollbar if `ROLLBAR_ENV` and `ROLLBAR_TOKEN` environment variables are present.
+
 ## v0.5.7 - 10 June 2019
 
 * Fix endpoint deletion in overlay network in case of target namespace does not exist anymore
