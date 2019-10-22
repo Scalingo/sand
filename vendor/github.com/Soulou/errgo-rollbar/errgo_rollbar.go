@@ -16,7 +16,7 @@ import (
 // }
 
 var (
-	_ rollbar.CauseStacker = wrappedError{}
+	_ rollbar.Stacker = wrappedError{}
 )
 
 type wrappedError struct {

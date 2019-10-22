@@ -38,7 +38,7 @@
   version = "v1.2.2"
 
 [[projects]]
-  digest = "1:b3ffe98a8ebe65530f87ca53d327a35a574f67c0b45bec3f2a9f646450409583"
+  digest = "1:1b4ed2227a47d7449e5d20e5207f97cf49a51db2b5468d6198838b3d37572a41"
   name = "github.com/Scalingo/go-utils"
   packages = [
     "etcd",
@@ -47,24 +47,24 @@
     "logger/plugins/rollbarplugin",
   ]
   pruneopts = "NUT"
-  revision = "d8875c53396e58dc421f3d7e39ce50af43b61e2e"
-  version = "v5.4.1"
+  revision = "a655ab88492fd6cfbac29df8aeb481d8eeffd79b"
+  version = "v5.5.15"
 
 [[projects]]
-  digest = "1:3c8728f651bb43e6da2f0887ec8d5ed767b2b3074c4535788d42a387f1225a62"
+  digest = "1:977b6c18d1755f2d655fa90ce81aa75680738ab3daf27174648ef74958abb866"
   name = "github.com/Scalingo/logrus-rollbar"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "39d9c14ed8b1bb7ed19e92e2275f9cdbf842f018"
-  version = "v1.3.1"
+  revision = "20275d9189973abaddb7ff363f529e6a38211bad"
+  version = "v1.3.2"
 
 [[projects]]
-  digest = "1:1a6f4e51ca8ee40c4054b01e0dfbe805cd0ab9d337733b0726a23b26f2bb9bc6"
+  digest = "1:5b49716d3e1c3cffc790878b04c95b9ef3d2e0f10e9cd1b8d9c184043ebe5ac0"
   name = "github.com/Soulou/errgo-rollbar"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "77469913cd68bc7aa12d62433bbc565e068a74a9"
-  version = "v0.1.0"
+  revision = "7065a8e87265f4d66815a0e44527027721266ef1"
+  version = "v0.1.1"
 
 [[projects]]
   digest = "1:bafdddf0e04f4d66c948468a03ecaf30e9cc894c2eed59a89cade22bc4364de8"
