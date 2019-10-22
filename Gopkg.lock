@@ -38,16 +38,33 @@
   version = "v1.2.2"
 
 [[projects]]
-  digest = "1:6d18cb9bdf9d5ab8cd356e0d042df45624af51a93eb9a03b58ffbff75f6c2483"
+  digest = "1:1b4ed2227a47d7449e5d20e5207f97cf49a51db2b5468d6198838b3d37572a41"
   name = "github.com/Scalingo/go-utils"
   packages = [
     "etcd",
     "graceful",
     "logger",
+    "logger/plugins/rollbarplugin",
   ]
   pruneopts = "NUT"
-  revision = "d8875c53396e58dc421f3d7e39ce50af43b61e2e"
-  version = "v5.4.1"
+  revision = "a655ab88492fd6cfbac29df8aeb481d8eeffd79b"
+  version = "v5.5.15"
+
+[[projects]]
+  digest = "1:977b6c18d1755f2d655fa90ce81aa75680738ab3daf27174648ef74958abb866"
+  name = "github.com/Scalingo/logrus-rollbar"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "20275d9189973abaddb7ff363f529e6a38211bad"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:5b49716d3e1c3cffc790878b04c95b9ef3d2e0f10e9cd1b8d9c184043ebe5ac0"
+  name = "github.com/Soulou/errgo-rollbar"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "7065a8e87265f4d66815a0e44527027721266ef1"
+  version = "v0.1.1"
 
 [[projects]]
   digest = "1:bafdddf0e04f4d66c948468a03ecaf30e9cc894c2eed59a89cade22bc4364de8"
@@ -238,6 +255,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:b8830793e4549bb2cecdca32d33539c20c3fbd282003780e909bc86738f0721f"
+  name = "github.com/rollbar/rollbar-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "09607ac17f660e27a1e3d38b6e1ec728cefa1f72"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:7ff9d791d48d8bafcfad8691d0f54dd3351d9d98e26a0f38a268479201022ca1"
   name = "github.com/satori/go.uuid"
   packages = ["."]
@@ -417,6 +442,7 @@
     "github.com/Scalingo/go-utils/etcd",
     "github.com/Scalingo/go-utils/graceful",
     "github.com/Scalingo/go-utils/logger",
+    "github.com/Scalingo/go-utils/logger/plugins/rollbarplugin",
     "github.com/coreos/etcd/clientv3",
     "github.com/coreos/etcd/mvcc/mvccpb",
     "github.com/docker/docker/pkg/reexec",
