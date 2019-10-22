@@ -10,11 +10,12 @@ import (
 
 	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/go-handlers"
-	"github.com/Scalingo/go-utils/logger"
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
 	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
 	"github.com/Scalingo/go-utils/graceful"
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/go-utils/logger/plugins/rollbarplugin"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
@@ -34,6 +35,7 @@ import (
 )
 
 func main() {
+	rollbarplugin.Register()
 	log := logrus.FieldLogger(logger.Default())
 	ctx := logger.ToCtx(context.Background(), log)
 
