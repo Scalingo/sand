@@ -1,5 +1,7 @@
 ## To be released
 
+## v0.5.9 - 25 Oct 2019
+
 * Better logging in endpoint listeners watching
 
 ## v0.5.8 - 22 Oct 2019
