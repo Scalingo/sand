@@ -1,3 +1,7 @@
+## To be released
+
+* Better logging in endpoint listeners watching
+
 ## v0.5.8 - 22 Oct 2019
 
 * Integration project with Rollbar:

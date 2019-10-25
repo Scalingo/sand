@@ -57,7 +57,6 @@ func (l *listener) Remove(ctx context.Context, network types.Network) error {
 }
 
 func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network types.Network) (chan struct{}, error) {
-	log := logger.Get(ctx)
 	l.Lock()
 	defer l.Unlock()
 
@@ -65,7 +64,14 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 		return nil, nil
 	}
 
-	w, err := l.store.Watch(l.globalContext, network.EndpointsStorageKey(""))
+	log := logger.Default().WithFields(logrus.Fields{
+		"network_id":   network.ID,
+		"network_name": network.Name,
+		"network_type": network.Type,
+	})
+	listenerCtx := logger.ToCtx(l.globalContext, log)
+
+	w, err := l.store.Watch(listenerCtx, network.EndpointsStorageKey(""))
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to create watcher for network %s", network)
 	}
@@ -81,7 +87,7 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 			if !ok {
 				break
 			}
-			err := l.handleMessage(l.globalContext, resp, nm, network)
+			err := l.handleMessage(listenerCtx, resp, nm, network)
 			if err != nil {
 				log.WithError(err).Error("fail to handle watch response")
 			}
@@ -137,7 +143,7 @@ func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchRespons
 
 			err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
 			if err != nil {
-				log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
+				log.WithError(err).Error("fail to remove endpoint ARP/FDB neigh rules")
 			}
 		}
 	}
