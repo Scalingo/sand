@@ -1,5 +1,9 @@
 ## To be released
 
+## v0.5.10 - 5 Nov 2019
+
+* Deactivating inactive endpoint in a network is a no-op
+
 ## v0.5.9 - 25 Oct 2019
 
 * Better logging in endpoint listeners watching
