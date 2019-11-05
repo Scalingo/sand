@@ -8,13 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	ErrNotActive = errors.New("endpoint is not active")
-)
-
 func (r *repository) Deactivate(ctx context.Context, n types.Network, e types.Endpoint) (types.Endpoint, error) {
 	if !e.Active {
-		return e, ErrNotActive
+		return e, nil
 	}
 
 	err := r.managers.Get(n.Type).DeleteEndpoint(ctx, n, e)
