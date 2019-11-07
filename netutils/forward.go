@@ -51,18 +51,30 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
+
+	// Error logs are Info as we're only proxying connections, if one is stopped abruptely
+	// The real error is either from the client side or the destination side, it's not an
+	// error for the proxy itself
 	go func() {
 		defer wg.Done()
 		defer dstSocket.Close()
-		io.Copy(dstSocket, srcSocket)
-		log.Info("end of connection from unix src to dst socket")
+		_, err := io.Copy(dstSocket, srcSocket)
+		if err != io.EOF {
+			log.Info("end of connection from unix src to dst socket with error: %v", err)
+			return
+		}
+		log.Debug("end of connection from unix src to dst socket")
 	}()
 
 	go func() {
 		defer wg.Done()
 		defer srcSocket.Close()
-		io.Copy(srcSocket, dstSocket)
-		log.Info("end of connection from dst socket to src socket")
+		_, err := io.Copy(srcSocket, dstSocket)
+		if err != io.EOF {
+			log.Info("end of connection from dst socket to src socket with error: %v", err)
+			return
+		}
+		log.Debug("end of connection from dst socket to src socket")
 	}()
 	wg.Wait()
 
