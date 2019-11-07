@@ -12,7 +12,6 @@ import (
 
 func init() {
 	reexec.Register("sc-netns-create", reexecCreateNamespace)
-	reexec.Register("sc-netns-pipe-socket", pipeSocket)
 }
 
 func reexecCreateNamespace() {
