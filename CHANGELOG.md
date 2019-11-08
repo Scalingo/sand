@@ -1,5 +1,10 @@
 ## To be released
 
+## v0.5.11 - 8 Nov 2019
+
+* Refactor connection forwarding to sand network, no more fork/exec, change namespace in current thread
+* Make logging more quiet when forwarding connections
+
 ## v0.5.10 - 5 Nov 2019
 
 * Deactivating inactive endpoint in a network is a no-op
