@@ -2,16 +2,15 @@ package netutils
 
 import (
 	"context"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
-	"os"
-	"os/exec"
+	"runtime"
 	"sync"
 
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/docker/docker/pkg/reexec"
 	"github.com/pkg/errors"
+	"github.com/vishvananda/netns"
 )
 
 type Conn interface {
@@ -23,102 +22,67 @@ type Conn interface {
 
 func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port string) error {
 	log := logger.Get(ctx)
-	addr, err := getTempFilename()
+
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	dst, err := netns.GetFromPath(ns)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get temp file name for unix socket")
+		return errors.Wrapf(err, "fail to get dest namespace handler %v", ns)
 	}
+	defer dst.Close()
 
-	src := srcSocket.(Conn)
-
-	// Explanation of the following tricky part
-	// At first we wanted to forward the socket from the HTTP connection directly
-	// to the child process located in the namespace of the sand network, thus
-	// able to reach the final target.
-	//
-	// This method doesn't work as when sand is running with TLS, the connection
-	// is a *tls.Conn and there is no way to transfer such socket in a child
-	// process.
-
-	// So we need to pass through an intermediary IPC system, here a UNIX socket.
-	// Basically the parent process is creating a unix socket server, the child
-	// process in the NS of our target is creating a connection to this socket,
-	// this connection is linking the remote client connection and the internal
-	// sand connection.
-	//
-	// HTTP client <----- inter-process unix conn -----> connection to target in sand network
-	unixSocket, err := net.ListenUnix("unix", &net.UnixAddr{Net: "unix", Name: addr})
+	current, err := netns.Get()
 	if err != nil {
-		return errors.Wrapf(err, "fail to open unix socket")
+		return errors.Wrapf(err, "fail to get current namespace handler")
 	}
-	defer unixSocket.Close()
+	defer current.Close()
 
-	go func() {
-		clientSocket, err := unixSocket.AcceptUnix()
+	err = netns.Set(dst)
+	if err != nil {
+		return errors.Wrapf(err, "fail to set current namespace to dst %v", dst)
+	}
+	defer func() {
+		err = netns.Set(current)
 		if err != nil {
-			log.WithError(err).Error("fail to accept unix connection")
-			return
+			log.WithError(err).Error("fail to get back to original ns")
 		}
-		log.Info("socket unix connection accepted from child process")
-		defer clientSocket.Close()
-
-		wg := &sync.WaitGroup{}
-		wg.Add(2)
-		go func() {
-			defer wg.Done()
-			defer clientSocket.CloseWrite()
-			defer src.Close()
-			_, err := io.Copy(clientSocket, src)
-			if err != nil && err != io.EOF {
-				log.WithError(err).Error("fail to copy data from HTTP src connection to unix socket")
-				return
-			}
-			log.Info("end of connection from HTTP src connection to unix socket")
-		}()
-
-		go func() {
-			defer wg.Done()
-			defer src.CloseWrite()
-			defer clientSocket.Close()
-			_, err := io.Copy(src, clientSocket)
-			if err != nil && err != io.EOF {
-				log.WithError(err).Error("fail to copy data from unix socket to HTTP src connection")
-				return
-			}
-			log.Info("end of connection from unix socket to HTTP src connection")
-		}()
-
-		wg.Wait()
 	}()
 
-	cmd := &exec.Cmd{
-		Path:   reexec.Self(),
-		Args:   append([]string{"sc-netns-pipe-socket"}, ns, ip, port, addr),
-		Stderr: os.Stderr,
-		Stdout: os.Stdout,
+	dstHost := fmt.Sprintf("%s:%s", ip, port)
+	dstSocket, err := net.Dial("tcp", dstHost)
+	if err != nil {
+		return errors.Wrapf(err, "fail to open connection to %v", dstHost)
 	}
 
-	err = cmd.Run()
-	if err != nil {
-		return errors.Wrapf(err, "fail to pipe socket to %s %s:%s", ns, ip, port)
-	}
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	// Error logs are Info as we're only proxying connections, if one is stopped abruptely
+	// The real error is either from the client side or the destination side, it's not an
+	// error for the proxy itself
+	go func() {
+		defer wg.Done()
+		defer dstSocket.Close()
+		_, err := io.Copy(dstSocket, srcSocket)
+		if err != io.EOF {
+			log.WithError(err).Info("end of connection from unix src to dst socket with error")
+			return
+		}
+		log.Debug("end of connection from unix src to dst socket")
+	}()
+
+	go func() {
+		defer wg.Done()
+		defer srcSocket.Close()
+		_, err := io.Copy(srcSocket, dstSocket)
+		if err != io.EOF {
+			log.WithError(err).Info("end of connection from dst socket to src socket with error")
+			return
+		}
+		log.Debug("end of connection from dst socket to src socket")
+	}()
+	wg.Wait()
 
 	return nil
-}
-
-func getTempFilename() (string, error) {
-	f, err := ioutil.TempFile("", "sand-connect-")
-	if err != nil {
-		return "", errors.Wrapf(err, "fail to create temp file")
-	}
-	addr := f.Name()
-
-	err = f.Close()
-	if err != nil {
-		return "", errors.Wrapf(err, "fail to close temp file")
-	}
-	err = os.Remove(addr)
-	if err != nil {
-		return "", errors.Wrapf(err, "fail to remove temp file")
-	}
-	return addr, nil
 }
