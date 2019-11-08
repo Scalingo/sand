@@ -65,7 +65,7 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 		defer wg.Done()
 		defer dstSocket.Close()
 		_, err := io.Copy(dstSocket, srcSocket)
-		if err != io.EOF {
+		if err != io.EOF && err != nil {
 			log.WithError(err).Info("end of connection from unix src to dst socket with error")
 			return
 		}
@@ -76,7 +76,7 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 		defer wg.Done()
 		defer srcSocket.Close()
 		_, err := io.Copy(srcSocket, dstSocket)
-		if err != io.EOF {
+		if err != io.EOF && err != nil {
 			log.WithError(err).Info("end of connection from dst socket to src socket with error")
 			return
 		}
