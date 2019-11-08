@@ -42,6 +42,12 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 	if err != nil {
 		return errors.Wrapf(err, "fail to set current namespace to dst %v", dst)
 	}
+	defer func() {
+		err = netns.Set(current)
+		if err != nil {
+			log.WithError(err).Error("fail to get back to original ns")
+		}
+	}()
 
 	dstHost := fmt.Sprintf("%s:%s", ip, port)
 	dstSocket, err := net.Dial("tcp", dstHost)
@@ -60,7 +66,7 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 		defer dstSocket.Close()
 		_, err := io.Copy(dstSocket, srcSocket)
 		if err != io.EOF {
-			log.Info("end of connection from unix src to dst socket with error: %v", err)
+			log.WithError(err).Info("end of connection from unix src to dst socket with error")
 			return
 		}
 		log.Debug("end of connection from unix src to dst socket")
@@ -71,17 +77,12 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 		defer srcSocket.Close()
 		_, err := io.Copy(srcSocket, dstSocket)
 		if err != io.EOF {
-			log.Info("end of connection from dst socket to src socket with error: %v", err)
+			log.WithError(err).Info("end of connection from dst socket to src socket with error")
 			return
 		}
 		log.Debug("end of connection from dst socket to src socket")
 	}()
 	wg.Wait()
-
-	err = netns.Set(current)
-	if err != nil {
-		return errors.Wrapf(err, "fail to get back to original ns")
-	}
 
 	return nil
 }
