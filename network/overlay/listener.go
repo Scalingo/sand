@@ -4,15 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"sync"
 
 	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-
-	"google.golang.org/grpc/codes"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
