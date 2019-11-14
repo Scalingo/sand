@@ -3,8 +3,9 @@ package store
 import (
 	"io"
 
+	"go.etcd.io/etcd/clientv3"
+
 	"github.com/Scalingo/sand/etcd"
-	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
 )
 

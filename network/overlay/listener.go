@@ -7,13 +7,14 @@ import (
 	"io"
 	"sync"
 
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/mvcc/mvccpb"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

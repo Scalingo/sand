@@ -27,4 +27,8 @@
 
 [[constraint]]
   name = "github.com/Scalingo/go-utils"
-	version = "^5"
+  version = "^5.6"
+
+[[constraint]]
+  name = "github.com/Scalingo/go-etcd-lock"
+  version = "^3.4"

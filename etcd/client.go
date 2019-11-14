@@ -4,8 +4,8 @@ import (
 	"os"
 
 	etcdutils "github.com/Scalingo/go-utils/etcd"
+	"go.etcd.io/etcd/clientv3"
 
-	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
 )
 

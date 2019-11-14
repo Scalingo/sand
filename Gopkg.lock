@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:5d72bbcc9c8667b11c3dc3cbe681c5a6f71e5096744c0bf7726ab5c6425d5dc4"
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
+  version = "v0.3.1"
+
+[[projects]]
   digest = "1:d4b3bb952a228f05d52a58f8ffc39d5edf5b8f1bd291ac82f0249ffa31c509f5"
   name = "github.com/Microsoft/go-winio"
   packages = ["."]
@@ -10,12 +18,12 @@
   version = "v0.4.7"
 
 [[projects]]
-  digest = "1:aa0b39608ad9387bb04f77a88566225bf8d753d3ef355a01e57e5ea3b4712ab8"
+  digest = "1:072203c1bac03611adf6b1f12c340ac05dfbca16a73316e0be554157bf7e63a3"
   name = "github.com/Scalingo/go-etcd-lock"
   packages = ["lock"]
   pruneopts = "NUT"
-  revision = "60492ce8c163cdd7821ac69588eb4bb6e4d57363"
-  version = "v3.0.0"
+  revision = "34bf599c9c2d8193259a9c2cc9952a0edd5496fd"
+  version = "v3.4.2"
 
 [[projects]]
   digest = "1:d3dc47eaaa4774d3b049993629807b9fb2a0b2caf722d8eea690598b0e22a419"
@@ -38,7 +46,7 @@
   version = "v1.2.2"
 
 [[projects]]
-  digest = "1:1b4ed2227a47d7449e5d20e5207f97cf49a51db2b5468d6198838b3d37572a41"
+  digest = "1:f5e0669556f3660adcdaffdc773375fcbc449ee33eb0dbbfe5c755f62cd7f045"
   name = "github.com/Scalingo/go-utils"
   packages = [
     "etcd",
@@ -47,8 +55,8 @@
     "logger/plugins/rollbarplugin",
   ]
   pruneopts = "NUT"
-  revision = "a655ab88492fd6cfbac29df8aeb481d8eeffd79b"
-  version = "v5.5.15"
+  revision = "a3018e9456dc223a42169f3cb1df6e3d04f0e45b"
+  version = "v5.6.1"
 
 [[projects]]
   digest = "1:977b6c18d1755f2d655fa90ce81aa75680738ab3daf27174648ef74958abb866"
@@ -75,30 +83,36 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:c3fa463e58d66839548e90ecee8158230eedee71fbf55b63d610dd65306aa5fc"
+  digest = "1:8bbcd5d361bb9f184bf6e2b361aa92b976aca2bdaf381d26d76e8f9e8aa3e69e"
   name = "github.com/coreos/etcd"
   packages = [
-    "auth/authpb",
-    "clientv3",
-    "clientv3/concurrency",
     "etcdserver/api/v3rpc/rpctypes",
-    "etcdserver/etcdserverpb",
     "mvcc/mvccpb",
     "pkg/tlsutil",
     "pkg/transport",
-    "pkg/types",
   ]
   pruneopts = "NUT"
   revision = "27fc7e2296f506182f58ce846e48f36b34fe6842"
   version = "v3.3.10"
 
 [[projects]]
-  digest = "1:97590846d4c85cfd1d68adb3e0a1e2028ce3fb9868b7112bf13c1f3d77395eeb"
+  digest = "1:1ebc1a7025ebbc8027a031c6e23aba0f271e62750fbdc36d0c39941a0c2479a2"
   name = "github.com/coreos/go-systemd"
-  packages = ["activation"]
+  packages = [
+    "activation",
+    "journal",
+  ]
   pruneopts = "NUT"
   revision = "40e2722dffead74698ca12a750f64ef313ddce05"
   version = "v16"
+
+[[projects]]
+  digest = "1:22332f13485f13511589dc1f59eb97594e8636d3606b69d172a9a85421ad465d"
+  name = "github.com/coreos/pkg"
+  packages = ["capnslog"]
+  pruneopts = "NUT"
+  revision = "97fdf19511ea361ae1c100dd393cc47f8dcfa1e1"
+  version = "v4"
 
 [[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
@@ -173,8 +187,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:0d390d7037c2aecc37e78c2cfbe43d020d6f1fa83fd22266b7ec621189447d57"
+  digest = "1:796f9c63c68774a89eade387a8476e45ec2b34f5649b0726983204202c3649d6"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -184,7 +197,16 @@
     "ptypes/timestamp",
   ]
   pruneopts = "NUT"
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  revision = "6c65a5562fc06764971b7c5d05c76c75e84bdbf7"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:ab3ec1fe3e39bac4b3ab63390767766622be35b7cab03f47f787f9ec60522a53"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:dbd86d229eacaa86a98b10f8fb3e3fc69a1913e0f4e010e7cc1f92bf12edca92"
@@ -325,12 +347,90 @@
   version = "v1.1.3"
 
 [[projects]]
+  digest = "1:915bb5ade32379b348340cb62c3f288838cea097516d82fa13d8c4adfd2107d5"
+  name = "go.etcd.io/etcd"
+  packages = [
+    "auth/authpb",
+    "clientv3",
+    "clientv3/balancer",
+    "clientv3/balancer/connectivity",
+    "clientv3/balancer/picker",
+    "clientv3/balancer/resolver/endpoint",
+    "clientv3/concurrency",
+    "clientv3/credentials",
+    "etcdserver/api/v3rpc/rpctypes",
+    "etcdserver/etcdserverpb",
+    "mvcc/mvccpb",
+    "pkg/logutil",
+    "pkg/systemd",
+    "pkg/types",
+    "raft",
+    "raft/confchange",
+    "raft/quorum",
+    "raft/raftpb",
+    "raft/tracker",
+  ]
+  pruneopts = "NUT"
+  revision = "3cf2f69b5738fb702ba1a935590f36b52b18979b"
+  version = "v3.4.3"
+
+[[projects]]
+  digest = "1:0e70a2bca7289a57e94d6452e05667d49319bba2a7457a2d1b3323bb1cd1d7d9"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "9dc4df04d0d1c39369750a9f6c32c39560672089"
+  version = "v1.5.0"
+
+[[projects]]
+  digest = "1:a1440ebbcb42dca581a6d557749cb72770e17b3bf7751f953ae2b0606cd65013"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "824d08f79702fe5f54aca8400aa0d754318786e7"
+  version = "v1.4.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:440ca29adfcd7fb9cf1cb6f2e55f251f9eafbd114064f049d495bbe7c9e22097"
+  name = "go.uber.org/tools"
+  packages = ["update-license"]
+  pruneopts = "NUT"
+  revision = "2cfd321de3ee5d5f8a5fda2521d1703478334d98"
+
+[[projects]]
+  digest = "1:e4b3e0fa7cb61b5b623ce3e0fd2c6f77d60fa5c7a5dc0ab023734c6bb48d7dff"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "NUT"
+  revision = "a6015e13fab9b744d96085308ce4e8f11bad1996"
+  version = "v1.12.0"
+
+[[projects]]
   branch = "master"
   digest = "1:707ec3bb6ccc1cd330b8789467fa6cd8dad40f63fed028ba777a6c2ca13a9838"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
   revision = "94eea52f7b742c7cbe0b03b22f0c4c8631ece122"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5b8b10c6c3a2c1b4131a1e05de506f8a544ff4ede7cd26cdfcdef4fc2a5b1510"
+  name = "golang.org/x/lint"
+  packages = [
+    ".",
+    "golint",
+  ]
+  pruneopts = "NUT"
+  revision = "16217165b5de779cb6a5e4fc81fa9c1166fda457"
 
 [[projects]]
   branch = "master"
@@ -351,14 +451,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2fd19a8bed3f4ba8e3b26620f114efec5f39c7b02635a89a915b1cbaefeab5ff"
+  digest = "1:b30e98161b63135917d3d4750906e8e1800b60a7da424f2eb37ecff96f374c42"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "1d2aa6dbdea45adaaebb9905d0666e4537563829"
+  revision = "d32e6e3b99c40f2bfaea45ea9596ed539eed1c0d"
 
 [[projects]]
   branch = "master"
@@ -385,6 +485,30 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:06a2c8ccc3d240a260f282a6b65821536f42fed27aa1406a0eea1954ad556d3c"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/analysis",
+    "go/analysis/passes/inspect",
+    "go/ast/astutil",
+    "go/ast/inspector",
+    "go/buildutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/objectpath",
+    "go/types/typeutil",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/semver",
+    "internal/span",
+  ]
+  pruneopts = "NUT"
+  revision = "a3f652f18032afc555e2a78e1e1c213be762260c"
+
+[[projects]]
+  branch = "master"
   digest = "1:cd018653a358d4b743a9d3bee89e825521f2ab2f2ec0770164bf7632d8d73ab7"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
@@ -392,20 +516,35 @@
   revision = "a8101f21cf983e773d0c1133ebc5424792003214"
 
 [[projects]]
-  digest = "1:c0327223ab42c7ba3abb4b3b892c60594a7b7143ff4a28234c8b25317230a20b"
+  digest = "1:d3c48719e6615b9a7847d1d773377b3c13f2731cf06191d425852e5f1de217f4"
   name = "google.golang.org/grpc"
   packages = [
     ".",
+    "backoff",
     "balancer",
+    "balancer/base",
     "balancer/roundrobin",
+    "binarylog/grpc_binarylog_v1",
     "codes",
     "connectivity",
     "credentials",
+    "credentials/internal",
     "encoding",
-    "grpclb/grpc_lb_v1/messages",
+    "encoding/proto",
     "grpclog",
-    "health/grpc_health_v1",
     "internal",
+    "internal/backoff",
+    "internal/balancerload",
+    "internal/binarylog",
+    "internal/buffer",
+    "internal/channelz",
+    "internal/envconfig",
+    "internal/grpcrand",
+    "internal/grpcsync",
+    "internal/resolver/dns",
+    "internal/resolver/passthrough",
+    "internal/syscall",
+    "internal/transport",
     "keepalive",
     "metadata",
     "naming",
@@ -413,14 +552,14 @@
     "resolver",
     "resolver/dns",
     "resolver/passthrough",
+    "serviceconfig",
     "stats",
     "status",
     "tap",
-    "transport",
   ]
   pruneopts = "NUT"
-  revision = "e687fa4e6424368ece6e4fe727cea2c806a0fcb4"
-  version = "v1.8.2"
+  revision = "1a3960e4bd028ac0cec0a2afd27d7d8e67c11514"
+  version = "v1.25.1"
 
 [[projects]]
   branch = "v1"
@@ -429,6 +568,40 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "442357a80af5c6bf9b6d51ae791a39c3421004f3"
+
+[[projects]]
+  digest = "1:41dcca9245f5ee3e71365b39b1eed7f4c8d8d50a4c5397cd3ac21a3c7a8866ef"
+  name = "honnef.co/go/tools"
+  packages = [
+    "arg",
+    "cmd/staticcheck",
+    "config",
+    "deprecated",
+    "facts",
+    "functions",
+    "go/types/typeutil",
+    "internal/cache",
+    "internal/passes/buildssa",
+    "internal/renameio",
+    "internal/sharedcheck",
+    "lint",
+    "lint/lintdsl",
+    "lint/lintutil",
+    "lint/lintutil/format",
+    "loader",
+    "printf",
+    "simple",
+    "ssa",
+    "ssautil",
+    "staticcheck",
+    "staticcheck/vrp",
+    "stylecheck",
+    "unused",
+    "version",
+  ]
+  pruneopts = "NUT"
+  revision = "afd67930eec2a9ed3e9b19f684d17a062285f16a"
+  version = "2019.2.3"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -443,7 +616,7 @@
     "github.com/Scalingo/go-utils/graceful",
     "github.com/Scalingo/go-utils/logger",
     "github.com/Scalingo/go-utils/logger/plugins/rollbarplugin",
-    "github.com/coreos/etcd/clientv3",
+    "github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes",
     "github.com/coreos/etcd/mvcc/mvccpb",
     "github.com/docker/docker/pkg/reexec",
     "github.com/docker/libnetwork/netutils",
@@ -463,6 +636,8 @@
     "github.com/vishvananda/netlink/nl",
     "github.com/vishvananda/netns",
     "github.com/willf/bitset",
+    "go.etcd.io/etcd/clientv3",
+    "google.golang.org/grpc/codes",
     "gopkg.in/errgo.v1",
   ]
   solver-name = "gps-cdcl"

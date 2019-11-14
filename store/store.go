@@ -7,9 +7,10 @@ import (
 	"reflect"
 	"strings"
 
+	"go.etcd.io/etcd/clientv3"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/config"
-	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
