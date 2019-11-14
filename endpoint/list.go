@@ -18,11 +18,11 @@ func (r *repository) List(ctx context.Context, filters map[string]string) ([]typ
 
 	if networkID == "" {
 		// if hostname empty -> all the endpoints
-		key = fmt.Sprintf("%s/%s", types.EndpointStoragePrefix, hostname)
+		key = fmt.Sprintf("%s/%s/", types.EndpointStoragePrefix, hostname)
 	} else if networkID != "" && hostname == "" {
-		key = fmt.Sprintf("%s/%s", types.NetworkEndpointStoragePrefix, networkID)
+		key = fmt.Sprintf("%s/%s/", types.NetworkEndpointStoragePrefix, networkID)
 	} else {
-		key = fmt.Sprintf("%s/%s/%s", types.EndpointStoragePrefix, r.config.PublicHostname, networkID)
+		key = fmt.Sprintf("%s/%s/%s/", types.EndpointStoragePrefix, r.config.PublicHostname, networkID)
 	}
 
 	err := r.store.Get(ctx, key, true, &endpoints)
