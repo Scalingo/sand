@@ -20,6 +20,7 @@ type NetManager interface {
 	RemoveEndpointNeigh(context.Context, types.Network, types.Endpoint) error
 
 	ListenNetworkChange(context.Context, types.Network) error
+	StopListenNetworkChange(context.Context, types.Network) error
 }
 
 var EndpointAlreadyDisabledErr = errors.New("endpoint already disabled")

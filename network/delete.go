@@ -39,6 +39,5 @@ func (c *repository) Delete(ctx context.Context, network types.Network, a ipallo
 	} else {
 		log.Infof("Network still on %d hosts, keeping %v definition", len(nets), network)
 	}
-
 	return nil
 }

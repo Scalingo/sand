@@ -20,6 +20,11 @@ func (c *repository) Deactivate(ctx context.Context, network types.Network) erro
 		if err != nil {
 			return errgo.Notef(err, "fail to deactive overlay network")
 		}
+
+		err = m.StopListenNetworkChange(ctx, network)
+		if err != nil {
+			return errors.Wrapf(err, "fail to stop listening for endpoints change on network '%s'", network)
+		}
 	default:
 		return errors.New("unknown network type")
 	}
