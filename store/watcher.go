@@ -4,9 +4,10 @@ import (
 	"context"
 	"io"
 
+	"go.etcd.io/etcd/clientv3"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/etcd"
-	"github.com/coreos/etcd/clientv3"
 	"github.com/pkg/errors"
 )
 
@@ -28,7 +29,7 @@ func (s *store) Watch(ctx context.Context, prefix string) (Watcher, error) {
 	log.Infof("create endpoints watcher on prefix %v", prefix)
 
 	// Use context.Background() to avoid the resulting chan to be closed at the end of a HTTP request
-	// https://godoc.org/github.com/coreos/etcd/clientv3#Watcher
+	// https://godoc.org/go.etcd.io/etcd/clientv3#Watcher
 	wchan := wc.Watch(context.Background(), prefix, clientv3.WithPrefix())
 
 	return watcher{etcdClient: client, etcdWatcher: wc, etcdWatchChan: wchan, ready: make(chan struct{})}, nil
