@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"os"
 	"sync"
+	"syscall"
 
 	"gopkg.in/errgo.v1"
 
@@ -76,7 +79,15 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 
 	if localEndpoint.ID != "" {
 		err := netutils.ForwardConnection(ctx, socket, localEndpoint.TargetNetnsPath, ip, port)
-		if err != nil {
+		// It happens that the target from the network connection (ip:port) is not
+		// actually bound in the network namespace, in this case a standard
+		// connection refused error is sent, this should not be an error, the
+		// connection to the SAND client should just be stopped normally
+		if err, ok := errors.Cause(err).(*net.OpError); ok {
+			if err, ok := err.Err.(*os.SyscallError); ok && err.Err == syscall.ECONNREFUSED {
+				log.WithError(err).Infof("local endpoint %v not binding port", localEndpoint)
+			}
+		} else if err != nil {
 			return errors.Wrapf(err, "fail to hijack and forward connection to %v", localEndpoint)
 		}
 		return nil
@@ -122,13 +133,17 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
+	// Here're we're forwarding connection, necessarily, one side or another will
+	// close the connection at some point, this should not be detected as an
+	// error.  Either the client should detect an error or the destination, but
+	// SAND here is just acting as a pipe.
 	go func() {
 		defer wg.Done()
 		defer src.Close()
 		defer dst.CloseWrite()
 		_, err := io.Copy(dst, src)
 		if err != nil && err != io.EOF {
-			log.WithError(err).Error("fail to copy data from src socket to next sand agent")
+			log.WithError(err).Info("fail to copy data from src socket to next sand agent")
 			return
 		}
 		log.Info("end of connection from client to next sand agent")
@@ -140,7 +155,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		defer dst.Close()
 		_, err := io.Copy(src, dst)
 		if err != nil && err != io.EOF {
-			log.WithError(err).Error("fail to copy data next sand agent to src")
+			log.WithError(err).Info("fail to copy data next sand agent to src")
 			return
 		}
 		log.Info("end of connection from next sand agent to src")

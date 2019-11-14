@@ -8,7 +8,10 @@ import (
 	"sync"
 
 	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+
+	"google.golang.org/grpc/codes"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
@@ -86,10 +89,16 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 		for {
 			resp, ok := w.NextResponse()
 			if !ok {
+				log.Info("exit watch response loop")
 				break
 			}
 			err := l.handleMessage(listenerCtx, resp, nm, network)
-			if err != nil {
+			// If the connection is canceled because grpc (HTTP/2) connection is
+			// closed as etcd restart We don't want to throw an error but just keep
+			// looping as the client will automatically reconnect.
+			if etcderr, ok := err.(rpctypes.EtcdError); ok && etcderr.Code() == codes.Canceled {
+				log.WithError(err).Info("watch response canceled, retry")
+			} else if err != nil {
 				log.WithError(err).Error("fail to handle watch response")
 			}
 		}
