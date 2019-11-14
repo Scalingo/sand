@@ -1,6 +1,8 @@
 package etcd
 
 import (
+	"os"
+
 	etcdutils "github.com/Scalingo/go-utils/etcd"
 	"go.etcd.io/etcd/clientv3"
 
@@ -10,6 +12,9 @@ import (
 func NewClient() (*clientv3.Client, error) {
 	// Error has already been checked in the config initialization. We can safely ignore it here
 	etcdConfig, _ := etcdutils.ConfigFromEnv()
+	if os.Getenv("GO_ENV") == "development" {
+		etcdConfig.TLS.InsecureSkipVerify = true
+	}
 
 	client, err := clientv3.New(etcdConfig)
 	if err != nil {
