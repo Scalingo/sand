@@ -86,6 +86,8 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		if err, ok := errors.Cause(err).(*net.OpError); ok {
 			if err, ok := err.Err.(*os.SyscallError); ok && err.Err == syscall.ECONNREFUSED {
 				log.WithError(err).Infof("local endpoint %v not binding port", localEndpoint)
+			} else {
+				return errors.Wrapf(err, "network connection error when forwarding to %v", localEndpoint)
 			}
 		} else if err != nil {
 			return errors.Wrapf(err, "fail to hijack and forward connection to %v", localEndpoint)
