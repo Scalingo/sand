@@ -14,3 +14,11 @@ func (m manager) ListenNetworkChange(ctx context.Context, n types.Network) error
 	}
 	return nil
 }
+
+func (m manager) StopListenNetworkChange(ctx context.Context, n types.Network) error {
+	err := m.listener.Remove(ctx, n)
+	if err != nil {
+		return errors.Wrapf(err, "fail to remove network listener")
+	}
+	return nil
+}

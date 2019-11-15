@@ -38,6 +38,7 @@ func (m *MockNetworkEndpointListener) EXPECT() *MockNetworkEndpointListenerMockR
 
 // Add mocks base method
 func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 netmanager.NetManager, arg2 types.Network) (chan struct{}, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", arg0, arg1, arg2)
 	ret0, _ := ret[0].(chan struct{})
 	ret1, _ := ret[1].(error)
@@ -46,11 +47,13 @@ func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 netmanager.
 
 // Add indicates an expected call of Add
 func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), arg0, arg1, arg2)
 }
 
 // Remove mocks base method
 func (m *MockNetworkEndpointListener) Remove(arg0 context.Context, arg1 types.Network) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Remove", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -58,5 +61,6 @@ func (m *MockNetworkEndpointListener) Remove(arg0 context.Context, arg1 types.Ne
 
 // Remove indicates an expected call of Remove
 func (mr *MockNetworkEndpointListenerMockRecorder) Remove(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Remove), arg0, arg1)
 }
