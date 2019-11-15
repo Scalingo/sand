@@ -1,5 +1,15 @@
 ## To be released
 
+## v0.6.0 - 15 Nov 2019
+
+* Update etcd client to 3.4.3
+* Fix error management to throw errors only when required
+* Bugfix when a node which hostname is a prefix of another, trying to add the other network on start
+
+  ie. `ip-10-0-0-20` considering networks of `ip-10-0-0-207` are theirs
+
+* Correctly stop listening network change when a network is deactive on a node
+
 ## v0.5.11 - 8 Nov 2019
 
 * Refactor connection forwarding to sand network, no more fork/exec, change namespace in current thread
