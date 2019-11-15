@@ -36,6 +36,7 @@ func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 
 // Generate mocks base method
 func (m *MockManager) Generate(arg0 context.Context) (int, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Generate", arg0)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
@@ -44,11 +45,13 @@ func (m *MockManager) Generate(arg0 context.Context) (int, error) {
 
 // Generate indicates an expected call of Generate
 func (mr *MockManagerMockRecorder) Generate(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockManager)(nil).Generate), arg0)
 }
 
 // Lock mocks base method
 func (m *MockManager) Lock(arg0 context.Context) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Lock", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -56,11 +59,13 @@ func (m *MockManager) Lock(arg0 context.Context) error {
 
 // Lock indicates an expected call of Lock
 func (mr *MockManagerMockRecorder) Lock(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockManager)(nil).Lock), arg0)
 }
 
 // Unlock mocks base method
 func (m *MockManager) Unlock(arg0 context.Context) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Unlock", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -68,5 +73,6 @@ func (m *MockManager) Unlock(arg0 context.Context) error {
 
 // Unlock indicates an expected call of Unlock
 func (mr *MockManagerMockRecorder) Unlock(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unlock", reflect.TypeOf((*MockManager)(nil).Unlock), arg0)
 }

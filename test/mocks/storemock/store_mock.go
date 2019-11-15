@@ -37,6 +37,7 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 
 // Delete mocks base method
 func (m *MockStore) Delete(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -44,11 +45,13 @@ func (m *MockStore) Delete(arg0 context.Context, arg1 string) error {
 
 // Delete indicates an expected call of Delete
 func (mr *MockStoreMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStore)(nil).Delete), arg0, arg1)
 }
 
 // Get mocks base method
 func (m *MockStore) Get(arg0 context.Context, arg1 string, arg2 bool, arg3 interface{}) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -56,11 +59,13 @@ func (m *MockStore) Get(arg0 context.Context, arg1 string, arg2 bool, arg3 inter
 
 // Get indicates an expected call of Get
 func (mr *MockStoreMockRecorder) Get(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0, arg1, arg2, arg3)
 }
 
 // GetWithRevision mocks base method
 func (m *MockStore) GetWithRevision(arg0 context.Context, arg1 string, arg2 int64, arg3 bool, arg4 interface{}) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetWithRevision", arg0, arg1, arg2, arg3, arg4)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -68,11 +73,13 @@ func (m *MockStore) GetWithRevision(arg0 context.Context, arg1 string, arg2 int6
 
 // GetWithRevision indicates an expected call of GetWithRevision
 func (mr *MockStoreMockRecorder) GetWithRevision(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithRevision", reflect.TypeOf((*MockStore)(nil).GetWithRevision), arg0, arg1, arg2, arg3, arg4)
 }
 
 // Set mocks base method
 func (m *MockStore) Set(arg0 context.Context, arg1 string, arg2 interface{}) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -80,11 +87,13 @@ func (m *MockStore) Set(arg0 context.Context, arg1 string, arg2 interface{}) err
 
 // Set indicates an expected call of Set
 func (mr *MockStoreMockRecorder) Set(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockStore)(nil).Set), arg0, arg1, arg2)
 }
 
 // Watch mocks base method
 func (m *MockStore) Watch(arg0 context.Context, arg1 string) (store.Watcher, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Watch", arg0, arg1)
 	ret0, _ := ret[0].(store.Watcher)
 	ret1, _ := ret[1].(error)
@@ -93,5 +102,6 @@ func (m *MockStore) Watch(arg0 context.Context, arg1 string) (store.Watcher, err
 
 // Watch indicates an expected call of Watch
 func (mr *MockStoreMockRecorder) Watch(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Watch", reflect.TypeOf((*MockStore)(nil).Watch), arg0, arg1)
 }

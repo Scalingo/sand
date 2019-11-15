@@ -41,6 +41,7 @@ func (m *MockClient) EXPECT() *MockClientMockRecorder {
 
 // EndpointCreate mocks base method
 func (m *MockClient) EndpointCreate(arg0 context.Context, arg1 params.EndpointCreate) (types.Endpoint, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EndpointCreate", arg0, arg1)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -49,11 +50,13 @@ func (m *MockClient) EndpointCreate(arg0 context.Context, arg1 params.EndpointCr
 
 // EndpointCreate indicates an expected call of EndpointCreate
 func (mr *MockClientMockRecorder) EndpointCreate(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndpointCreate", reflect.TypeOf((*MockClient)(nil).EndpointCreate), arg0, arg1)
 }
 
 // EndpointDelete mocks base method
 func (m *MockClient) EndpointDelete(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EndpointDelete", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -61,11 +64,13 @@ func (m *MockClient) EndpointDelete(arg0 context.Context, arg1 string) error {
 
 // EndpointDelete indicates an expected call of EndpointDelete
 func (mr *MockClientMockRecorder) EndpointDelete(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndpointDelete", reflect.TypeOf((*MockClient)(nil).EndpointDelete), arg0, arg1)
 }
 
 // EndpointsList mocks base method
 func (m *MockClient) EndpointsList(arg0 context.Context, arg1 params.EndpointsList) ([]types.Endpoint, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EndpointsList", arg0, arg1)
 	ret0, _ := ret[0].([]types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -74,11 +79,13 @@ func (m *MockClient) EndpointsList(arg0 context.Context, arg1 params.EndpointsLi
 
 // EndpointsList indicates an expected call of EndpointsList
 func (mr *MockClientMockRecorder) EndpointsList(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndpointsList", reflect.TypeOf((*MockClient)(nil).EndpointsList), arg0, arg1)
 }
 
 // NetworkConnect mocks base method
 func (m *MockClient) NetworkConnect(arg0 context.Context, arg1 string, arg2 params.NetworkConnect) (net.Conn, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NetworkConnect", arg0, arg1, arg2)
 	ret0, _ := ret[0].(net.Conn)
 	ret1, _ := ret[1].(error)
@@ -87,11 +94,13 @@ func (m *MockClient) NetworkConnect(arg0 context.Context, arg1 string, arg2 para
 
 // NetworkConnect indicates an expected call of NetworkConnect
 func (mr *MockClientMockRecorder) NetworkConnect(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkConnect", reflect.TypeOf((*MockClient)(nil).NetworkConnect), arg0, arg1, arg2)
 }
 
 // NetworkCreate mocks base method
 func (m *MockClient) NetworkCreate(arg0 context.Context, arg1 params.NetworkCreate) (types.Network, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NetworkCreate", arg0, arg1)
 	ret0, _ := ret[0].(types.Network)
 	ret1, _ := ret[1].(error)
@@ -100,11 +109,13 @@ func (m *MockClient) NetworkCreate(arg0 context.Context, arg1 params.NetworkCrea
 
 // NetworkCreate indicates an expected call of NetworkCreate
 func (mr *MockClientMockRecorder) NetworkCreate(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkCreate", reflect.TypeOf((*MockClient)(nil).NetworkCreate), arg0, arg1)
 }
 
 // NetworkDelete mocks base method
 func (m *MockClient) NetworkDelete(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NetworkDelete", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -112,11 +123,13 @@ func (m *MockClient) NetworkDelete(arg0 context.Context, arg1 string) error {
 
 // NetworkDelete indicates an expected call of NetworkDelete
 func (mr *MockClientMockRecorder) NetworkDelete(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkDelete", reflect.TypeOf((*MockClient)(nil).NetworkDelete), arg0, arg1)
 }
 
 // NetworkShow mocks base method
 func (m *MockClient) NetworkShow(arg0 context.Context, arg1 string) (types.Network, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NetworkShow", arg0, arg1)
 	ret0, _ := ret[0].(types.Network)
 	ret1, _ := ret[1].(error)
@@ -125,11 +138,13 @@ func (m *MockClient) NetworkShow(arg0 context.Context, arg1 string) (types.Netwo
 
 // NetworkShow indicates an expected call of NetworkShow
 func (mr *MockClientMockRecorder) NetworkShow(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkShow", reflect.TypeOf((*MockClient)(nil).NetworkShow), arg0, arg1)
 }
 
 // NetworksList mocks base method
 func (m *MockClient) NetworksList(arg0 context.Context) ([]types.Network, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NetworksList", arg0)
 	ret0, _ := ret[0].([]types.Network)
 	ret1, _ := ret[1].(error)
@@ -138,11 +153,13 @@ func (m *MockClient) NetworksList(arg0 context.Context) ([]types.Network, error)
 
 // NetworksList indicates an expected call of NetworksList
 func (mr *MockClientMockRecorder) NetworksList(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworksList", reflect.TypeOf((*MockClient)(nil).NetworksList), arg0)
 }
 
 // NewHTTPRoundTripper mocks base method
 func (m *MockClient) NewHTTPRoundTripper(arg0 context.Context, arg1 string, arg2 sand.HTTPRoundTripperOpts) http.RoundTripper {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NewHTTPRoundTripper", arg0, arg1, arg2)
 	ret0, _ := ret[0].(http.RoundTripper)
 	return ret0
@@ -150,5 +167,21 @@ func (m *MockClient) NewHTTPRoundTripper(arg0 context.Context, arg1 string, arg2
 
 // NewHTTPRoundTripper indicates an expected call of NewHTTPRoundTripper
 func (mr *MockClientMockRecorder) NewHTTPRoundTripper(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewHTTPRoundTripper", reflect.TypeOf((*MockClient)(nil).NewHTTPRoundTripper), arg0, arg1, arg2)
+}
+
+// Version mocks base method
+func (m *MockClient) Version(arg0 context.Context) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Version", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Version indicates an expected call of Version
+func (mr *MockClientMockRecorder) Version(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Version", reflect.TypeOf((*MockClient)(nil).Version), arg0)
 }

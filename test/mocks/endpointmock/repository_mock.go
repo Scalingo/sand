@@ -39,6 +39,7 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 
 // Activate mocks base method
 func (m *MockRepository) Activate(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint, arg3 params.EndpointActivate) (types.Endpoint, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Activate", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -47,11 +48,13 @@ func (m *MockRepository) Activate(arg0 context.Context, arg1 types.Network, arg2
 
 // Activate indicates an expected call of Activate
 func (mr *MockRepositoryMockRecorder) Activate(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Activate", reflect.TypeOf((*MockRepository)(nil).Activate), arg0, arg1, arg2, arg3)
 }
 
 // Create mocks base method
 func (m *MockRepository) Create(arg0 context.Context, arg1 types.Network, arg2 params.EndpointCreate) (types.Endpoint, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -60,11 +63,13 @@ func (m *MockRepository) Create(arg0 context.Context, arg1 types.Network, arg2 p
 
 // Create indicates an expected call of Create
 func (mr *MockRepositoryMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRepository)(nil).Create), arg0, arg1, arg2)
 }
 
 // Deactivate mocks base method
 func (m *MockRepository) Deactivate(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) (types.Endpoint, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Deactivate", arg0, arg1, arg2)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -73,11 +78,13 @@ func (m *MockRepository) Deactivate(arg0 context.Context, arg1 types.Network, ar
 
 // Deactivate indicates an expected call of Deactivate
 func (mr *MockRepositoryMockRecorder) Deactivate(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Deactivate", reflect.TypeOf((*MockRepository)(nil).Deactivate), arg0, arg1, arg2)
 }
 
 // Delete mocks base method
 func (m *MockRepository) Delete(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint, arg3 endpoint.DeleteOpts) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -85,11 +92,13 @@ func (m *MockRepository) Delete(arg0 context.Context, arg1 types.Network, arg2 t
 
 // Delete indicates an expected call of Delete
 func (mr *MockRepositoryMockRecorder) Delete(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockRepository)(nil).Delete), arg0, arg1, arg2, arg3)
 }
 
 // Exists mocks base method
 func (m *MockRepository) Exists(arg0 context.Context, arg1 string) (types.Endpoint, bool, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Exists", arg0, arg1)
 	ret0, _ := ret[0].(types.Endpoint)
 	ret1, _ := ret[1].(bool)
@@ -99,11 +108,13 @@ func (m *MockRepository) Exists(arg0 context.Context, arg1 string) (types.Endpoi
 
 // Exists indicates an expected call of Exists
 func (mr *MockRepositoryMockRecorder) Exists(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockRepository)(nil).Exists), arg0, arg1)
 }
 
 // List mocks base method
 func (m *MockRepository) List(arg0 context.Context, arg1 map[string]string) ([]types.Endpoint, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List", arg0, arg1)
 	ret0, _ := ret[0].([]types.Endpoint)
 	ret1, _ := ret[1].(error)
@@ -112,5 +123,6 @@ func (m *MockRepository) List(arg0 context.Context, arg1 map[string]string) ([]t
 
 // List indicates an expected call of List
 func (mr *MockRepositoryMockRecorder) List(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockRepository)(nil).List), arg0, arg1)
 }

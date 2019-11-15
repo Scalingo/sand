@@ -37,6 +37,7 @@ func (m *MockIPAllocator) EXPECT() *MockIPAllocatorMockRecorder {
 
 // AllocateIP mocks base method
 func (m *MockIPAllocator) AllocateIP(arg0 context.Context, arg1 string, arg2 ipallocator.AllocateIPOpts) (string, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AllocateIP", arg0, arg1, arg2)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
@@ -45,11 +46,13 @@ func (m *MockIPAllocator) AllocateIP(arg0 context.Context, arg1 string, arg2 ipa
 
 // AllocateIP indicates an expected call of AllocateIP
 func (mr *MockIPAllocatorMockRecorder) AllocateIP(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocateIP", reflect.TypeOf((*MockIPAllocator)(nil).AllocateIP), arg0, arg1, arg2)
 }
 
 // ReleaseIP mocks base method
 func (m *MockIPAllocator) ReleaseIP(arg0 context.Context, arg1, arg2 string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReleaseIP", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -57,11 +60,13 @@ func (m *MockIPAllocator) ReleaseIP(arg0 context.Context, arg1, arg2 string) err
 
 // ReleaseIP indicates an expected call of ReleaseIP
 func (mr *MockIPAllocatorMockRecorder) ReleaseIP(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleaseIP", reflect.TypeOf((*MockIPAllocator)(nil).ReleaseIP), arg0, arg1, arg2)
 }
 
 // ReleasePool mocks base method
 func (m *MockIPAllocator) ReleasePool(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReleasePool", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -69,5 +74,6 @@ func (m *MockIPAllocator) ReleasePool(arg0 context.Context, arg1 string) error {
 
 // ReleasePool indicates an expected call of ReleasePool
 func (mr *MockIPAllocatorMockRecorder) ReleasePool(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReleasePool", reflect.TypeOf((*MockIPAllocator)(nil).ReleasePool), arg0, arg1)
 }

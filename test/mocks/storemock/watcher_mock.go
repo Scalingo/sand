@@ -7,9 +7,8 @@ package storemock
 import (
 	reflect "reflect"
 
-	clientv3 "go.etcd.io/etcd/clientv3"
-
 	gomock "github.com/golang/mock/gomock"
+	clientv3 "go.etcd.io/etcd/clientv3"
 )
 
 // MockWatcher is a mock of Watcher interface
@@ -37,6 +36,7 @@ func (m *MockWatcher) EXPECT() *MockWatcherMockRecorder {
 
 // Close mocks base method
 func (m *MockWatcher) Close() error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Close")
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -44,11 +44,13 @@ func (m *MockWatcher) Close() error {
 
 // Close indicates an expected call of Close
 func (mr *MockWatcherMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockWatcher)(nil).Close))
 }
 
 // NextResponse mocks base method
 func (m *MockWatcher) NextResponse() (clientv3.WatchResponse, bool) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "NextResponse")
 	ret0, _ := ret[0].(clientv3.WatchResponse)
 	ret1, _ := ret[1].(bool)
@@ -57,5 +59,6 @@ func (m *MockWatcher) NextResponse() (clientv3.WatchResponse, bool) {
 
 // NextResponse indicates an expected call of NextResponse
 func (mr *MockWatcherMockRecorder) NextResponse() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NextResponse", reflect.TypeOf((*MockWatcher)(nil).NextResponse))
 }
