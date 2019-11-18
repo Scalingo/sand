@@ -12,7 +12,7 @@ import (
 func NewClient() (*clientv3.Client, error) {
 	// Error has already been checked in the config initialization. We can safely ignore it here
 	etcdConfig, _ := etcdutils.ConfigFromEnv()
-	if os.Getenv("GO_ENV") == "development" {
+	if os.Getenv("GO_ENV") == "development" && etcdConfig.TLS != nil {
 		etcdConfig.TLS.InsecureSkipVerify = true
 	}
 
