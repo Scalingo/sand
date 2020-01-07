@@ -31,4 +31,4 @@
 
 [[constraint]]
   name = "github.com/Scalingo/go-etcd-lock"
-  version = "^3.4"
+  version = "^4"

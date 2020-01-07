@@ -18,12 +18,12 @@
   version = "v0.4.7"
 
 [[projects]]
-  digest = "1:072203c1bac03611adf6b1f12c340ac05dfbca16a73316e0be554157bf7e63a3"
+  digest = "1:e04e1e0a25457dcff87e18777dcbe18202231570435b775dd61d28e34fab38be"
   name = "github.com/Scalingo/go-etcd-lock"
   packages = ["lock"]
   pruneopts = "NUT"
-  revision = "34bf599c9c2d8193259a9c2cc9952a0edd5496fd"
-  version = "v3.4.2"
+  revision = "e17f1fc4bba7d186ced64df3f72b5ace8a238642"
+  version = "v4.0.0"
 
 [[projects]]
   digest = "1:d3dc47eaaa4774d3b049993629807b9fb2a0b2caf722d8eea690598b0e22a419"
