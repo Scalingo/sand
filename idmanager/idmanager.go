@@ -3,7 +3,6 @@ package idmanager
 import (
 	"context"
 	"fmt"
-	"sort"
 
 	"github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/sand/config"
@@ -62,18 +61,17 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 		return -1, errors.Wrapf(err, "fail to get list of items with prefix %s from store", m.prefix)
 	}
 
-	var ids []int
+	ids := map[int]bool{}
 	for _, item := range items {
-		ids = append(ids, int(item[m.field].(float64)))
+		ids[int(item[m.field].(float64))] = true
 	}
-	sort.Ints(ids)
 
-	for i, v := range ids {
-		// First ID generated is 1, not 0
-		if i+1 != v {
-			return i + 1, nil
+	for i := 1; ; i++ {
+		if !ids[i] {
+			return i, nil
 		}
 	}
 
-	return len(items) + 1, nil
+	// unreachable
+	return -1, errors.New("fail to select new ID")
 }
