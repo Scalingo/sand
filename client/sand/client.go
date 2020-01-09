@@ -56,6 +56,7 @@ func (c httpClient) Do(r *http.Request) (*http.Response, error) {
 
 type client struct {
 	url        string
+	timeout    time.Duration
 	httpClient *httpClient
 	tlsConfig  *tls.Config
 }
@@ -68,7 +69,8 @@ type Opt func(c *client)
 
 func NewClient(opts ...Opt) *client {
 	c := &client{
-		url: "http://localhost:9999",
+		url:     "http://localhost:9999",
+		timeout: 30 * time.Second,
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -76,7 +78,7 @@ func NewClient(opts ...Opt) *client {
 	if c.httpClient == nil {
 		c.httpClient = &httpClient{
 			Client: &http.Client{
-				Timeout: 30 * time.Second,
+				Timeout: c.timeout,
 			},
 		}
 	}
@@ -100,6 +102,12 @@ func WithHttpClient(hc *http.Client) Opt {
 		c.httpClient = &httpClient{
 			Client: hc,
 		}
+	}
+}
+
+func WithTimeout(t time.Duration) Opt {
+	return func(c *client) {
+		c.timeout = t
 	}
 }
 
