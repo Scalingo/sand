@@ -1,5 +1,11 @@
 ## To be released
 
+## v0.7.0 - 10 Jan 2020
+
+* New algorithm for VxLAN ID generation
+* Update go-etcd-lock lib to remove plenty of bugs
+* Add ability to use --timeout on the CLI
+
 ## v0.6.0 - 15 Nov 2019
 
 * Update etcd client to 3.4.3
