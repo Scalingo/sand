@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/Scalingo/sand/store"
-	"github.com/Scalingo/sand/test/mocks/storemock"
+	"github.com/Scalingo/sand/store/storemock"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

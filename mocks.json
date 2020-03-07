@@ -1,0 +1,67 @@
+{
+	"base_package": "github.com/Scalingo/sand",
+	"mocks": [
+		{
+			"mock_file": "test/mocks/netlinkmock/handler_mock.go",
+			"src_package": "netlink",
+			"interface":"Handler"
+		},
+		{
+			"mock_file": "test/mocks/ipallocatormock/ipallocator_mock.go",
+			"src_package": "ipallocator",
+			"interface":"IPAllocator"
+		},
+		{
+			"mock_file": "test/mocks/netnsbuildermock/manager_mock.go",
+			"src_package": "netnsbuilder",
+			"interface":"Manager"
+		},
+		{
+			"mock_file": "test/mocks/idmanagermock/manager_mock.go",
+			"src_package": "idmanager",
+			"interface":"Manager"
+		},
+		{
+			"mock_file": "store/etcd_watcher_mock.go",
+			"src_package": "store",
+			"interface":"EtcdWatcher"
+		},
+		{
+			"mock_file": "test/mocks/endpointmock/repository_mock.go",
+			"src_package": "endpoint",
+			"interface":"Repository"
+		},
+		{
+			"mock_file": "test/mocks/networkmock/repository_mock.go",
+			"src_package": "network",
+			"interface":"Repository"
+		},
+		{
+			"mock_file": "test/mocks/network/netmanagermock/netmanager_mock.go",
+			"src_package": "network/netmanager",
+			"interface":"NetManager"
+		},
+		{
+			"mock_file": "test/mocks/network/overlaymock/networkendpointlistener_mock.go",
+			"src_package": "network/overlay",
+			"interface":"NetworkEndpointListener"
+		},
+    {
+      "src_package": "store",
+      "interface": "Registration"
+    },
+		{
+			"src_package": "store",
+			"interface":"Store"
+		},
+    {
+      "src_package": "network/overlay",
+      "interface": "Registrar"
+    },
+		{
+			"mock_file": "test/mocks/client/sandmock/client_mock.go",
+			"src_package": "client/sand",
+			"interface":"Client"
+		}
+	]
+}
