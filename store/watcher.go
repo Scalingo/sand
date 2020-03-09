@@ -106,8 +106,9 @@ func (w Watcher) watchModifications(ctx context.Context) {
 			if etcderr, ok := err.(rpctypes.EtcdError); ok && etcderr.Code() == codes.Canceled {
 				log.WithError(err).Info("watch response canceled, retry")
 			} else if err != nil {
-				log.WithError(err).Error("fail to handle Watcher response")
+				log.WithError(err).Error("fail to handle watcher response")
 			}
+			continue
 		}
 		log.WithField("events_count", len(res.Events)).Debug("received events from etcd")
 		for _, event := range res.Events {

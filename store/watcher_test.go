@@ -35,9 +35,6 @@ func TestWatcher_Register(t *testing.T) {
 		"it should not get an event after unregistration": {
 			registrationKey: "/prefix/subkey2",
 			expect: func(t *testing.T, w Watcher, in chan clientv3.WatchResponse, r Registration) {
-				// Ensure the watcher has started watching etcd events, sleep to schedule the goroutine
-				time.Sleep(10 * time.Millisecond)
-
 				r.Unregister()
 				// buffered chan, non blocking operation
 				in <- clientv3.WatchResponse{
@@ -48,6 +45,19 @@ func TestWatcher_Register(t *testing.T) {
 					if ok {
 						require.Fail(t, "should not get an event")
 					}
+				}
+			},
+		},
+		"it should log an error and keep on listening until the chan is closed": {
+			registrationKey: "/prefix/subkey3",
+			expect: func(t *testing.T, w Watcher, in chan clientv3.WatchResponse, r Registration) {
+				in <- clientv3.WatchResponse{
+					Canceled: true,
+				}
+				select {
+				case <-r.EventChan():
+					t.Error("nothing should get out of this")
+				default:
 				}
 			},
 		},
@@ -77,6 +87,9 @@ func TestWatcher_Register(t *testing.T) {
 
 			r, err := Watcher.Register(c.registrationKey)
 			require.NoError(t, err)
+
+			// Ensure the watcher has started watching etcd events, sleep to schedule the goroutine
+			time.Sleep(10 * time.Millisecond)
 
 			c.expect(t, Watcher, incomingEvents, r)
 		})
