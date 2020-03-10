@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
-	"strings"
 
 	"go.etcd.io/etcd/clientv3"
 
@@ -22,7 +21,6 @@ type Store interface {
 	GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data interface{}) error
 	Set(ctx context.Context, key string, data interface{}) error
 	Delete(ctx context.Context, key string) error
-	Watch(ctx context.Context, key string) (Watcher, error)
 }
 
 type store struct {
@@ -35,7 +33,7 @@ func New(c *config.Config) Store {
 
 func (s *store) get(ctx context.Context, key string, data interface{}, opts []clientv3.OpOption) error {
 	log := logger.Get(ctx).WithField("scope", "store")
-	key = s.Key(key)
+	key = prefixedKey(s.config, key)
 	c, closer, err := s.newEtcdClient()
 	if err != nil {
 		return errors.Wrap(err, "fail to build etcd client")
@@ -88,7 +86,7 @@ func (s *store) Get(ctx context.Context, key string, recursive bool, data interf
 
 func (s *store) Set(ctx context.Context, key string, data interface{}) error {
 	log := logger.Get(ctx).WithField("scope", "store")
-	key = s.Key(key)
+	key = prefixedKey(s.config, key)
 	c, closer, err := s.newEtcdClient()
 	if err != nil {
 		return errors.Wrap(err, "fail to build etcd client")
@@ -111,7 +109,7 @@ func (s *store) Set(ctx context.Context, key string, data interface{}) error {
 
 func (s *store) Delete(ctx context.Context, key string) error {
 	log := logger.Get(ctx).WithField("scope", "store")
-	key = s.Key(key)
+	key = prefixedKey(s.config, key)
 	c, closer, err := s.newEtcdClient()
 	if err != nil {
 		return errors.Wrap(err, "fail to build etcd client")
@@ -124,11 +122,4 @@ func (s *store) Delete(ctx context.Context, key string) error {
 	}
 	log.WithFields(logrus.Fields{"key": key}).Debug("delete key")
 	return nil
-}
-
-func (s *store) Key(key string) string {
-	if strings.HasPrefix(key, s.config.EtcdPrefix) {
-		return key
-	}
-	return s.config.EtcdPrefix + key
 }

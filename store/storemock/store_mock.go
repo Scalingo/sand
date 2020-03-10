@@ -8,7 +8,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	store "github.com/Scalingo/sand/store"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -89,19 +88,4 @@ func (m *MockStore) Set(arg0 context.Context, arg1 string, arg2 interface{}) err
 func (mr *MockStoreMockRecorder) Set(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockStore)(nil).Set), arg0, arg1, arg2)
-}
-
-// Watch mocks base method
-func (m *MockStore) Watch(arg0 context.Context, arg1 string) (store.Watcher, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Watch", arg0, arg1)
-	ret0, _ := ret[0].(store.Watcher)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Watch indicates an expected call of Watch
-func (mr *MockStoreMockRecorder) Watch(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Watch", reflect.TypeOf((*MockStore)(nil).Watch), arg0, arg1)
 }

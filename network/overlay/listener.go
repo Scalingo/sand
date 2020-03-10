@@ -4,14 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io"
 	"sync"
 
 	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-
-	"google.golang.org/grpc/codes"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
@@ -27,35 +23,37 @@ type NetworkEndpointListener interface {
 	Remove(context.Context, types.Network) error
 }
 
+type Registrar interface {
+	Register(string) (store.Registration, error)
+}
+
 type listener struct {
 	sync.Mutex
-	config          *config.Config
-	store           store.Store
-	networkWatchers map[string]io.Closer
+	config               *config.Config
+	store                store.Store
+	registrar            Registrar
+	networkRegistrations map[string]store.Registration
 
-	// globalContext is the context used to start etcd watcher when it is
+	// globalContext is the context used to start etcd registrar when it is
 	// canceled all resources are released. We can't use the one of Add, as it is
 	// often bount to a temporary http request, the context gets canceled
 	// directly at the end of the request and the watch breaks
 	globalContext context.Context
 }
 
-func NewNetworkEndpointListener(ctx context.Context, config *config.Config, store store.Store) NetworkEndpointListener {
-	return &listener{config: config, store: store, networkWatchers: map[string]io.Closer{}, globalContext: ctx}
+func NewNetworkEndpointListener(ctx context.Context, config *config.Config, r Registrar, s store.Store) NetworkEndpointListener {
+	return &listener{config: config, registrar: r, store: s, networkRegistrations: map[string]store.Registration{}, globalContext: ctx}
 }
 
 func (l *listener) Remove(ctx context.Context, network types.Network) error {
 	l.Lock()
 	defer l.Unlock()
 
-	if w, ok := l.networkWatchers[network.ID]; !ok {
+	if r, ok := l.networkRegistrations[network.ID]; !ok {
 		return nil
 	} else {
-		err := w.Close()
-		if err != nil {
-			return errors.Wrapf(err, "fail to stop watcher")
-		}
-		delete(l.networkWatchers, network.ID)
+		r.Unregister()
+		delete(l.networkRegistrations, network.ID)
 	}
 	return nil
 }
@@ -64,7 +62,7 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 	l.Lock()
 	defer l.Unlock()
 
-	if _, ok := l.networkWatchers[network.ID]; ok {
+	if _, ok := l.networkRegistrations[network.ID]; ok {
 		return nil, nil
 	}
 
@@ -75,86 +73,70 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 	})
 	listenerCtx := logger.ToCtx(l.globalContext, log)
 
-	w, err := l.store.Watch(listenerCtx, network.EndpointsStorageKey(""))
+	log.Info("registering to network modifications")
+	r, err := l.registrar.Register(network.EndpointsStorageKey(""))
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create watcher for network %s", network)
+		return nil, errors.Wrapf(err, "fail to create registration for network %s", network)
 	}
-
-	l.networkWatchers[network.ID] = w
+	l.networkRegistrations[network.ID] = r
 
 	done := make(chan struct{})
-	go func(w store.Watcher) {
+	go func(r store.Registration) {
 		defer close(done)
-		log.Debug("start listening to etcd watch chan")
-		for {
-			resp, ok := w.NextResponse()
-			if !ok {
-				log.Info("exit watch response loop")
-				break
-			}
-			err := l.handleMessage(listenerCtx, resp, nm, network)
-			// If the connection is canceled because grpc (HTTP/2) connection is
-			// closed as etcd restart We don't want to throw an error but just keep
-			// looping as the client will automatically reconnect.
-			if etcderr, ok := err.(rpctypes.EtcdError); ok && etcderr.Code() == codes.Canceled {
-				log.WithError(err).Info("watch response canceled, retry")
-			} else if err != nil {
-				log.WithError(err).Error("fail to handle watch response")
+		log.Info("start listening registration events")
+		for event := range r.EventChan() {
+			err := l.handleEvent(listenerCtx, event, nm, network)
+			if err != nil {
+				log.WithError(err).Error("fail to handle registration response")
 			}
 		}
-		log.Debug("watcher closed")
-	}(w)
+		log.Info("stop listening registration events")
+	}(r)
 
 	return done, nil
 }
 
-func (l *listener) handleMessage(ctx context.Context, resp clientv3.WatchResponse, nm netmanager.NetManager, network types.Network) error {
+func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm netmanager.NetManager, network types.Network) error {
 	log := logger.Get(ctx)
+	switch event.Type {
+	case mvccpb.PUT:
+		var endpoint types.Endpoint
+		err := json.NewDecoder(bytes.NewReader(event.Kv.Value)).Decode(&endpoint)
+		if err != nil {
+			return errors.Wrapf(err, "fail to decode JSON")
+		}
 
-	if err := resp.Err(); err != nil {
-		return errors.Wrapf(err, "error when watching events")
-	}
-	for _, event := range resp.Events {
-		switch event.Type {
-		case mvccpb.PUT:
-			var endpoint types.Endpoint
-			err := json.NewDecoder(bytes.NewReader(event.Kv.Value)).Decode(&endpoint)
-			if err != nil {
-				return errors.Wrapf(err, "fail to decode JSON")
-			}
+		log = log.WithFields(logrus.Fields{
+			"endpoint_id":        endpoint.ID,
+			"endpoint_target_ip": endpoint.TargetVethIP,
+			"endpoint_hostname":  endpoint.Hostname,
+		})
+		log.Info("registration got new endpoint")
+		ctx = logger.ToCtx(ctx, log)
 
-			log = log.WithFields(logrus.Fields{
-				"endpoint_id":        endpoint.ID,
-				"endpoint_target_ip": endpoint.TargetVethIP,
-				"endpoint_hostname":  endpoint.Hostname,
-			})
-			log.Info("etcd watch got new endpoint")
-			ctx = logger.ToCtx(ctx, log)
+		err = nm.AddEndpointNeigh(ctx, network, endpoint)
+		if err != nil {
+			log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
+		}
 
-			err = nm.AddEndpointNeigh(ctx, network, endpoint)
-			if err != nil {
-				log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
-			}
+	case mvccpb.DELETE:
+		var endpoint types.Endpoint
+		err := l.store.GetWithRevision(ctx, string(event.Kv.Key), event.Kv.ModRevision-1, false, &endpoint)
+		if err != nil {
+			return errors.Wrapf(err, "fail to get endpoint %v", string(event.Kv.Key))
+		}
 
-		case mvccpb.DELETE:
-			var endpoint types.Endpoint
-			err := l.store.GetWithRevision(ctx, string(event.Kv.Key), event.Kv.ModRevision-1, false, &endpoint)
-			if err != nil {
-				return errors.Wrapf(err, "fail to get endpoint %v", string(event.Kv.Key))
-			}
+		log = log.WithFields(logrus.Fields{
+			"endpoint_id":        endpoint.ID,
+			"endpoint_target_ip": endpoint.TargetVethIP,
+			"endpoint_hostname":  endpoint.Hostname,
+		})
+		log.Info("etcd watch got deleted endpoint")
+		ctx = logger.ToCtx(ctx, log)
 
-			log = log.WithFields(logrus.Fields{
-				"endpoint_id":        endpoint.ID,
-				"endpoint_target_ip": endpoint.TargetVethIP,
-				"endpoint_hostname":  endpoint.Hostname,
-			})
-			log.Info("etcd watch got deleted endpoint")
-			ctx = logger.ToCtx(ctx, log)
-
-			err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
-			if err != nil {
-				log.WithError(err).Error("fail to remove endpoint ARP/FDB neigh rules")
-			}
+		err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
+		if err != nil {
+			log.WithError(err).Error("fail to remove endpoint ARP/FDB neigh rules")
 		}
 	}
 	return nil

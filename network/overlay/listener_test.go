@@ -10,9 +10,9 @@ import (
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
-	"github.com/Scalingo/sand/store"
+	"github.com/Scalingo/sand/network/overlay/overlaymock"
+	"github.com/Scalingo/sand/store/storemock"
 	"github.com/Scalingo/sand/test/mocks/network/netmanagermock"
-	"github.com/Scalingo/sand/test/mocks/storemock"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,42 +20,38 @@ import (
 
 func TestListener_Add(t *testing.T) {
 	cases := []struct {
-		Name             string
-		Error            string
-		ExpectStore      func(m *storemock.MockStore, network types.Network, watcher store.Watcher)
-		ExpectWatcher    func(m *storemock.MockWatcher)
-		ExpectNetManager func(m *netmanagermock.MockNetManager, n types.Network)
-		ExpectDone       bool
+		Name               string
+		Error              string
+		ExpectStore        func(m *storemock.MockStore, network types.Network, registrar Registrar)
+		ExpectRegistration func(r *storemock.MockRegistration)
+		ExpectNetManager   func(m *netmanagermock.MockNetManager, n types.Network)
+		ExpectDone         bool
 	}{
 		{
-			Name: "it should start listening to message and stop when there is no more message",
-			ExpectStore: func(m *storemock.MockStore, network types.Network, watcher store.Watcher) {
-				m.EXPECT().Watch(gomock.Any(), network.EndpointsStorageKey("")).Return(watcher, nil)
-			},
-			ExpectWatcher: func(m *storemock.MockWatcher) {
-				m.EXPECT().NextResponse().Return(clientv3.WatchResponse{}, false)
-			},
+			Name:       "it should start listening to message and stop when there is no more message",
 			ExpectDone: true,
+			ExpectRegistration: func(r *storemock.MockRegistration) {
+				c := make(chan *clientv3.Event)
+				close(c)
+				r.EXPECT().EventChan().Return(c)
+			},
 		}, {
 			Name:       "it should handle PUT message with an Endpoint and add it as neighbor",
 			ExpectDone: true,
-			ExpectStore: func(m *storemock.MockStore, network types.Network, watcher store.Watcher) {
-				m.EXPECT().Watch(gomock.Any(), network.EndpointsStorageKey("")).Return(watcher, nil)
-			},
-			ExpectWatcher: func(m *storemock.MockWatcher) {
-				m.EXPECT().NextResponse().Return(clientv3.WatchResponse{
-					Events: []*clientv3.Event{{
-						Type: mvccpb.PUT,
-						Kv: &mvccpb.KeyValue{
-							Value: []byte(`{
-								"id": "1",
-								"target_veth_ip": "10.0.0.1",
-								"hostname": "src-node.example.com"
-							}`),
-						},
-					}},
-				}, true)
-				m.EXPECT().NextResponse().Return(clientv3.WatchResponse{}, false)
+			ExpectRegistration: func(r *storemock.MockRegistration) {
+				c := make(chan *clientv3.Event, 1)
+				c <- &clientv3.Event{
+					Type: mvccpb.PUT,
+					Kv: &mvccpb.KeyValue{
+						Value: []byte(`{
+							"id": "1",
+							"target_veth_ip": "10.0.0.1",
+							"hostname": "src-node.example.com"
+						}`),
+					},
+				}
+				close(c)
+				r.EXPECT().EventChan().Return(c)
 			},
 			ExpectNetManager: func(m *netmanagermock.MockNetManager, n types.Network) {
 				m.EXPECT().AddEndpointNeigh(gomock.Any(), n, types.Endpoint{
@@ -70,20 +66,23 @@ func TestListener_Add(t *testing.T) {
 			defer ctrl.Finish()
 			nm := netmanagermock.NewMockNetManager(ctrl)
 			store := storemock.NewMockStore(ctrl)
-			watcher := storemock.NewMockWatcher(ctrl)
+			registrar := overlaymock.NewMockRegistrar(ctrl)
+			registration := storemock.NewMockRegistration(ctrl)
 
 			config, err := config.Build()
 			require.NoError(t, err)
 
-			listener := NewNetworkEndpointListener(context.Background(), config, store)
 			network := types.Network{ID: "1"}
+			registrar.EXPECT().Register("/network-endpoints/1").Return(registration, nil)
+
+			listener := NewNetworkEndpointListener(context.Background(), config, registrar, store)
 
 			if c.ExpectStore != nil {
-				c.ExpectStore(store, network, watcher)
+				c.ExpectStore(store, network, registrar)
 			}
 
-			if c.ExpectWatcher != nil {
-				c.ExpectWatcher(watcher)
+			if c.ExpectRegistration != nil {
+				c.ExpectRegistration(registration)
 			}
 
 			if c.ExpectNetManager != nil {

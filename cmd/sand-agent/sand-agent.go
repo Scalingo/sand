@@ -61,8 +61,12 @@ func main() {
 		os.Exit(-1)
 	}
 
-	store := store.New(c)
-	peerListener := overlay.NewNetworkEndpointListener(ctx, c, store)
+	dataStore := store.New(c)
+	endpointsWatcher, err := store.NewWatcher(ctx, c, store.WithPrefix(types.NetworkEndpointStoragePrefix))
+	if err != nil {
+		log.WithError(err).Error("fail to initialize store watcher")
+	}
+	peerListener := overlay.NewNetworkEndpointListener(ctx, c, endpointsWatcher, dataStore)
 
 	managers := netmanager.NewManagerMap()
 	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
@@ -72,11 +76,12 @@ func main() {
 		log.WithError(err).Error("fail to initialize etcd client")
 		os.Exit(-1)
 	}
-	locker := lock.NewEtcdLocker(etcdClient)
-	ipAllocator := ipallocator.New(c, store, locker)
 
-	endpointRepository := endpoint.NewRepository(c, store, managers)
-	networkRepository := network.NewRepository(c, store, managers)
+	locker := lock.NewEtcdLocker(etcdClient)
+	ipAllocator := ipallocator.New(c, dataStore, locker)
+
+	endpointRepository := endpoint.NewRepository(c, dataStore, managers)
+	networkRepository := network.NewRepository(c, dataStore, managers)
 
 	err = ensureNetworks(ctx, c, networkRepository, endpointRepository)
 	if err != nil {
@@ -107,7 +112,7 @@ func main() {
 
 	if c.EnableDockerPlugin {
 		log.WithField("port", c.DockerPluginHttpPort).Info("Enabling docker plugin")
-		dockerRepository := docker.NewRepository(c, store)
+		dockerRepository := docker.NewRepository(c, dataStore)
 		plugin := docker.NewDockerPlugin(
 			c, networkRepository, endpointRepository, dockerRepository, ipAllocator,
 		)
@@ -159,9 +164,11 @@ func main() {
 		log.WithError(err).Error("fail to listen and serve")
 		os.Exit(-1)
 	}
-	log.Info("http API stopped")
+	log.Info("HTTP API stopped")
 	wg.Wait()
-	log.Info("all APIs stopped, shutting down..")
+	log.Info("Stop watching etcd changes")
+	endpointsWatcher.Close()
+	log.Info("All APIs stopped, shutting down..")
 }
 
 func tlsListener(ctx context.Context, c *config.Config, serviceEndpoint string, handler http.Handler) error {
