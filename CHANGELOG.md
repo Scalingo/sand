@@ -1,5 +1,10 @@
 ## To be released
 
+## v0.8.0 - 10 Mar 2020
+
+* Use only one ETCD connection watching key changes in order to avoid starting
+  thousands of listeners in SAND infrastructure deployments
+
 ## v0.7.0 - 10 Jan 2020
 
 * New algorithm for VxLAN ID generation
