@@ -10,6 +10,7 @@ import (
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/idmanager"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
@@ -20,6 +21,7 @@ var (
 )
 
 func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
+	var err error
 	log := logger.Get(ctx).WithField("network_name", params.Name)
 
 	if params.Type == "" {
@@ -52,9 +54,10 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 
 	vniGen := overlay.NewVNIGenerator(ctx, r.config, r.store)
 
+	var idlock idmanager.Lock
 	switch network.Type {
 	case types.OverlayNetworkType:
-		err := vniGen.Lock(ctx)
+		idlock, err = vniGen.Lock(ctx)
 		if err != nil {
 			return network, errors.Wrapf(err, "fail to lock VNI generator for %s", network)
 		}
@@ -69,13 +72,13 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 		return network, errors.New("invalid network type for init")
 	}
 
-	err := r.store.Set(ctx, network.StorageKey(), &network)
+	err = r.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
 		return network, errors.Wrapf(err, "fail to get network %s from store", network)
 	}
 
-	if vniGen != nil {
-		err := vniGen.Unlock(ctx)
+	if idlock != nil {
+		err := idlock.Unlock(ctx)
 		if err != nil {
 			log.WithError(err).Errorf("fail to unlock VNI generator for %s", network)
 		}
