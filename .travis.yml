@@ -3,8 +3,15 @@ language: go
 go:
   - "1.x"
 
+before_script:
+  - curl -L "https://github.com/coreos/etcd/releases/download/v3.4.9/etcd-v3.4.9-linux-amd64.tar.gz" | tar -xzvf - -C /tmp --strip-components=1
+  - /tmp/etcd &
+
 before_install:
   - go get github.com/mitchellh/gox
+
+env:
+  - GO_ENV=testing ETCD_HOSTS="http://127.0.0.1:2379"
 
 script:
   - go test ./...
