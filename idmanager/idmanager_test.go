@@ -40,6 +40,7 @@ func TestManager_Generate(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
 	for title, e := range examples {
 		t.Run(title, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
@@ -68,7 +69,11 @@ func TestManager_Generate(t *testing.T) {
 				stub.Return(errors.New(e.err))
 			}
 
-			id, err := manager.Generate(context.Background())
+			lock, err := manager.Lock(ctx)
+			require.NoError(t, err)
+
+			id, err := manager.Generate(ctx)
+			require.NoError(t, lock.Unlock(ctx))
 			if e.err != "" {
 				require.Error(t, err)
 				return
@@ -82,7 +87,7 @@ func TestManager_Generate(t *testing.T) {
 					reflect.ValueOf(ptritems).Elem().Set(reflect.ValueOf(items))
 				},
 			)
-			id, err = manager.Generate(context.Background())
+			id, err = manager.Generate(ctx)
 			require.NoError(t, err)
 			assert.Equal(t, e.expected[1], id)
 		})
