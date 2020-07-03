@@ -54,7 +54,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 
 	vniGen := overlay.NewVNIGenerator(ctx, r.config, r.store)
 
-	var idlock idmanager.Lock
+	var idlock idmanager.Unlocker
 	switch network.Type {
 	case types.OverlayNetworkType:
 		idlock, err = vniGen.Lock(ctx)

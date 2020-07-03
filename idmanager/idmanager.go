@@ -13,11 +13,11 @@ import (
 )
 
 type Manager interface {
-	Lock(context.Context) (Lock, error)
+	Lock(context.Context) (Unlocker, error)
 	Generate(context.Context) (int, error)
 }
 
-type Lock interface {
+type Unlocker interface {
 	Unlock(ctx context.Context) error
 }
 
@@ -38,16 +38,14 @@ func New(c *config.Config, s store.Store, name string, field string, prefix stri
 	return &manager{config: c, store: s, field: field, name: name, prefix: prefix}
 }
 
-func (m *manager) Lock(ctx context.Context) (Lock, error) {
-	var l Lock
-
+func (m *manager) Lock(ctx context.Context) (Unlocker, error) {
 	client, err := etcd.NewClient()
 	if err != nil {
-		return l, errors.Wrapf(err, "fail to get etcd client")
+		return nil, errors.Wrapf(err, "fail to get etcd client")
 	}
 	resourceLock, err := etcdlock.NewEtcdLocker(client).WaitAcquire(fmt.Sprintf("/%s-idgen", m.name), 300)
 	if err != nil {
-		return l, errors.Wrapf(err, "fail to get etcd lock")
+		return nil, errors.Wrapf(err, "fail to get etcd lock")
 	}
 	return lock{
 		resourceLock:   resourceLock,
@@ -59,13 +57,13 @@ func (l lock) Unlock(ctx context.Context) error {
 	if l.resourceLock == nil {
 		return errors.New("not locked")
 	}
-	err := l.resourceLock.Release()
-	if err != nil {
-		return errors.Wrapf(err, "fail to release etcd lock")
+	lockErr := l.resourceLock.Release()
+	backendErr := l.lockingBackend.Close()
+	if lockErr != nil {
+		return errors.Wrapf(lockErr, "fail to release etcd lock, backendErr: %v", backendErr)
 	}
-	err = l.lockingBackend.Close()
-	if err != nil {
-		return errors.Wrapf(err, "fail to close etcd client")
+	if backendErr != nil {
+		return errors.Wrapf(backendErr, "fail to close etcd client")
 	}
 	return nil
 }
