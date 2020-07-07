@@ -1,5 +1,9 @@
 ## To be released
 
+## v0.8.1 - 7 Jul 2020
+
+* Fix file descriptor leakage: correctly close etcd client when allocating a unique VxLAN VNI ID.
+
 ## v0.8.0 - 10 Mar 2020
 
 * Use only one ETCD connection watching key changes in order to avoid starting
