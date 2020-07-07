@@ -3,8 +3,9 @@ package idmanager
 import (
 	"context"
 	"fmt"
+	"io"
 
-	"github.com/Scalingo/go-etcd-lock/lock"
+	etcdlock "github.com/Scalingo/go-etcd-lock/lock"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/store"
@@ -12,42 +13,59 @@ import (
 )
 
 type Manager interface {
-	Lock(context.Context) error
+	Lock(context.Context) (Unlocker, error)
 	Generate(context.Context) (int, error)
-	Unlock(context.Context) error
+}
+
+type Unlocker interface {
+	Unlock(ctx context.Context) error
 }
 
 type manager struct {
 	store  store.Store
 	config *config.Config
-	lock   lock.Lock
 	field  string
 	name   string
 	prefix string
+}
+
+type lock struct {
+	resourceLock   etcdlock.Lock
+	lockingBackend io.Closer
 }
 
 func New(c *config.Config, s store.Store, name string, field string, prefix string) Manager {
 	return &manager{config: c, store: s, field: field, name: name, prefix: prefix}
 }
 
-func (m *manager) Lock(ctx context.Context) error {
+func (m *manager) Lock(ctx context.Context) (Unlocker, error) {
 	client, err := etcd.NewClient()
 	if err != nil {
-		return errors.Wrapf(err, "fail to get etcd client")
+		return nil, errors.Wrapf(err, "fail to get etcd client")
 	}
-	l, err := lock.NewEtcdLocker(client).WaitAcquire(fmt.Sprintf("/%s-idgen", m.name), 300)
+	resourceLock, err := etcdlock.NewEtcdLocker(client).WaitAcquire(fmt.Sprintf("/%s-idgen", m.name), 300)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get etcd lock")
+		return nil, errors.Wrapf(err, "fail to get etcd lock")
 	}
-	m.lock = l
-	return nil
+	return lock{
+		resourceLock:   resourceLock,
+		lockingBackend: client,
+	}, nil
 }
 
-func (m *manager) Unlock(ctx context.Context) error {
-	if m.lock == nil {
+func (l lock) Unlock(ctx context.Context) error {
+	if l.resourceLock == nil {
 		return errors.New("not locked")
 	}
-	return m.lock.Release()
+	lockErr := l.resourceLock.Release()
+	backendErr := l.lockingBackend.Close()
+	if lockErr != nil {
+		return errors.Wrapf(lockErr, "fail to release etcd lock, backendErr: %v", backendErr)
+	}
+	if backendErr != nil {
+		return errors.Wrapf(backendErr, "fail to close etcd client")
+	}
+	return nil
 }
 
 func (m *manager) Generate(ctx context.Context) (int, error) {

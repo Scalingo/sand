@@ -24,6 +24,7 @@ services:
     volumes:
      - ./:/go/src/github.com/Scalingo/sand
     environment:
+      ETCD_HOSTS: "http://172.17.0.1:22379"
       GO_ENV: testing
     stop_signal: SIGKILL
     command: "tail -F /dev/null"
