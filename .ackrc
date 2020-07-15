@@ -1,1 +1,2 @@
 --ignore-dir=vendor
+--ignore-dir=docker/etcd
