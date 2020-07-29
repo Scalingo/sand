@@ -10,6 +10,7 @@ import (
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netnsbuilder"
 	"github.com/docker/libnetwork/ns"
+	"github.com/google/nftables"
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netlink/nl"
@@ -145,6 +146,27 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 			return errors.Wrapf(err, "fail to set %s in bridge %s", VxLANInNSName, BridgeName)
 		}
 	}
+
+	nft := nftables.Conn{}
+	table := &nftables.Table{
+		Name:   "sand",
+		Family: nftables.TableFamilyINet,
+	}
+	accept := nftables.ChainPolicyAccept
+	chain := &nftables.Chain{
+		Name:   "basic",
+		Table:  table,
+		Type:   nftables.ChainTypeFilter,
+		Policy: &accept,
+	}
+	rule := &nftables.Rule{
+		Table: table,
+		Chain: chain,
+	}
+
+	nft.AddTable(table)
+	nft.AddChain(chain)
+	nft.AddRule(rule)
 
 	for _, ifName := range []string{"lo", BridgeName, VxLANInNSName} {
 		link, err = nlh.LinkByName(ifName)
