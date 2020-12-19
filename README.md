@@ -117,7 +117,7 @@ openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out c
 
 Documentation: [godoc](https://godoc.org/github.com/Scalingo/sand/client/sand)
 
-```
+```go
 import "github.com/Scalingo/sand/client/sand
 
 func main() {
