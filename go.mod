@@ -6,7 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Microsoft/go-winio v0.4.7 // indirect
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.3
-	github.com/Scalingo/go-handlers v1.2.3
+	github.com/Scalingo/go-handlers v1.3.1
 	github.com/Scalingo/go-plugins-helpers v1.2.2
 	github.com/Scalingo/go-utils v5.6.1+incompatible
 	github.com/Scalingo/logrus-rollbar v1.3.2 // indirect
@@ -25,17 +25,16 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
-	github.com/gorilla/mux v1.6.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/magefile/mage v1.11.0
 	github.com/pborman/uuid v0.0.0-20170612153648-e790cca94e6c
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rollbar/rollbar-go v1.2.0 // indirect
 	github.com/satori/go.uuid v1.1.0 // indirect
-	github.com/sirupsen/logrus v1.6.0
-	github.com/stretchr/testify v1.4.0
+	github.com/sirupsen/logrus v1.7.0
+	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli v1.20.0
 	github.com/vishvananda/netlink v0.0.0-20171128170821-f67b75edbf5e
 	github.com/vishvananda/netns v0.0.0-20171111001504-be1fbeda1936
@@ -48,7 +47,6 @@ require (
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de // indirect
 	golang.org/x/net v0.0.0-20200519113804-d87ec0cfa476 // indirect
-	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/tools v0.0.0-20200522201501-cb1345f3a375 // indirect
 	google.golang.org/genproto v0.0.0-20200515170657-fc4c6c6a6587 // indirect
