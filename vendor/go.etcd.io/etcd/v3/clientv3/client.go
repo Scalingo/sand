@@ -112,7 +112,7 @@ func New(cfg Config) (*Client, error) {
 // service interface implementations and do not need connection management.
 func NewCtxClient(ctx context.Context) *Client {
 	cctx, cancel := context.WithCancel(ctx)
-	return &Client{ctx: cctx, cancel: cancel}
+	return &Client{ctx: cctx, cancel: cancel, lg: zap.NewNop()}
 }
 
 // NewFromURL creates a new etcdv3 client from a URL.
@@ -123,6 +123,12 @@ func NewFromURL(url string) (*Client, error) {
 // NewFromURLs creates a new etcdv3 client from URLs.
 func NewFromURLs(urls []string) (*Client, error) {
 	return New(Config{Endpoints: urls})
+}
+
+// WithLogger sets a logger
+func (c *Client) WithLogger(lg *zap.Logger) *Client {
+	c.lg = lg
+	return c
 }
 
 // Close shuts down the client's etcd connections.
@@ -331,7 +337,13 @@ func (c *Client) dial(target string, creds grpccredentials.TransportCredentials,
 
 		err = c.getToken(ctx)
 		if err != nil {
+			// TODO: Consider retrying transient errors like:
+			// "error":"rpc error: code = Unavailable desc = etcdserver: leader changed"
+
+			// Ignore rpctypes.ErrAuthNotEnabled error.
 			if toErr(ctx, err) != rpctypes.ErrAuthNotEnabled {
+				// This logic originates from 62d7bae496 and is not clear why we cannot just return err
+				// without looking into parent's context.
 				if err == ctx.Err() && ctx.Err() != c.ctx.Err() {
 					err = context.DeadlineExceeded
 				}
@@ -460,7 +472,8 @@ func newClient(cfg *Config) (*Client, error) {
 	client.resolverGroup.SetEndpoints(cfg.Endpoints)
 
 	if len(cfg.Endpoints) < 1 {
-		return nil, fmt.Errorf("at least one Endpoint must is required in client config")
+		client.cancel()
+		return nil, fmt.Errorf("at least one Endpoint is required in client config")
 	}
 	dialEndpoint := cfg.Endpoints[0]
 
