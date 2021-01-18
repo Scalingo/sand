@@ -36,31 +36,14 @@ github.com/Soulou/errgo-rollbar
 ## explicit
 # github.com/coreos/etcd v3.3.25+incompatible
 ## explicit
-github.com/coreos/etcd/auth/authpb
-github.com/coreos/etcd/clientv3/balancer
-github.com/coreos/etcd/clientv3/balancer/connectivity
-github.com/coreos/etcd/clientv3/balancer/picker
-github.com/coreos/etcd/clientv3/balancer/resolver/endpoint
-github.com/coreos/etcd/clientv3/credentials
-github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes
-github.com/coreos/etcd/etcdserver/etcdserverpb
-github.com/coreos/etcd/mvcc/mvccpb
-github.com/coreos/etcd/pkg/logutil
-github.com/coreos/etcd/pkg/systemd
-github.com/coreos/etcd/pkg/types
-github.com/coreos/etcd/raft
-github.com/coreos/etcd/raft/raftpb
-github.com/coreos/etcd/version
 # github.com/coreos/go-semver v0.3.0
 github.com/coreos/go-semver/semver
 # github.com/coreos/go-systemd v0.0.0-20180511133405-39ca1b05acc7
 github.com/coreos/go-systemd/activation
-github.com/coreos/go-systemd/journal
 # github.com/coreos/go-systemd/v22 v22.0.0
 github.com/coreos/go-systemd/v22/journal
 # github.com/coreos/pkg v0.0.0-20180108230652-97fdf19511ea
 ## explicit
-github.com/coreos/pkg/capnslog
 # github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
@@ -157,10 +140,8 @@ github.com/vishvananda/netns
 github.com/willf/bitset
 # go.etcd.io/etcd v3.3.25+incompatible
 ## explicit
-go.etcd.io/etcd/clientv3
-go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes
-go.etcd.io/etcd/mvcc/mvccpb
 # go.etcd.io/etcd/v3 v3.3.0-rc.0.0.20200826232710-c20cc05fc548
+## explicit
 go.etcd.io/etcd/v3/auth/authpb
 go.etcd.io/etcd/v3/clientv3
 go.etcd.io/etcd/v3/clientv3/balancer
@@ -222,7 +203,6 @@ golang.org/x/text/unicode/norm
 # golang.org/x/tools v0.0.0-20200522201501-cb1345f3a375
 ## explicit
 # google.golang.org/genproto v0.0.0-20201111145450-ac7456db90a6
-google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.29.1
 ## explicit
@@ -294,7 +274,6 @@ google.golang.org/protobuf/reflect/protoreflect
 google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
-google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb

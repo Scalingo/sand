@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/v3/clientv3"
 )
 
 type Watcher struct {
@@ -21,7 +21,7 @@ func NewWatcher(prefix string) (Watcher, error) {
 	wc := clientv3.NewWatcher(client)
 
 	// Use context.Background() to avoid the resulting chan to be closed at the end of a HTTP request
-	// https://godoc.org/go.etcd.io/etcd/clientv3#Watcher
+	// https://godoc.org/go.etcd.io/etcd/v3/clientv3#Watcher
 	wchan := wc.Watch(context.Background(), prefix, clientv3.WithPrefix())
 
 	return Watcher{
