@@ -7,7 +7,7 @@ require (
 	github.com/Microsoft/go-winio v0.4.7 // indirect
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.3
 	github.com/Scalingo/go-handlers v1.3.1
-	github.com/Scalingo/go-plugins-helpers v1.2.2
+	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.0.1
 	github.com/Scalingo/go-utils/graceful v1.0.0
 	github.com/Scalingo/go-utils/logger v1.0.0

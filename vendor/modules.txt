@@ -9,7 +9,7 @@ github.com/Scalingo/go-etcd-lock/v5/lock
 # github.com/Scalingo/go-handlers v1.3.1
 ## explicit
 github.com/Scalingo/go-handlers
-# github.com/Scalingo/go-plugins-helpers v1.2.2
+# github.com/Scalingo/go-plugins-helpers v1.3.0
 ## explicit
 github.com/Scalingo/go-plugins-helpers/ipam
 github.com/Scalingo/go-plugins-helpers/network

@@ -17,6 +17,8 @@ github.com/Scalingo/go-handlers v1.3.1 h1:gAtS/07beP2qNn9z2GQ25GekB9lIIkOlLGprSb
 github.com/Scalingo/go-handlers v1.3.1/go.mod h1:BiMitUP7QeZKjXkJ7wSiKcrQtRf8rAPL8ArmkzfDog4=
 github.com/Scalingo/go-plugins-helpers v1.2.2 h1:vpPqAY23wXjQrEuOxqj3H0405g6uDYBLZTz9zvAT3sM=
 github.com/Scalingo/go-plugins-helpers v1.2.2/go.mod h1:GrFDpSJ1nIh7ht2pU/HGpRtU2pS3UW2Uw0Wix2NRO1I=
+github.com/Scalingo/go-plugins-helpers v1.3.0 h1:jaVIs+d8UT+J/7tZMaSCAZupNhh0VptRB/LY80oxvVw=
+github.com/Scalingo/go-plugins-helpers v1.3.0/go.mod h1:Z8rY7D3xK6RzNNjnlTsghe52gaVYTPda4djPbzED0ts=
 github.com/Scalingo/go-utils v1.1.2 h1:Nc3gtIB4Gl5wiMs54pxOQ0TNUl1AUNTCfFY3P/M5HdY=
 github.com/Scalingo/go-utils v5.6.1+incompatible h1:EKEAphFrY80H7Sgez+4QUny80dk1YJ4kj47sinUL30I=
 github.com/Scalingo/go-utils v5.6.1+incompatible/go.mod h1:YcispJL9BCnNJwWxspalrRQ6zHAYPyNSnDLlfdfhxt8=
