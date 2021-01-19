@@ -1,5 +1,7 @@
 ## To be released
 
+* Migration to Go Module
+
 ## v0.8.1 - 7 Jul 2020
 
 * Fix file descriptor leakage: correctly close etcd client when allocating a unique VxLAN VNI ID.
