@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/Scalingo/go-etcd-lock/lock"
+	"github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/go-handlers"
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"

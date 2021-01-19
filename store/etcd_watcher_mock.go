@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	clientv3 "go.etcd.io/etcd/clientv3"
+	clientv3 "go.etcd.io/etcd/v3/clientv3"
 )
 
 // MockEtcdWatcher is a mock of EtcdWatcher interface

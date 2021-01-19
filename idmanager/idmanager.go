@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	etcdlock "github.com/Scalingo/go-etcd-lock/lock"
+	etcdlock "github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/store"

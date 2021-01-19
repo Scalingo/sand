@@ -7,8 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"gopkg.in/errgo.v1"
 )
 
 func AuthMiddleware(check func(user, password string) bool) MiddlewareFunc {
@@ -34,7 +32,7 @@ func AuthMiddleware(check func(user, password string) bool) MiddlewareFunc {
 
 			if !check(httpUser, httpPassword) {
 				res.WriteHeader(401)
-				return errgo.New("invalid auth")
+				return errors.New("invalid auth")
 			}
 			return handler(res, req, vars)
 		}

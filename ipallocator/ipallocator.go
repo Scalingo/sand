@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Scalingo/go-etcd-lock/lock"
+	"github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/netutils"
