@@ -1,5 +1,6 @@
 ## To be released
 
+* [Dependabot] Update various dependencies
 * Migration to Go Module
 
 ## v0.8.1 - 7 Jul 2020
