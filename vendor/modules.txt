@@ -79,7 +79,7 @@ github.com/golang/protobuf/ptypes/timestamp
 github.com/google/uuid
 # github.com/gorilla/mux v1.7.4
 github.com/gorilla/mux
-# github.com/kelseyhightower/envconfig v1.3.0
+# github.com/kelseyhightower/envconfig v1.4.0
 ## explicit
 github.com/kelseyhightower/envconfig
 # github.com/magefile/mage v1.11.0
