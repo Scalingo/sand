@@ -21,7 +21,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1
-	github.com/urfave/cli v1.22.1
+	github.com/urfave/cli v1.22.5
 	github.com/vishvananda/netlink v0.0.0-20171128170821-f67b75edbf5e
 	github.com/vishvananda/netns v0.0.0-20171111001504-be1fbeda1936
 	github.com/willf/bitset v1.1.11
