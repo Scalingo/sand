@@ -26,6 +26,7 @@ require (
 	github.com/vishvananda/netns v0.0.0-20171111001504-be1fbeda1936
 	github.com/willf/bitset v1.1.11
 	go.etcd.io/etcd/v3 v3.3.0-rc.0.0.20200826232710-c20cc05fc548
-	google.golang.org/grpc v1.29.1
+	google.golang.org/grpc v1.35.0
+	google.golang.org/grpc/examples v0.0.0-20210122012134-2c42474aca0c // indirect
 	gopkg.in/errgo.v1 v1.0.1
 )
