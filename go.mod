@@ -14,7 +14,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-plugins-helpers v0.0.0-20200102110956-c9a8a2d92ccc // indirect
 	github.com/docker/libnetwork v0.8.0-dev.2.0.20171213192018-26531e56a76d
-	github.com/golang/mock v1.4.3
+	github.com/golang/mock v1.4.4
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/magefile/mage v1.11.0
 	github.com/pborman/uuid v1.2.0
