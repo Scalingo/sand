@@ -61,6 +61,7 @@ github.com/docker/libnetwork/types
 # github.com/facebookgo/grace v0.0.0-20180706040059-75cf19382434
 github.com/facebookgo/grace/gracenet
 # github.com/gofrs/uuid v3.2.0+incompatible
+## explicit
 github.com/gofrs/uuid
 # github.com/gogo/protobuf v1.3.1
 github.com/gogo/protobuf/gogoproto
@@ -86,9 +87,6 @@ github.com/kelseyhightower/envconfig
 ## explicit
 github.com/magefile/mage/mg
 github.com/magefile/mage/sh
-# github.com/pborman/uuid v1.2.0
-## explicit
-github.com/pborman/uuid
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
