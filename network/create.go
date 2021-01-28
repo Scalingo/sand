@@ -12,7 +12,7 @@ import (
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/idmanager"
 	"github.com/Scalingo/sand/network/overlay"
-	"github.com/pborman/uuid"
+	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -28,7 +28,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 		params.Type = types.OverlayNetworkType
 	}
 
-	uuid := uuid.NewRandom().String()
+	uuid := uuid.Must(uuid.NewV4()).String()
 	if params.ID != "" {
 		if !uuidRegexp.MatchString(params.ID) {
 			return types.Network{}, errors.Errorf("invalid UUID %v", params.ID)
