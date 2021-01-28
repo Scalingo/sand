@@ -110,7 +110,7 @@ github.com/stretchr/testify/require
 github.com/urfave/cli
 # github.com/urfave/negroni v1.0.0
 github.com/urfave/negroni
-# github.com/vishvananda/netlink v0.0.0-20171128170821-f67b75edbf5e
+# github.com/vishvananda/netlink v1.0.0
 ## explicit
 github.com/vishvananda/netlink
 github.com/vishvananda/netlink/nl
