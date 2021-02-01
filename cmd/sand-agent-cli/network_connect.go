@@ -6,10 +6,11 @@ import (
 	"net"
 	"sync"
 
-	"github.com/Scalingo/go-utils/logger"
-	"github.com/Scalingo/sand/api/params"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
+
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/sand/api/params"
 )
 
 func (a *App) NetworkConnect(c *cli.Context) error {
@@ -84,5 +85,6 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 			wg.Wait()
 		}(localConn)
 	}
-	return nil
+
+	// unreachable
 }

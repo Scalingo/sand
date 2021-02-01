@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/pkg/errors"
+
 	etcdlock "github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
 )
 
 type Manager interface {
@@ -91,5 +92,4 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 	}
 
 	// unreachable
-	return -1, errors.New("fail to select new ID")
 }
