@@ -5,7 +5,7 @@ github.com/Microsoft/go-winio/pkg/guid
 # github.com/Scalingo/go-etcd-lock/v5 v5.0.4
 ## explicit
 github.com/Scalingo/go-etcd-lock/v5/lock
-# github.com/Scalingo/go-handlers v1.3.1
+# github.com/Scalingo/go-handlers v1.4.0
 ## explicit
 github.com/Scalingo/go-handlers
 # github.com/Scalingo/go-plugins-helpers v1.3.0
@@ -78,7 +78,7 @@ github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
 # github.com/google/uuid v1.1.2
 github.com/google/uuid
-# github.com/gorilla/mux v1.7.4
+# github.com/gorilla/mux v1.8.0
 github.com/gorilla/mux
 # github.com/kelseyhightower/envconfig v1.4.0
 ## explicit
