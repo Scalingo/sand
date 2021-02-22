@@ -98,7 +98,7 @@ github.com/rollbar/rollbar-go
 github.com/russross/blackfriday/v2
 # github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
-# github.com/sirupsen/logrus v1.7.0
+# github.com/sirupsen/logrus v1.8.0
 ## explicit
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.7.0
