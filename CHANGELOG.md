@@ -5,7 +5,7 @@
 * chore: Migration to Go Module
 * Bump github.com/Scalingo/go-handlers from 1.3.1 to 1.4.0
 * Bump github.com/golang/mock from 1.4.4 to 1.5.0
-* Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.0
+* Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
 
 ## v0.8.1 - 7 Jul 2020
 
