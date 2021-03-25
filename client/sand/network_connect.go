@@ -8,11 +8,38 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"runtime"
 	"strings"
+	"time"
 
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/pkg/errors"
 )
+
+type sandConn struct {
+	closed chan struct{}
+	net.Conn
+}
+
+func (c sandConn) Close() error {
+	close(c.closed)
+	return c.Conn.Close()
+}
+
+func (c sandConn) dumpStackIfCloseForgotten(ctx context.Context, buffer []byte) {
+	log := logger.Get(ctx)
+	timer := time.NewTimer(24 * time.Hour)
+	defer timer.Stop()
+
+	log.Debug("watching connection close")
+	select {
+	case <-timer.C:
+		log.Error("unclosed SAND connnection")
+		fmt.Println(string(buffer))
+	case <-c.closed:
+	}
+}
 
 func (c *client) NetworkConnect(ctx context.Context, id string, opts params.NetworkConnect) (net.Conn, error) {
 	req, err := http.NewRequest("CONNECT", fmt.Sprintf("%s/networks/%s?ip=%s&port=%s", c.url, id, opts.IP, opts.Port), nil)
@@ -52,7 +79,13 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 	}
 
 	socket, _ := conn.Hijack()
-	return socket, nil
+
+	sandConn := sandConn{Conn: socket, closed: make(chan struct{})}
+
+	buffer := make([]byte, 128*1024)
+	n := runtime.Stack(buffer, false)
+	go sandConn.dumpStackIfCloseForgotten(ctx, buffer[:n])
+	return sandConn, nil
 }
 
 // We can't copy a tls.Config with a simple assignment (i.e. `config := *tls.Config) as go vet
