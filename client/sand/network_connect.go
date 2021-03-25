@@ -43,9 +43,11 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 
 	res, err := conn.Do(req)
 	if err != httputil.ErrPersistEOF && err != nil {
+		conn.Close()
 		return nil, errors.Wrapf(err, "fail to execute CONNECT /networks/%s", id)
 	}
 	if res.StatusCode != 200 {
+		conn.Close()
 		return nil, errors.Errorf("invalid return code %v", res.StatusCode)
 	}
 
