@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/v3/clientv3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/config"

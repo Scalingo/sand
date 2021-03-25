@@ -8,7 +8,7 @@ import (
 
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/pborman/uuid"
+	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -24,7 +24,7 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 	}
 
 	endpoint = types.Endpoint{
-		ID:            uuid.NewRandom().String(),
+		ID:            uuid.Must(uuid.NewV4()).String(),
 		Hostname:      r.config.PublicHostname,
 		HostIP:        r.config.PublicIP,
 		NetworkID:     n.ID,

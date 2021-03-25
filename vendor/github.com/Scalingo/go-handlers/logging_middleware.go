@@ -2,16 +2,15 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"regexp"
 	"sync"
 	"time"
 
-	"gopkg.in/errgo.v1"
-
-	"github.com/codegangsta/negroni"
 	"github.com/sirupsen/logrus"
+	"github.com/urfave/negroni"
 )
 
 var (
@@ -47,7 +46,7 @@ func NewLoggingMiddlewareWithFilters(logger logrus.FieldLogger, filters map[stri
 	for pattern, level := range filters {
 		re, err := regexp.Compile(pattern)
 		if err != nil {
-			return nil, errgo.Notef(err, "invalid regexp '%v'", pattern)
+			return nil, fmt.Errorf("invalid regexp '%v': %v", pattern, err)
 		}
 		refilters = append(refilters, patternInfo{re: re, level: level})
 	}
@@ -65,14 +64,23 @@ func (l *LoggingMiddleware) Apply(next HandlerFunc) HandlerFunc {
 			logger = logger.WithField("request_id", id)
 		}
 
+		from := r.RemoteAddr
+		if r.Header.Get("X-Forwarded-For") != "" {
+			from = r.Header.Get("X-Forwarded-For")
+		}
+		proto := r.Proto
+		if r.Header.Get("X-Forwarded-Proto") != "" {
+			proto = r.Header.Get("X-Forwarded-Proto")
+		}
+
 		r = r.WithContext(context.WithValue(r.Context(), "logger", logger))
 
 		fields := logrus.Fields{
 			"method":     r.Method,
 			"path":       r.URL.String(),
 			"host":       r.Host,
-			"from":       r.RemoteAddr,
-			"protocol":   r.Proto,
+			"from":       from,
+			"protocol":   proto,
 			"referer":    r.Referer(),
 			"user_agent": r.UserAgent(),
 		}

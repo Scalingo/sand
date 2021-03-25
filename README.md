@@ -95,7 +95,7 @@ openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out c
 
 > `GET` requests accept parameters through URL query parameters
 > `POST` requests accept a JSON body
-> `POST` and `GET` requests retun a JSON body
+> `POST` and `GET` requests return a JSON body
 
 * `GET /networks`
 * `POST /networks`
@@ -117,7 +117,7 @@ openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out c
 
 Documentation: [godoc](https://godoc.org/github.com/Scalingo/sand/client/sand)
 
-```
+```go
 import "github.com/Scalingo/sand/client/sand
 
 func main() {
