@@ -1,5 +1,6 @@
 ## To be released
 
+* fix: 2 descriptor leaks when the request fails
 * chore: Replace github.com/pborman/uuid with github.com/gofrs/uuid
 * chore(Dependabot): Update various dependencies
 * chore: Migration to Go Module
