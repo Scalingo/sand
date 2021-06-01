@@ -28,6 +28,7 @@ require (
 	go.etcd.io/etcd/v3 v3.3.0-rc.0.0.20200826232710-c20cc05fc548
 	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
-	google.golang.org/grpc v1.29.1
+	google.golang.org/grpc v1.38.0
+	google.golang.org/grpc/examples v0.0.0-20210526223527-2de42fcbbce3 // indirect
 	gopkg.in/errgo.v1 v1.0.1
 )
