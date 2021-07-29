@@ -10,19 +10,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 func TestWatcher_Register(t *testing.T) {
 	cases := map[string]struct {
 		registrationKey string
-		expect          func(t *testing.T, w Watcher, in chan client.WatchResponse, r Registration)
+		expect          func(t *testing.T, w Watcher, in chan clientv3.WatchResponse, r Registration)
 	}{
 		"it should get an event impacting a subkey": {
 			registrationKey: "/prefix/subkey1",
-			expect: func(t *testing.T, w Watcher, in chan client.WatchResponse, r Registration) {
-				in <- client.WatchResponse{
-					Events: []*client.Event{{
+			expect: func(t *testing.T, w Watcher, in chan clientv3.WatchResponse, r Registration) {
+				in <- clientv3.WatchResponse{
+					Events: []*clientv3.Event{{
 						Kv:   &mvccpb.KeyValue{Key: []byte("/sc-net/prefix/subkey1/key1")},
 						Type: mvccpb.PUT,
 					}},
@@ -34,11 +34,11 @@ func TestWatcher_Register(t *testing.T) {
 		},
 		"it should not get an event after unregistration": {
 			registrationKey: "/prefix/subkey2",
-			expect: func(t *testing.T, w Watcher, in chan client.WatchResponse, r Registration) {
+			expect: func(t *testing.T, w Watcher, in chan clientv3.WatchResponse, r Registration) {
 				r.Unregister()
 				// buffered chan, non blocking operation
-				in <- client.WatchResponse{
-					Events: []*client.Event{{Kv: &mvccpb.KeyValue{}}},
+				in <- clientv3.WatchResponse{
+					Events: []*clientv3.Event{{Kv: &mvccpb.KeyValue{}}},
 				}
 				select {
 				case _, ok := <-r.EventChan():
@@ -50,8 +50,8 @@ func TestWatcher_Register(t *testing.T) {
 		},
 		"it should log an error and keep on listening until the chan is closed": {
 			registrationKey: "/prefix/subkey3",
-			expect: func(t *testing.T, w Watcher, in chan client.WatchResponse, r Registration) {
-				in <- client.WatchResponse{
+			expect: func(t *testing.T, w Watcher, in chan clientv3.WatchResponse, r Registration) {
+				in <- clientv3.WatchResponse{
 					Canceled: true,
 				}
 				select {
@@ -69,9 +69,9 @@ func TestWatcher_Register(t *testing.T) {
 			defer ctrl.Finish()
 
 			etcdWatcher := NewMockEtcdWatcher(ctrl)
-			incomingEvents := make(chan client.WatchResponse, 1)
+			incomingEvents := make(chan clientv3.WatchResponse, 1)
 
-			etcdWatcher.EXPECT().WatchChan().Return(client.WatchChan(incomingEvents))
+			etcdWatcher.EXPECT().WatchChan().Return(clientv3.WatchChan(incomingEvents))
 			etcdWatcher.EXPECT().Close().Return(nil)
 
 			config, err := config.Build()
