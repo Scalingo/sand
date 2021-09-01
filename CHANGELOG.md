@@ -1,4 +1,6 @@
-## To be released
+# Changelog
+
+## To be Released
 
 * fix: 2 descriptor leaks when the request fails
 * chore: Replace github.com/pborman/uuid with github.com/gofrs/uuid
@@ -8,6 +10,7 @@
 * Bump github.com/golang/mock from 1.4.4 to 1.5.0
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
 * Bump go.etcd.io/etcd from v3-pregomod to v3.5.0
+* Bump google.golang.org/grpc from 1.39.0 to 1.40.0
 
 ## v0.8.1 - 7 Jul 2020
 
