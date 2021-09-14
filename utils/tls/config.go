@@ -4,14 +4,14 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
+	"os"
 
 	"github.com/pkg/errors"
 )
 
 // NewConfig generate a *tls.Config, clientAuth should be false to generate client configuration
 func NewConfig(caPath, certPath, keyPath string, clientAuth bool) (*tls.Config, error) {
-	caCertBytes, err := ioutil.ReadFile(caPath)
+	caCertBytes, err := os.ReadFile(caPath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to read CA cert file %v", caPath)
 	}

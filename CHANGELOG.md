@@ -11,6 +11,7 @@
 * Bump github.com/sirupsen/logrus from 1.7.0 to 1.8.1
 * Bump go.etcd.io/etcd from v3-pregomod to v3.5.0
 * Bump google.golang.org/grpc from 1.39.0 to 1.40.0
+* Bump go version to 1.16 and remove deprecated lib `ioutil`
 
 ## v0.8.1 - 7 Jul 2020
 
