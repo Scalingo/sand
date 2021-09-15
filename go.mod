@@ -10,6 +10,7 @@ require (
 	github.com/Scalingo/go-utils/etcd v1.1.0
 	github.com/Scalingo/go-utils/graceful v1.0.0
 	github.com/Scalingo/go-utils/logger v1.0.0
+	github.com/bits-and-blooms/bitset v1.2.1
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/docker/docker v1.13.1
@@ -27,7 +28,6 @@ require (
 	github.com/urfave/cli v1.22.5
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f
-	github.com/willf/bitset v1.1.11
 	go.etcd.io/etcd/api/v3 v3.5.0
 	go.etcd.io/etcd/client/v3 v3.5.0
 	go.uber.org/atomic v1.9.0 // indirect

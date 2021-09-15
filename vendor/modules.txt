@@ -29,6 +29,9 @@ github.com/Scalingo/go-utils/logger/plugins/rollbarplugin
 github.com/Scalingo/logrus-rollbar
 # github.com/Soulou/errgo-rollbar v0.1.1
 github.com/Soulou/errgo-rollbar
+# github.com/bits-and-blooms/bitset v1.2.1
+## explicit
+github.com/bits-and-blooms/bitset
 # github.com/coreos/go-semver v0.3.0
 github.com/coreos/go-semver/semver
 # github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
@@ -119,9 +122,6 @@ github.com/vishvananda/netlink/nl
 # github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f
 ## explicit
 github.com/vishvananda/netns
-# github.com/willf/bitset v1.1.11
-## explicit
-github.com/willf/bitset
 # go.etcd.io/etcd/api/v3 v3.5.0
 ## explicit
 go.etcd.io/etcd/api/v3/authpb
