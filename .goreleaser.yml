@@ -1,0 +1,50 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+builds:
+  - id: sand-agent
+    binary: sand-agent
+    main: ./cmd/sand-agent
+    env:
+      - CGO_ENABLED=1
+    goarch:
+      - 386
+      - amd64
+    goos:
+      - linux
+  - id: sand-agent-cli
+    binary: sand-agent-cli
+    main: ./cmd/sand-agent-cli
+    env:
+      - CGO_ENABLED=0
+    goarch:
+      - 386
+      - amd64
+    goos:
+      - linux
+archives:
+  - format: tar.gz
+    builds:
+    - sand-agent
+    - sand-agent-cli
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    wrap_in_directory: true
+    files:
+    - LICENSE
+    - README.md
+    - CHANGELOG.md
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
