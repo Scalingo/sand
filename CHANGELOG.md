@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* client: don't create a new pool of connection each time a sand.Client is created
 * fix: 2 descriptor leaks when the request fails
 * chore: Replace github.com/pborman/uuid with github.com/gofrs/uuid
 * chore(Dependabot): Update various dependencies
