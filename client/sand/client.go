@@ -81,13 +81,18 @@ func NewClient(opts ...Opt) *client {
 				Timeout: c.timeout,
 			},
 		}
-	}
 
-	if c.tlsConfig != nil {
-		c.httpClient.Transport = &http.Transport{
-			TLSClientConfig: c.tlsConfig,
+		// We expect that if the user gives an httpClient, it's totally configured, TLS included
+		if c.tlsConfig != nil {
+			c.httpClient.Transport = &http.Transport{
+				TLSClientConfig: c.tlsConfig,
+				// We disable KeepAlives since the client will be only used for this
+				// sand.Client, and we don't want to leak open connections
+				DisableKeepAlives: true,
+			}
 		}
 	}
+
 	return c
 }
 
