@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.0.0 - 20 Oct 2021
+
 * client: don't create a new pool of connection each time a sand.Client is created
 * fix: 2 descriptor leaks when the request fails
 * chore: Replace github.com/pborman/uuid with github.com/gofrs/uuid
