@@ -17,6 +17,8 @@ builds:
       - amd64
     goos:
       - linux
+    ldflags:
+      - -X main.Version={{.Version}}
   - id: sand-agent-cli
     binary: sand-agent-cli
     main: ./cmd/sand-agent-cli
@@ -27,6 +29,8 @@ builds:
       - amd64
     goos:
       - linux
+    ldflags:
+      - -X main.Version={{.Version}}
 archives:
   - format: tar.gz
     builds:
