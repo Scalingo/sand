@@ -18,7 +18,7 @@ builds:
     goos:
       - linux
     ldflags:
-      - -X main.Version={{.Version}}
+      - -X config.Version={{.Version}}
   - id: sand-agent-cli
     binary: sand-agent-cli
     main: ./cmd/sand-agent-cli
