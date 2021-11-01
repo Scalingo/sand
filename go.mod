@@ -5,11 +5,11 @@ go 1.16
 require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.5
-	github.com/Scalingo/go-handlers v1.4.0
+	github.com/Scalingo/go-handlers v1.4.1
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.0
 	github.com/Scalingo/go-utils/graceful v1.0.0
-	github.com/Scalingo/go-utils/logger v1.0.0
+	github.com/Scalingo/go-utils/logger v1.1.0
 	github.com/bits-and-blooms/bitset v1.2.1
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
@@ -17,7 +17,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-plugins-helpers v0.0.0-20200102110956-c9a8a2d92ccc // indirect
 	github.com/docker/libnetwork v0.8.0-dev.2.0.20171213192018-26531e56a76d
-	github.com/gofrs/uuid v3.4.0+incompatible
+	github.com/gofrs/uuid v4.1.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kr/text v0.2.0 // indirect
