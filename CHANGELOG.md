@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* Bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.1
+
 ## v1.0.0 - 20 Oct 2021
 
 * client: don't create a new pool of connection each time a sand.Client is created
