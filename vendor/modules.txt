@@ -20,7 +20,7 @@ github.com/Scalingo/go-utils/errors
 # github.com/Scalingo/go-utils/etcd v1.1.0
 ## explicit
 github.com/Scalingo/go-utils/etcd
-# github.com/Scalingo/go-utils/graceful v1.0.0
+# github.com/Scalingo/go-utils/graceful v1.1.0
 ## explicit
 github.com/Scalingo/go-utils/graceful
 # github.com/Scalingo/go-utils/logger v1.1.0
@@ -170,8 +170,7 @@ golang.org/x/net/internal/socks
 golang.org/x/net/internal/timeseries
 golang.org/x/net/proxy
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
-## explicit
+# golang.org/x/sys v0.0.0-20211020174200-9d6173849985
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
