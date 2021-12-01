@@ -44,7 +44,7 @@ github.com/coreos/go-systemd/v22/journal
 github.com/cpuguy83/go-md2man/v2/md2man
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/docker/docker v1.13.1
+# github.com/docker/docker v20.10.11+incompatible
 ## explicit
 github.com/docker/docker/pkg/ioutils
 github.com/docker/docker/pkg/longpath
@@ -161,7 +161,6 @@ go.uber.org/zap/zapcore
 go.uber.org/zap/zapgrpc
 # golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
 ## explicit
-golang.org/x/net/context
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
@@ -270,3 +269,5 @@ gopkg.in/errgo.v1
 ## explicit
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
+# gotest.tools/v3 v3.0.3
+## explicit
