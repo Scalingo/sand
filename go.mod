@@ -8,7 +8,7 @@ require (
 	github.com/Scalingo/go-handlers v1.4.1
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.0
-	github.com/Scalingo/go-utils/graceful v1.0.0
+	github.com/Scalingo/go-utils/graceful v1.1.0
 	github.com/Scalingo/go-utils/logger v1.1.0
 	github.com/bits-and-blooms/bitset v1.2.1
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect
@@ -34,7 +34,6 @@ require (
 	go.uber.org/multierr v1.7.0 // indirect
 	go.uber.org/zap v1.18.1 // indirect
 	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	google.golang.org/genproto v0.0.0-20210729151513-df9385d47c1b // indirect
 	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124

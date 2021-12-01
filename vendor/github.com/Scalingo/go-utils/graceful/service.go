@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"sync"
@@ -88,7 +87,7 @@ func (s *service) ListenAndServe(ctx context.Context, proto string, addr string,
 func (s *service) listenAndServe(ctx context.Context, proto string, addr string, server *http.Server) error {
 	if s.pidFile != "" {
 		pid := os.Getpid()
-		err := ioutil.WriteFile(s.pidFile, []byte(fmt.Sprintf("%d\n", pid)), 0600)
+		err := os.WriteFile(s.pidFile, []byte(fmt.Sprintf("%d\n", pid)), 0600)
 		if err != nil {
 			return errgo.Notef(err, "fail to write PID file")
 		}
