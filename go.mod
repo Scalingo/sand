@@ -37,7 +37,7 @@ require (
 	google.golang.org/genproto v0.0.0-20210729151513-df9385d47c1b // indirect
 	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
-	google.golang.org/grpc v1.41.0
+	google.golang.org/grpc v1.42.0
 	gopkg.in/errgo.v1 v1.0.1
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
