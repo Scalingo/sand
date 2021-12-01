@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* chore(deps): bump github.com/gofrs/uuid from 4.1.0+incompatible to 4.2.0+incompatible
 * Bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.1
 * Bump go.etcd.io/etcd/api/v3 from 3.5.0 to 3.5.1
 
