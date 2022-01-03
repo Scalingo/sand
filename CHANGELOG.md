@@ -6,6 +6,7 @@
 * Bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.1
 * Bump go.etcd.io/etcd/api/v3 from 3.5.0 to 3.5.1
 * chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.43.0
+* chore(deps): bump github.com/magefile/mage from 1.11.0 to 1.12.1
 
 ## v1.0.0 - 20 Oct 2021
 
