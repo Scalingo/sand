@@ -28,7 +28,7 @@ require (
 	github.com/urfave/cli v1.22.5
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f
-	go.etcd.io/etcd/api/v3 v3.5.1
+	go.etcd.io/etcd/api/v3 v3.5.2
 	go.etcd.io/etcd/client/v3 v3.5.1
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
@@ -39,6 +39,5 @@ require (
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
 	google.golang.org/grpc v1.44.0
 	gopkg.in/errgo.v1 v1.0.1
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gotest.tools/v3 v3.0.3 // indirect
 )
