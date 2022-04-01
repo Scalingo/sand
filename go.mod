@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.5
-	github.com/Scalingo/go-handlers v1.4.2
+	github.com/Scalingo/go-handlers v1.4.3
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.0
 	github.com/Scalingo/go-utils/graceful v1.1.0
@@ -24,7 +24,7 @@ require (
 	github.com/magefile/mage v1.12.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/urfave/cli v1.22.5
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f
@@ -37,7 +37,7 @@ require (
 	google.golang.org/genproto v0.0.0-20210729151513-df9385d47c1b // indirect
 	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
-	google.golang.org/grpc v1.44.0
+	google.golang.org/grpc v1.45.0
 	gopkg.in/errgo.v1 v1.0.1
 	gotest.tools/v3 v3.0.3 // indirect
 )
