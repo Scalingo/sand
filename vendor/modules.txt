@@ -88,7 +88,7 @@ github.com/gorilla/mux
 github.com/kelseyhightower/envconfig
 # github.com/kr/text v0.2.0
 ## explicit
-# github.com/magefile/mage v1.12.1
+# github.com/magefile/mage v1.13.0
 ## explicit
 github.com/magefile/mage/mg
 github.com/magefile/mage/sh
