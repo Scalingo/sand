@@ -7,7 +7,7 @@ github.com/Scalingo/errgo-rollbar
 # github.com/Scalingo/go-etcd-lock/v5 v5.0.5
 ## explicit
 github.com/Scalingo/go-etcd-lock/v5/lock
-# github.com/Scalingo/go-handlers v1.4.2
+# github.com/Scalingo/go-handlers v1.4.3
 ## explicit
 github.com/Scalingo/go-handlers
 # github.com/Scalingo/go-plugins-helpers v1.3.0
@@ -29,7 +29,7 @@ github.com/Scalingo/go-utils/logger
 github.com/Scalingo/go-utils/logger/plugins/rollbarplugin
 # github.com/Scalingo/logrus-rollbar v1.4.0
 github.com/Scalingo/logrus-rollbar
-# github.com/bits-and-blooms/bitset v1.2.1
+# github.com/bits-and-blooms/bitset v1.2.2
 ## explicit
 github.com/bits-and-blooms/bitset
 # github.com/coreos/go-semver v0.3.0
@@ -106,7 +106,7 @@ github.com/shurcooL/sanitized_anchor_name
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.7.1
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
