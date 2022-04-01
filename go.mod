@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.5
-	github.com/Scalingo/go-handlers v1.4.2
+	github.com/Scalingo/go-handlers v1.4.3
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.0
 	github.com/Scalingo/go-utils/graceful v1.1.0
