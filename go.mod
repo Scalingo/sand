@@ -10,7 +10,7 @@ require (
 	github.com/Scalingo/go-utils/etcd v1.1.0
 	github.com/Scalingo/go-utils/graceful v1.1.0
 	github.com/Scalingo/go-utils/logger v1.1.0
-	github.com/bits-and-blooms/bitset v1.2.1
+	github.com/bits-and-blooms/bitset v1.2.2
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/docker/docker v20.10.14+incompatible

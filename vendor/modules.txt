@@ -29,7 +29,7 @@ github.com/Scalingo/go-utils/logger
 github.com/Scalingo/go-utils/logger/plugins/rollbarplugin
 # github.com/Scalingo/logrus-rollbar v1.4.0
 github.com/Scalingo/logrus-rollbar
-# github.com/bits-and-blooms/bitset v1.2.1
+# github.com/bits-and-blooms/bitset v1.2.2
 ## explicit
 github.com/bits-and-blooms/bitset
 # github.com/coreos/go-semver v0.3.0
