@@ -5,6 +5,7 @@
 * chore(deps): bump github.com/gofrs/uuid from 4.1.0+incompatible to 4.2.0+incompatible
 * Bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.1
 * Bump go.etcd.io/etcd/api/v3 from 3.5.0 to 3.5.4
+* Bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.4
 * chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.46.0
 * chore(deps): bump github.com/magefile/mage from 1.11.0 to 1.12.1
 * chore(deps): bump github.com/docker/docker from 20.10.11+incompatible to 20.10.12+incompatible
