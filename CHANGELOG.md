@@ -8,6 +8,7 @@
 * chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.43.0
 * chore(deps): bump github.com/magefile/mage from 1.11.0 to 1.12.1
 * chore(deps): bump github.com/docker/docker from 20.10.11+incompatible to 20.10.12+incompatible
+* chore(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.8
 
 ## v1.0.0 - 20 Oct 2021
 
