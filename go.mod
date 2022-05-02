@@ -28,7 +28,7 @@ require (
 	github.com/urfave/cli v1.22.8
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f
-	go.etcd.io/etcd/api/v3 v3.5.2
+	go.etcd.io/etcd/api/v3 v3.5.4
 	go.etcd.io/etcd/client/v3 v3.5.2
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
