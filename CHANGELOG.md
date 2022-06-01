@@ -6,10 +6,10 @@
 * Bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.1
 * Bump go.etcd.io/etcd/api/v3 from 3.5.0 to 3.5.4
 * Bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.4
-* chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.46.0
+* chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.47.0
 * chore(deps): bump github.com/magefile/mage from 1.11.0 to 1.12.1
-* chore(deps): bump github.com/docker/docker from 20.10.11+incompatible to 20.10.12+incompatible
-* chore(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.8
+* chore(deps): bump github.com/docker/docker from 20.10.11+incompatible to 20.10.16+incompatible
+* chore(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.9
 
 ## v1.0.0 - 20 Oct 2021
 
