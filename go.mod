@@ -10,7 +10,7 @@ require (
 	github.com/Scalingo/go-utils/graceful v1.1.0
 	github.com/Scalingo/go-utils/logger v1.1.0
 	github.com/bits-and-blooms/bitset v1.2.2
-	github.com/docker/docker v20.10.16+incompatible
+	github.com/docker/docker v20.10.17+incompatible
 	github.com/docker/libnetwork v0.8.0-dev.2.0.20171213192018-26531e56a76d
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang/mock v1.6.0
