@@ -7,19 +7,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Scalingo/sand/api/types"
-	"github.com/Scalingo/sand/netnsbuilder"
-	"github.com/docker/libnetwork/ns"
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netlink/nl"
 	"github.com/vishvananda/netns"
+
+	"github.com/Scalingo/sand/api/types"
+	"github.com/Scalingo/sand/netnsbuilder"
 )
 
 const (
-	BridgeName        = "br0"
-	VxLANInNSName     = "vxlan0"
-	VxLANInHostPrefix = "vxlan-"
+	BridgeName            = "br0"
+	VxLANInNSName         = "vxlan0"
+	VxLANInHostPrefix     = "vxlan-"
+	NetlinkSocketsTimeout = 3 * time.Second
 )
 
 func (netm manager) Ensure(ctx context.Context, network types.Network) error {
@@ -29,6 +30,20 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 		return errors.Wrapf(err, "fail to create network namspace")
 	}
 
+	// Get a netlink handle to the root network namespace
+	rootNetlinkHandle, err := netlink.NewHandle(syscall.NETLINK_ROUTE)
+	if err != nil {
+		return errors.Wrapf(err, "could not create netlink handle on initial root namespace")
+	}
+	defer rootNetlinkHandle.Delete()
+
+	err = rootNetlinkHandle.SetSocketTimeout(NetlinkSocketsTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "fail to configure timeout on netlink socket")
+	}
+
+	// Get namespace file descriptor and netlink handle for VxLAN Namespace to
+	// check how it's configured
 	nsfd, err := netns.GetFromPath(network.NSHandlePath)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get namespace handler")
@@ -40,14 +55,20 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
 	defer nlh.Delete()
+	err = nlh.SetSocketTimeout(NetlinkSocketsTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "fail to configure timeout on netlink socket")
+	}
 
+	// List all interfaces in the VxLAN namespace
 	var link netlink.Link
-
 	links, err := nlh.LinkList()
 	if err != nil {
 		return errors.Wrapf(err, "fail to list links")
 	}
 
+	// There should be a bridge linking all interfaces sharing the same VxLAN
+	// network on the host
 	exist := false
 	var bridge *netlink.Bridge
 	for _, l := range links {
@@ -78,6 +99,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 		bridge = link.(*netlink.Bridge)
 	}
 
+	// Check the gateway IP address is correctly set on the bridge
 	addresses, err := nlh.AddrList(link, nl.FAMILY_V4)
 	if err != nil {
 		return errors.Wrapf(err, "fail to list addresses of %s", BridgeName)
@@ -94,6 +116,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 		}
 	}
 
+	// Check that the VxLAN interface exist in its dedicated namespace (alongside the bridge)
 	exist = false
 	for _, link := range links {
 		if link.Attrs().Name == VxLANInNSName {
@@ -113,17 +136,22 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 			L2miss:    true,
 		}
 
-		err := ns.NlHandle().LinkAdd(vxlan)
+		// Create a VxLAN interface in the root namespace (only way to ensure the
+		// kernel does take it into account, creating one in a sub-namespace
+		// doesn't work)
+		err := rootNetlinkHandle.LinkAdd(vxlan)
 		if err != nil {
 			return errors.Wrapf(err, "error creating %s interface (VNI: %v)", vxlan.Attrs().Name, network.VxLANVNI)
 		}
 
-		link, err := ns.NlHandle().LinkByName(vxlan.Attrs().Name)
+		link, err := rootNetlinkHandle.LinkByName(vxlan.Attrs().Name)
 		if err != nil {
 			return errors.Wrapf(err, "fail to get %s link", vxlan.Attrs().Name)
 		}
 
-		err = ns.NlHandle().LinkSetNsFd(link, int(nsfd))
+		// Move the VxLAN link in the right namespace to prevent processes in root
+		// namespace to use it
+		err = rootNetlinkHandle.LinkSetNsFd(link, int(nsfd))
 		if err != nil {
 			return errors.Wrap(err, "fail to set netns of vxlan")
 		}
@@ -134,6 +162,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 		}
 	}
 
+	// Plug the VxLAN interface in the bridge by setting its master attribute
 	link, err = nlh.LinkByName(VxLANInNSName)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get %s link", VxLANInNSName)
@@ -146,6 +175,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 		}
 	}
 
+	// Ensure all interface of the VxLAN namespace are up
 	for _, ifName := range []string{"lo", BridgeName, VxLANInNSName} {
 		link, err = nlh.LinkByName(ifName)
 		if err != nil {
