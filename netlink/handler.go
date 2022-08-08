@@ -23,7 +23,7 @@ type Handler interface {
 	LinkDel(Link) error
 	LinkSetName(Link, string) error
 	LinkSetMTU(Link, int) error
-	LinkSetMaster(Link, *Bridge) error
+	LinkSetMaster(Link, Link) error
 	LinkSetUp(Link) error
 	LinkSetDown(Link) error
 	LinkSetNsFd(Link, int) error

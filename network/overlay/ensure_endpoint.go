@@ -5,14 +5,15 @@ import (
 	"net"
 	"syscall"
 
+	"github.com/pkg/errors"
+	"github.com/vishvananda/netlink/nl"
+	"github.com/vishvananda/netns"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netlink"
 	"github.com/Scalingo/sand/netutils"
-	"github.com/pkg/errors"
-	"github.com/vishvananda/netlink/nl"
-	"github.com/vishvananda/netns"
 )
 
 type overlayEndpoint struct {
@@ -82,11 +83,10 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 		return endpoint, errors.Wrapf(err, "fail to create veth pair")
 	}
 
-	bridgeLink, err := overlaynlh.LinkByName("br0")
+	bridge, err := overlaynlh.LinkByName("br0")
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to find br0")
 	}
-	bridge := bridgeLink.(*netlink.Bridge)
 
 	err = overlaynlh.LinkSetMTU(vethOverlay, 1450)
 	if err != nil {
