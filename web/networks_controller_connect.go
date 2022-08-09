@@ -69,7 +69,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		return nil
 	}
 
-	log.Info("hijacking http connection and forward to %v", localEndpoint.Hostname)
+	log.Infof("hijacking http connection and forward to %v", localEndpoint.Hostname)
 	h := w.(http.Hijacker)
 	socket, _, err := h.Hijack()
 	if err != nil {
