@@ -6,13 +6,18 @@ import (
 	"net"
 	"time"
 
-	"github.com/Scalingo/sand/api/params"
-	"github.com/Scalingo/sand/api/types"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/api/types"
 )
 
 func (r *repository) Create(ctx context.Context, n types.Network, params params.EndpointCreate) (types.Endpoint, error) {
+	log := logger.Get(ctx)
+	log.Info("Create endpoint")
+
 	var endpoint types.Endpoint
 
 	macAddress, err := ipv4ToMac(params.IPv4Address)
@@ -32,6 +37,8 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 		TargetVethIP:  params.IPv4Address,
 		TargetVethMAC: macAddress,
 	}
+	log = log.WithField("endpoint_id", endpoint.ID)
+	ctx = logger.ToCtx(ctx, log)
 
 	err = r.store.Set(ctx, endpoint.StorageKey(), &endpoint)
 	if err != nil {
@@ -50,6 +57,7 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 		}
 	}
 
+	log.Info("Endpoint created")
 	return endpoint, nil
 }
 

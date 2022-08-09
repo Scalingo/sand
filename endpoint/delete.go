@@ -3,8 +3,10 @@ package endpoint
 import (
 	"context"
 
-	"github.com/Scalingo/sand/api/types"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/sand/api/types"
 )
 
 var (
@@ -16,6 +18,9 @@ type DeleteOpts struct {
 }
 
 func (r *repository) Delete(ctx context.Context, n types.Network, e types.Endpoint, opts DeleteOpts) error {
+	log := logger.Get(ctx)
+	log.Info("Delete endpoint")
+
 	var err error
 
 	if opts.ForceDeactivation {
@@ -39,5 +44,6 @@ func (r *repository) Delete(ctx context.Context, n types.Network, e types.Endpoi
 		return errors.Wrapf(err, "fail to delete endpoint storage key")
 	}
 
+	log.Info("Endpoint deleted")
 	return nil
 }

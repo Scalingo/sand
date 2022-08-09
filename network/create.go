@@ -7,13 +7,14 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/gofrs/uuid"
+	"github.com/pkg/errors"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/idmanager"
 	"github.com/Scalingo/sand/network/overlay"
-	"github.com/gofrs/uuid"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -23,6 +24,7 @@ var (
 func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	var err error
 	log := logger.Get(ctx).WithField("network_name", params.Name)
+	log.Info("Create network")
 
 	if params.Type == "" {
 		params.Type = types.OverlayNetworkType
@@ -51,9 +53,10 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 			r.config.NetnsPath, fmt.Sprintf("%s%s", r.config.NetnsPrefix, uuid),
 		),
 	}
+	log = log.WithField("network_id", network.ID)
+	ctx = logger.ToCtx(ctx, log)
 
 	vniGen := overlay.NewVNIGenerator(ctx, r.config, r.store)
-
 	var idlock idmanager.Unlocker
 	switch network.Type {
 	case types.OverlayNetworkType:
@@ -83,5 +86,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 			log.WithError(err).Errorf("fail to unlock VNI generator for %s", network)
 		}
 	}
+
+	log.Info("Network created")
 	return network, nil
 }
