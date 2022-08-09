@@ -67,6 +67,7 @@ func (p *dockerNetworkPlugin) AllocateNetwork(ctx context.Context, req *network.
 
 func (p *dockerNetworkPlugin) DeleteNetwork(ctx context.Context, req *network.DeleteNetworkRequest) error {
 	log := logger.Get(ctx).WithField("docker_network_id", req.NetworkID)
+	ctx = logger.ToCtx(ctx, log)
 	log.Info("Delete network by docker integration")
 
 	dpn, err := p.dockerPluginRepository.GetNetworkByDockerID(ctx, req.NetworkID)
@@ -105,6 +106,7 @@ func (p *dockerNetworkPlugin) FreeNetwork(ctx context.Context, req *network.Free
 
 func (p *dockerNetworkPlugin) CreateEndpoint(ctx context.Context, req *network.CreateEndpointRequest) (*network.CreateEndpointResponse, error) {
 	log := logger.Get(ctx).WithField("docker_network_id", req.NetworkID)
+	ctx = logger.ToCtx(ctx, log)
 	log.Info("Create endpoint by docker integration")
 	dpn, err := p.dockerPluginRepository.GetNetworkByDockerID(ctx, req.NetworkID)
 	if err != nil {
