@@ -1,21 +1,23 @@
 package netutils
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"io"
 	"strings"
 
-	"github.com/Scalingo/sand/netlink"
-	"github.com/docker/libnetwork/netutils"
-	"github.com/docker/libnetwork/types"
 	nl "github.com/vishvananda/netlink"
+	"gopkg.in/errgo.v1"
+
+	"github.com/Scalingo/sand/netlink"
 )
 
 // GenerateIfaceName returns an interface name using the passed in
 // prefix and the length of random bytes. The api ensures that the
 // there are is no interface which exists with that name.
-// From "github.com/docker/libnetwork/netutils"
 func GenerateIfaceName(nlh netlink.Handler, prefix string, len int) (string, error) {
 	for i := 0; i < 3; i++ {
-		name, err := netutils.GenerateRandomName(prefix, len)
+		name, err := GenerateRandomName(prefix, len)
 		if err != nil {
 			continue
 		}
@@ -27,7 +29,17 @@ func GenerateIfaceName(nlh netlink.Handler, prefix string, len int) (string, err
 			return "", err
 		}
 	}
-	return "", types.InternalErrorf("could not generate interface name")
+	return "", errgo.New("could not generate interface name after 3 attempts")
+}
+
+// GenerateRandomName returns a new name joined with a prefix.  This size
+// specified is used to truncate the randomly generated value
+func GenerateRandomName(prefix string, size int) (string, error) {
+	id := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, id); err != nil {
+		return "", err
+	}
+	return prefix + hex.EncodeToString(id)[:size], nil
 }
 
 // ParseAddr parses the string representation of an address in the
