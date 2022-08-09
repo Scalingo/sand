@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
 )
 
 func (c *repository) Ensure(ctx context.Context, network types.Network) error {
+	log := logger.Get(ctx)
+	log.Info("Ensure network setup")
+
 	m := c.managers.Get(network.Type)
 
 	switch network.Type {
@@ -60,5 +65,6 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 		return errors.Wrapf(err, "err to store network %s link to hostname", network)
 	}
 
+	log.Info("Network setup ensured")
 	return nil
 }

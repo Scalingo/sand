@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/docker/docker/pkg/reexec"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/go-handlers"
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
@@ -29,9 +33,6 @@ import (
 	"github.com/Scalingo/sand/store"
 	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
-	"github.com/docker/docker/pkg/reexec"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -203,7 +204,9 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 			continue
 		}
 		log = log.WithFields(logrus.Fields{
-			"endpoint_id": endpoint.ID, "endpoint_netns_path": endpoint.TargetNetnsPath,
+			"network_id":          endpoint.NetworkID,
+			"endpoint_id":         endpoint.ID,
+			"endpoint_netns_path": endpoint.TargetNetnsPath,
 		})
 		log.Info("restoring endpoint")
 

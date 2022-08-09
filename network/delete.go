@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
 )
 
 func (c *repository) Delete(ctx context.Context, network types.Network, a ipallocator.IPAllocator) error {
 	log := logger.Get(ctx)
+	log.Info("Delete network")
 
 	var nets []types.Network
 	err := c.store.Get(

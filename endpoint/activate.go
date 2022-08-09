@@ -3,12 +3,17 @@ package endpoint
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/pkg/errors"
 )
 
 func (r *repository) Activate(ctx context.Context, n types.Network, endpoint types.Endpoint, params params.EndpointActivate) (types.Endpoint, error) {
+	log := logger.Get(ctx)
+	log.Info("Activate endpoint")
+
 	var err error
 
 	if params.NSHandlePath == "" {
@@ -34,5 +39,6 @@ func (r *repository) Activate(ctx context.Context, n types.Network, endpoint typ
 		return endpoint, errors.Wrapf(err, "fail to save endpoint %s in store network", endpoint)
 	}
 
+	log.Info("Endpoint activated")
 	return endpoint, nil
 }
