@@ -56,7 +56,6 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 	if err != nil {
 		return errors.Wrapf(err, "fail to open connection to %v", dstHost)
 	}
-	fmt.Println("Connected to", dstHost)
 
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
