@@ -12,13 +12,14 @@ import (
 
 	"gopkg.in/errgo.v1"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/client/sand"
 	"github.com/Scalingo/sand/netutils"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlparams map[string]string) error {
@@ -68,24 +69,30 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		return nil
 	}
 
-	log.Info("hijacking http connection")
+	log.Info("hijacking http connection and forward to %v", localEndpoint.Hostname)
 	h := w.(http.Hijacker)
 	socket, _, err := h.Hijack()
 	if err != nil {
 		return errors.Wrapf(err, "fail to hijack http connection")
 	}
-
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
+	// If this is the destination node, forward the connection in the right namespace
+	// Otherwise the connection will be forwarded to another SAND agent which has
+	// the network namespace available on it.
 	if localEndpoint.ID != "" {
 		err := netutils.ForwardConnection(ctx, socket, localEndpoint.TargetNetnsPath, ip, port)
-		// It happens that the target from the network connection (ip:port) is not
-		// actually bound in the network namespace, in this case a standard
-		// connection refused error is sent, this should not be an error, the
-		// connection to the SAND client should just be stopped normally
-		if err, ok := errors.Cause(err).(*net.OpError); ok {
-			if err, ok := err.Err.(*os.SyscallError); ok && err.Err == syscall.ECONNREFUSED {
+		if operr, ok := errors.Cause(err).(*net.OpError); ok {
+			if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == syscall.ECONNREFUSED {
+				// It happens that the target from the network connection (ip:port) is not
+				// actually bound in the network namespace, in this case a standard
+				// connection refused error is sent, this should not be an error, the
+				// connection to the SAND client should just be stopped normally
 				log.WithError(err).Infof("local endpoint %v not binding port", localEndpoint)
+			} else if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == syscall.EHOSTUNREACH {
+				// It's also possible that the targeted IP is not reachable anymore and it leads
+				// to a no route to host error. This error is not related to sand itself
+				log.WithError(err).Infof("local endpoint %v no route to host", localEndpoint)
 			} else {
 				return errors.Wrapf(err, "network connection error when forwarding to %v", localEndpoint)
 			}
