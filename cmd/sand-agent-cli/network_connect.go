@@ -46,6 +46,7 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 			})
 			if err != nil {
 				log.WithError(err).Errorf("fail to connect to network %v", c.String("network"))
+				return
 			}
 
 			wg := &sync.WaitGroup{}

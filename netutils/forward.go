@@ -8,9 +8,10 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netns"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 type Conn interface {
@@ -50,7 +51,8 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 	}()
 
 	dstHost := fmt.Sprintf("%s:%s", ip, port)
-	dstSocket, err := net.Dial("tcp", dstHost)
+	dialer := net.Dialer{}
+	dstSocket, err := dialer.DialContext(ctx, "tcp", dstHost)
 	if err != nil {
 		return errors.Wrapf(err, "fail to open connection to %v", dstHost)
 	}
