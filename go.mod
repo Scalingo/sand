@@ -3,7 +3,7 @@ module github.com/Scalingo/sand
 go 1.17
 
 require (
-	github.com/Scalingo/go-etcd-lock/v5 v5.0.5
+	github.com/Scalingo/go-etcd-lock/v5 v5.0.6
 	github.com/Scalingo/go-handlers v1.4.4
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.1
