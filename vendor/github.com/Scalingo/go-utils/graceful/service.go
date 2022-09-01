@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/facebookgo/grace/gracenet"
-
 	"gopkg.in/errgo.v1"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 type service struct {
@@ -22,7 +22,7 @@ type service struct {
 	stopped    chan error
 	// waitDuration is the duration which is waited for all connections to stop
 	// in order to graceful shutdown the server. If some connections are still up
-	// after this timer they'll be cut agressively.
+	// after this timer they'll be cut aggressively.
 	waitDuration time.Duration
 	// reloadWaitDuration is the duration the old process is waiting for
 	// connection to close when a graceful restart has been ordered. The new

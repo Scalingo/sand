@@ -7,7 +7,7 @@ require (
 	github.com/Scalingo/go-handlers v1.4.4
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.1
-	github.com/Scalingo/go-utils/graceful v1.1.0
+	github.com/Scalingo/go-utils/graceful v1.1.1
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/bits-and-blooms/bitset v1.3.0
 	github.com/docker/docker v20.10.17+incompatible

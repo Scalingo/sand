@@ -16,8 +16,8 @@ github.com/Scalingo/go-utils/errors v1.1.1 h1:G7zypaDBj0O6QFvX0xL5dMDXbiBgq+3KKu
 github.com/Scalingo/go-utils/errors v1.1.1/go.mod h1:gsnGOMma5x3CSgPb8i5eMuHcKi3RvTJ9dWPNRev161c=
 github.com/Scalingo/go-utils/etcd v1.1.1 h1:nEOR8fJfdNbOhu0CILE6jLu5Mmb4r2VlO1UyW/vmQA8=
 github.com/Scalingo/go-utils/etcd v1.1.1/go.mod h1:bOBNccHVoURRQVdCsppy3RalQJeomx/V4ISKLxJNzeA=
-github.com/Scalingo/go-utils/graceful v1.1.0 h1:eeB1LOj0H5UiOJESBYeQwihiZJI6DsAhTsExhzMQqn8=
-github.com/Scalingo/go-utils/graceful v1.1.0/go.mod h1:RyVwuiKshEie5u/Q+SFCPquFS/0LGSEGeTxviYocIJ8=
+github.com/Scalingo/go-utils/graceful v1.1.1 h1:nBWr7UKnd6LkXNLI/DqDYQ71jhgkbwPKwz/08mEGZ0s=
+github.com/Scalingo/go-utils/graceful v1.1.1/go.mod h1:9Uy+l0OGHeJyj1vriWrEZaGHWNw5cG72coN7GP8Gyos=
 github.com/Scalingo/go-utils/logger v1.1.0/go.mod h1:ZJLfkPJ4kfTAliBBAka0IH06+SS+LmRetKuw00WAe+s=
 github.com/Scalingo/go-utils/logger v1.2.0 h1:E3jtaoRxpIsFcZu/jsvWew8ttUAwKUYQufdPqGYp7EU=
 github.com/Scalingo/go-utils/logger v1.2.0/go.mod h1:JArjD1gHdB/vwnlcVG7rYxuIY0tk8/VG4MtirnRwn8k=
