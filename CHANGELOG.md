@@ -5,16 +5,20 @@
 * chore(go): use go 1.17
 * chore(deps): bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.4
 * chore(deps): bump github.com/Scalingo/go-utils/etcd from 1.1.0 to 1.1.1
-* chore(deps): bump github.com/Scalingo/go-utils/logger from 1.1.0 to 1.1.1
+* chore(deps): bump github.com/Scalingo/go-utils/logger from 1.1.0 to 1.2.0
+* chore(deps): bump github.com/Scalingo/go-utils/graceful
+* chore(deps): bump github.com/Scalingo/go-etcd-lock/v5
 * chore(deps): bump github.com/gofrs/uuid from 4.1.0+incompatible to 4.2.0+incompatible
 * chore(deps): bump github.com/sirupsen/logrus from 1.8.1 to 1.9.0
 * chore(deps): bump github.com/vishvananda/netlink from 1.0.0 to 1.1.0
 * chore(deps): bump go.etcd.io/etcd/api/v3 from 3.5.0 to 3.5.4
 * chore(deps): bump go.etcd.io/etcd/client/v3 from 3.5.0 to 3.5.4
-* chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.48.0
+* chore(deps): bump google.golang.org/grpc from 1.42.0 to 1.49.0
 * chore(deps): bump github.com/magefile/mage from 1.11.0 to 1.12.1
 * chore(deps): bump github.com/docker/docker from 20.10.11+incompatible to 20.10.17+incompatible
 * chore(deps): bump github.com/urfave/cli from 1.22.5 to 1.22.9
+* chore(deps): bump github.com/bits-and-blooms/bitset from 1.2.2 to 1.3.0
+* chore(deps): bump github.com/stretchr/testify from 1.7.1 to 1.8.0
 
 ## v1.0.0 - 20 Oct 2021
 
