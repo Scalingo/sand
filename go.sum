@@ -7,11 +7,10 @@ github.com/Scalingo/errgo-rollbar v0.2.0 h1:Jm/7K2ymVhPGGFL8BgFGOjpPRlCk+vYRCDtT
 github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4anm2L8T6rITx41A=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6 h1:EY3wlM/Krc6Hyil+ft+viCUiyVVjMp/cwqxd5hcaQFI=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6/go.mod h1:2CZIWQI2R3E6b/NB8dDxkb5EIkPPBGtMIti4uG3Ll6Q=
-github.com/Scalingo/go-handlers v1.4.4 h1:NRwrdrDU/NJMPm6Plst5wkI6NQEFedp2q1/+Orssjx0=
-github.com/Scalingo/go-handlers v1.4.4/go.mod h1:FHIIC8HsIVsaSO0IPJW1abXkch4WuDWqn/vfQlyYM9w=
+github.com/Scalingo/go-handlers v1.4.5 h1:DdEEX5zK8W+/m4zQZngKC4BZ4vU5bKz0Rv+FXQzG7hU=
+github.com/Scalingo/go-handlers v1.4.5/go.mod h1:OstpMAfLfEXqHbZMS7DCYlNEgsQ/m85e+x07T7rzvPA=
 github.com/Scalingo/go-plugins-helpers v1.3.0 h1:jaVIs+d8UT+J/7tZMaSCAZupNhh0VptRB/LY80oxvVw=
 github.com/Scalingo/go-plugins-helpers v1.3.0/go.mod h1:Z8rY7D3xK6RzNNjnlTsghe52gaVYTPda4djPbzED0ts=
-github.com/Scalingo/go-utils/errors v1.1.0/go.mod h1:bJP50Ic+y5KafDFBSFRkELufB+F9j9f4S2N/1LG3Z6I=
 github.com/Scalingo/go-utils/errors v1.1.1 h1:G7zypaDBj0O6QFvX0xL5dMDXbiBgq+3KKuodldtOpg0=
 github.com/Scalingo/go-utils/errors v1.1.1/go.mod h1:gsnGOMma5x3CSgPb8i5eMuHcKi3RvTJ9dWPNRev161c=
 github.com/Scalingo/go-utils/etcd v1.1.1 h1:nEOR8fJfdNbOhu0CILE6jLu5Mmb4r2VlO1UyW/vmQA8=
@@ -94,8 +93,8 @@ github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V
 github.com/go-logfmt/logfmt v0.5.0/go.mod h1:wCYkCAKZfumFQihp8CzCvQ3paCTfi41vtzG1KdI/P7A=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/godbus/dbus/v5 v5.0.4/go.mod h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA=
-github.com/gofrs/uuid v4.2.0+incompatible h1:yyYWMnhkhrKwwr8gAOcOCYxOOscHgDS9yZgBrnJfGa0=
-github.com/gofrs/uuid v4.2.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
+github.com/gofrs/uuid v4.3.0+incompatible h1:CaSVZxm5B+7o45rtab4jC2G37WGYX1zQfuU2i6DSvnc=
+github.com/gofrs/uuid v4.3.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRxnplIgP/c0N/04lM=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/gogo/protobuf v1.3.2 h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
