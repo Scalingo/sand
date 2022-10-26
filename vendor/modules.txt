@@ -61,7 +61,7 @@ github.com/docker/go-connections/sockets
 # github.com/facebookgo/grace v0.0.0-20180706040059-75cf19382434
 ## explicit
 github.com/facebookgo/grace/gracenet
-# github.com/gofrs/uuid v4.2.0+incompatible
+# github.com/gofrs/uuid v4.3.0+incompatible
 ## explicit
 github.com/gofrs/uuid
 # github.com/gogo/protobuf v1.3.2
