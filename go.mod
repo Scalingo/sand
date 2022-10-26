@@ -9,7 +9,7 @@ require (
 	github.com/Scalingo/go-utils/etcd v1.1.1
 	github.com/Scalingo/go-utils/graceful v1.1.1
 	github.com/Scalingo/go-utils/logger v1.2.0
-	github.com/bits-and-blooms/bitset v1.3.0
+	github.com/bits-and-blooms/bitset v1.3.3
 	github.com/docker/docker v20.10.21+incompatible
 	github.com/gofrs/uuid v4.3.0+incompatible
 	github.com/golang/mock v1.6.0
