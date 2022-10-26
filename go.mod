@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.6
-	github.com/Scalingo/go-handlers v1.4.4
+	github.com/Scalingo/go-handlers v1.5.0
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.1
 	github.com/Scalingo/go-utils/graceful v1.1.1
@@ -17,7 +17,7 @@ require (
 	github.com/magefile/mage v1.13.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli v1.22.10
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.0-20210104183010-2eb08e3e575f
@@ -32,7 +32,9 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/Scalingo/errgo-rollbar v0.2.0 // indirect
+	github.com/Scalingo/go-utils/crypto v1.0.0 // indirect
 	github.com/Scalingo/go-utils/errors v1.1.1 // indirect
+	github.com/Scalingo/go-utils/security v1.0.0 // indirect
 	github.com/Scalingo/logrus-rollbar v1.4.1 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e // indirect

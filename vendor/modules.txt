@@ -8,7 +8,7 @@ github.com/Scalingo/errgo-rollbar
 # github.com/Scalingo/go-etcd-lock/v5 v5.0.6
 ## explicit; go 1.17
 github.com/Scalingo/go-etcd-lock/v5/lock
-# github.com/Scalingo/go-handlers v1.4.4
+# github.com/Scalingo/go-handlers v1.5.0
 ## explicit; go 1.17
 github.com/Scalingo/go-handlers
 # github.com/Scalingo/go-plugins-helpers v1.3.0
@@ -16,6 +16,9 @@ github.com/Scalingo/go-handlers
 github.com/Scalingo/go-plugins-helpers/ipam
 github.com/Scalingo/go-plugins-helpers/network
 github.com/Scalingo/go-plugins-helpers/sdk
+# github.com/Scalingo/go-utils/crypto v1.0.0
+## explicit; go 1.17
+github.com/Scalingo/go-utils/crypto
 # github.com/Scalingo/go-utils/errors v1.1.1
 ## explicit; go 1.17
 github.com/Scalingo/go-utils/errors
@@ -29,6 +32,9 @@ github.com/Scalingo/go-utils/graceful
 ## explicit; go 1.17
 github.com/Scalingo/go-utils/logger
 github.com/Scalingo/go-utils/logger/plugins/rollbarplugin
+# github.com/Scalingo/go-utils/security v1.0.0
+## explicit; go 1.19
+github.com/Scalingo/go-utils/security
 # github.com/Scalingo/logrus-rollbar v1.4.1
 ## explicit; go 1.17
 github.com/Scalingo/logrus-rollbar
@@ -110,7 +116,7 @@ github.com/shurcooL/sanitized_anchor_name
 # github.com/sirupsen/logrus v1.9.0
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.8.0
+# github.com/stretchr/testify v1.8.1
 ## explicit; go 1.13
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
