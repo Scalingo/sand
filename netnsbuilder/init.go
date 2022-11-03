@@ -3,11 +3,12 @@ package netnsbuilder
 import (
 	"context"
 	"os"
-	"syscall"
 
-	"github.com/Scalingo/go-utils/logger"
 	"github.com/docker/docker/pkg/reexec"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/logger"
 )
 
 func init() {
@@ -28,5 +29,5 @@ func reexecCreateNamespace() {
 func mountNetworkNamespace(ctx context.Context, basePath string, lnPath string) error {
 	log := logger.Get(ctx)
 	log.Info("mounting")
-	return syscall.Mount(basePath, lnPath, "bind", syscall.MS_BIND, "")
+	return unix.Mount(basePath, lnPath, "bind", unix.MS_BIND, "")
 }

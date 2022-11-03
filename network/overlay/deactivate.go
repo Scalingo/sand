@@ -4,12 +4,13 @@ import (
 	"context"
 	"os"
 	"strings"
-	"syscall"
 
-	"github.com/Scalingo/sand/api/types"
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/sand/api/types"
 )
 
 func (netm manager) Deactivate(ctx context.Context, network types.Network) error {
@@ -22,7 +23,7 @@ func (netm manager) Deactivate(ctx context.Context, network types.Network) error
 	}
 	defer nsfd.Close()
 
-	nlh, err := netlink.NewHandleAt(nsfd, syscall.NETLINK_ROUTE)
+	nlh, err := netlink.NewHandleAt(nsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
@@ -42,18 +43,21 @@ func (netm manager) Deactivate(ctx context.Context, network types.Network) error
 
 	for _, link := range links {
 		for _, linkToClean := range interfacesToClean {
-			if link.Attrs().Name == linkToClean {
-				link, err := nlh.LinkByName(linkToClean)
-				if _, ok := err.(netlink.LinkNotFoundError); ok {
-					continue
-				}
-				if err != nil {
-					return errors.Wrapf(err, "fail to get %s link", linkToClean)
-				}
-				err = nlh.LinkDel(link)
-				if err != nil {
-					return errors.Wrapf(err, "fail to delete %s link", linkToClean)
-				}
+			if link.Attrs().Name != linkToClean {
+				continue
+			}
+
+			link, err := nlh.LinkByName(linkToClean)
+			if _, ok := err.(netlink.LinkNotFoundError); ok {
+				continue
+			}
+			if err != nil {
+				return errors.Wrapf(err, "fail to get %s link", linkToClean)
+			}
+
+			err = nlh.LinkDel(link)
+			if err != nil {
+				return errors.Wrapf(err, "fail to delete %s link", linkToClean)
 			}
 		}
 	}

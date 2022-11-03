@@ -3,16 +3,17 @@ package netnsbuilder
 import (
 	"context"
 	"os"
-	"syscall"
+
+	"github.com/pkg/errors"
+	"golang.org/x/sys/unix"
 
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/pkg/errors"
 )
 
 func UnmountNetworkNamespace(ctx context.Context, path string) error {
 	log := logger.Get(ctx).WithField("mount-netns", path)
 	log.Info("unmounting")
-	err := syscall.Unmount(path, syscall.MNT_DETACH)
+	err := unix.Unmount(path, unix.MNT_DETACH)
 	if err != nil {
 		return errors.Wrapf(err, "fail to umount %v", path)
 	}

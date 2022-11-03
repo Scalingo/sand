@@ -3,11 +3,11 @@ package overlay
 import (
 	"context"
 	"net"
-	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink/nl"
 	"github.com/vishvananda/netns"
+	"golang.org/x/sys/unix"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
@@ -44,13 +44,13 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 		defer targetnsfd.Close()
 	}
 
-	hostnlh, err := netlink.NewHandleAt(hostnsfd, syscall.NETLINK_ROUTE)
+	hostnlh, err := netlink.NewHandleAt(hostnsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get host namespace handler")
 	}
 	defer hostnlh.Delete()
 
-	targetnlh, err := netlink.NewHandleAt(targetnsfd, syscall.NETLINK_ROUTE)
+	targetnlh, err := netlink.NewHandleAt(targetnsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get target namespace netlink handler")
 	}
@@ -62,7 +62,7 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 	}
 	defer overlaynsfd.Close()
 
-	overlaynlh, err := netlink.NewHandleAt(overlaynsfd, syscall.NETLINK_ROUTE)
+	overlaynlh, err := netlink.NewHandleAt(overlaynsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
@@ -161,19 +161,18 @@ func (e overlayEndpoint) ensureVethPair(ctx context.Context, params params.Endpo
 			}
 			if ok {
 				return overlayLink, targetLink, nil
-			} else {
-				log.Info("recreate veth pairs as interface not present on target")
-				err = e.overlaynlh.LinkDel(overlayLink)
-				if err != nil {
-					return nil, nil, errors.Wrapf(err, "fail to remove overlay %s", e.endpoint.OverlayVethName)
-				}
+			}
+			log.Info("recreate veth pairs as interface not present on target")
+			err = e.overlaynlh.LinkDel(overlayLink)
+			if err != nil {
+				return nil, nil, errors.Wrapf(err, "fail to remove overlay %s", e.endpoint.OverlayVethName)
 			}
 		}
 	}
 	return e.createVethPair(ctx, params)
 }
 
-func (e overlayEndpoint) isOverlayVethPresent(ctx context.Context) (netlink.Link, bool, error) {
+func (e overlayEndpoint) isOverlayVethPresent(_ context.Context) (netlink.Link, bool, error) {
 	link, err := e.overlaynlh.LinkByName(e.endpoint.OverlayVethName)
 	if _, ok := err.(netlink.LinkNotFoundError); ok {
 		return nil, false, nil
@@ -185,7 +184,7 @@ func (e overlayEndpoint) isOverlayVethPresent(ctx context.Context) (netlink.Link
 
 // isTargetVethPresent is a little more tricky as docker#libnetwork like to rename interfaces
 // So interfaces should be listed anc MAC compared in ordered to know if it is present or not
-func (e overlayEndpoint) isTargetVethPresent(ctx context.Context) (netlink.Link, bool, error) {
+func (e overlayEndpoint) isTargetVethPresent(_ context.Context) (netlink.Link, bool, error) {
 	links, err := e.targetnlh.LinkList()
 	if err != nil {
 		return nil, false, errors.Wrapf(err, "fail to list links of target namespace")
@@ -199,7 +198,7 @@ func (e overlayEndpoint) isTargetVethPresent(ctx context.Context) (netlink.Link,
 	return nil, false, nil
 }
 
-func (e overlayEndpoint) createVethPair(ctx context.Context, params params.EndpointActivate) (netlink.Link, netlink.Link, error) {
+func (e overlayEndpoint) createVethPair(_ context.Context, params params.EndpointActivate) (netlink.Link, netlink.Link, error) {
 	vethOverlayName, err := netutils.GenerateIfaceName(e.hostnlh, "sand", 4)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "fail to generate veth-overlay name")

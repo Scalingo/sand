@@ -4,12 +4,13 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"syscall"
+
+	"github.com/docker/docker/pkg/reexec"
+	"github.com/pkg/errors"
+	"golang.org/x/sys/unix"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
-	"github.com/docker/docker/pkg/reexec"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -44,7 +45,7 @@ func (m *manager) Create(ctx context.Context, name string, n types.Network) erro
 	return nil
 }
 
-func (m *manager) createNS(ctx context.Context, path string) error {
+func (m *manager) createNS(_ context.Context, path string) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return errors.Wrap(err, "fail to touch netns mountpoint file")
@@ -55,15 +56,14 @@ func (m *manager) createNS(ctx context.Context, path string) error {
 	}
 
 	cmd := &exec.Cmd{
-		Path:   reexec.Self(),
-		Args:   append([]string{"sc-netns-create"}, path),
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
+		Path:        reexec.Self(),
+		Args:        append([]string{"sc-netns-create"}, path),
+		Stdout:      os.Stdout,
+		Stderr:      os.Stderr,
+		SysProcAttr: &unix.SysProcAttr{Cloneflags: unix.CLONE_NEWNET},
 	}
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Cloneflags = syscall.CLONE_NEWNET
-
-	if err = cmd.Run(); err != nil {
+	err = cmd.Run()
+	if err != nil {
 		return errors.Wrap(err, "namespace creation reexec command failed")
 	}
 

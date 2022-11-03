@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"syscall"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netlink/nl"
 	"github.com/vishvananda/netns"
+	"golang.org/x/sys/unix"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/netnsbuilder"
@@ -31,7 +31,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 	}
 
 	// Get a netlink handle to the root network namespace
-	rootNetlinkHandle, err := netlink.NewHandle(syscall.NETLINK_ROUTE)
+	rootNetlinkHandle, err := netlink.NewHandle(unix.NETLINK_ROUTE)
 	if err != nil {
 		return errors.Wrapf(err, "could not create netlink handle on initial root namespace")
 	}
@@ -50,7 +50,7 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 	}
 	defer nsfd.Close()
 
-	nlh, err := netlink.NewHandleAt(nsfd, syscall.NETLINK_ROUTE)
+	nlh, err := netlink.NewHandleAt(nsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
@@ -74,20 +74,20 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 	for _, l := range links {
 		if l.Attrs().Name == BridgeName {
 			link = l
-			bridge = l.(*netlink.Bridge)
+			// We can safely cast l after checking the value of l.Attrs().Name
+			bridge, _ = l.(*netlink.Bridge)
 			exist = true
 			break
 		}
 	}
 
 	if !exist {
-		b := &netlink.Bridge{
+		err := nlh.LinkAdd(&netlink.Bridge{
 			LinkAttrs: netlink.LinkAttrs{
 				Name: BridgeName,
 			},
-		}
-
-		if err := nlh.LinkAdd(b); err != nil {
+		})
+		if err != nil {
 			return errors.Wrapf(err, "fail to create bridge in namespace")
 		}
 
@@ -96,7 +96,8 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 			return errors.Wrapf(err, "fail to get bridge link")
 		}
 
-		bridge = link.(*netlink.Bridge)
+		// We can safely cast link as we just retrieved it as a bridge
+		bridge, _ = link.(*netlink.Bridge)
 	}
 
 	// Check the gateway IP address is correctly set on the bridge
