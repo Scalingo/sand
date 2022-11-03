@@ -74,20 +74,20 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 	for _, l := range links {
 		if l.Attrs().Name == BridgeName {
 			link = l
-			bridge = l.(*netlink.Bridge)
+			// We can safely cast l after checking the value of l.Attrs().Name
+			bridge, _ = l.(*netlink.Bridge)
 			exist = true
 			break
 		}
 	}
 
 	if !exist {
-		b := &netlink.Bridge{
+		err := nlh.LinkAdd(&netlink.Bridge{
 			LinkAttrs: netlink.LinkAttrs{
 				Name: BridgeName,
 			},
-		}
-
-		if err := nlh.LinkAdd(b); err != nil {
+		})
+		if err != nil {
 			return errors.Wrapf(err, "fail to create bridge in namespace")
 		}
 
@@ -96,7 +96,8 @@ func (netm manager) Ensure(ctx context.Context, network types.Network) error {
 			return errors.Wrapf(err, "fail to get bridge link")
 		}
 
-		bridge = link.(*netlink.Bridge)
+		// We can safely cast link as we just retrieved it as a bridge
+		bridge, _ = link.(*netlink.Bridge)
 	}
 
 	// Check the gateway IP address is correctly set on the bridge

@@ -43,18 +43,21 @@ func (netm manager) Deactivate(ctx context.Context, network types.Network) error
 
 	for _, link := range links {
 		for _, linkToClean := range interfacesToClean {
-			if link.Attrs().Name == linkToClean {
-				link, err := nlh.LinkByName(linkToClean)
-				if _, ok := err.(netlink.LinkNotFoundError); ok {
-					continue
-				}
-				if err != nil {
-					return errors.Wrapf(err, "fail to get %s link", linkToClean)
-				}
-				err = nlh.LinkDel(link)
-				if err != nil {
-					return errors.Wrapf(err, "fail to delete %s link", linkToClean)
-				}
+			if link.Attrs().Name != linkToClean {
+				continue
+			}
+
+			link, err := nlh.LinkByName(linkToClean)
+			if _, ok := err.(netlink.LinkNotFoundError); ok {
+				continue
+			}
+			if err != nil {
+				return errors.Wrapf(err, "fail to get %s link", linkToClean)
+			}
+
+			err = nlh.LinkDel(link)
+			if err != nil {
+				return errors.Wrapf(err, "fail to delete %s link", linkToClean)
 			}
 		}
 	}

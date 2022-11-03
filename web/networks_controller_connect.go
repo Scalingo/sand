@@ -68,8 +68,11 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		return nil
 	}
 
-	log.Infof("hijacking http connection and forward to %v", localEndpoint.Hostname)
-	h := w.(http.Hijacker)
+	log.Infof("Hijacking http connection and forward to %v", localEndpoint.Hostname)
+	h, ok := w.(http.Hijacker)
+	if !ok {
+		return errors.New("invalid response writer")
+	}
 	socket, _, err := h.Hijack()
 	if err != nil {
 		return errors.Wrapf(err, "fail to hijack http connection")
