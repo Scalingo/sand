@@ -8,12 +8,11 @@ import (
 	"net/http"
 	"os"
 	"sync"
-	"syscall"
-
-	"gopkg.in/errgo.v1"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
+	"gopkg.in/errgo.v1"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
@@ -83,13 +82,13 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	if localEndpoint.ID != "" {
 		err := netutils.ForwardConnection(ctx, socket, localEndpoint.TargetNetnsPath, ip, port)
 		if operr, ok := errors.Cause(err).(*net.OpError); ok {
-			if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == syscall.ECONNREFUSED {
+			if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == unix.ECONNREFUSED {
 				// It happens that the target from the network connection (ip:port) is not
 				// actually bound in the network namespace, in this case a standard
 				// connection refused error is sent, this should not be an error, the
 				// connection to the SAND client should just be stopped normally
 				log.WithError(err).Infof("local endpoint %v not binding port", localEndpoint)
-			} else if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == syscall.EHOSTUNREACH {
+			} else if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == unix.EHOSTUNREACH {
 				// It's also possible that the targeted IP is not reachable anymore and it leads
 				// to a no route to host error. This error is not related to sand itself
 				log.WithError(err).Infof("local endpoint %v no route to host", localEndpoint)

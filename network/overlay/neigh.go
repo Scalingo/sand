@@ -3,14 +3,15 @@ package overlay
 import (
 	"context"
 	"net"
-	"syscall"
 
-	"github.com/Scalingo/go-utils/logger"
-	"github.com/Scalingo/sand/api/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/logger"
+	"github.com/Scalingo/sand/api/types"
 )
 
 func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network, endpoints []types.Endpoint) error {
@@ -56,7 +57,7 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 	}
 	defer nsfd.Close()
 
-	nlh, err := netlink.NewHandleAt(nsfd, syscall.NETLINK_ROUTE)
+	nlh, err := netlink.NewHandleAt(nsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
@@ -95,7 +96,7 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 		HardwareAddr: mac,
 		State:        netlink.NUD_PERMANENT,
 		LinkIndex:    link.Attrs().Index,
-		Family:       syscall.AF_BRIDGE,
+		Family:       unix.AF_BRIDGE,
 		Flags:        netlink.NTF_SELF,
 	}
 	if err := action(nlh, nlnh); err != nil {

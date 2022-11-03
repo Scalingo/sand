@@ -3,11 +3,11 @@ package overlay
 import (
 	"context"
 	"net"
-	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink/nl"
 	"github.com/vishvananda/netns"
+	"golang.org/x/sys/unix"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
@@ -44,13 +44,13 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 		defer targetnsfd.Close()
 	}
 
-	hostnlh, err := netlink.NewHandleAt(hostnsfd, syscall.NETLINK_ROUTE)
+	hostnlh, err := netlink.NewHandleAt(hostnsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get host namespace handler")
 	}
 	defer hostnlh.Delete()
 
-	targetnlh, err := netlink.NewHandleAt(targetnsfd, syscall.NETLINK_ROUTE)
+	targetnlh, err := netlink.NewHandleAt(targetnsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get target namespace netlink handler")
 	}
@@ -62,7 +62,7 @@ func (m manager) EnsureEndpoint(ctx context.Context, network types.Network, endp
 	}
 	defer overlaynsfd.Close()
 
-	overlaynlh, err := netlink.NewHandleAt(overlaynsfd, syscall.NETLINK_ROUTE)
+	overlaynlh, err := netlink.NewHandleAt(overlaynsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return endpoint, errors.Wrapf(err, "fail to get netlink handler of netns")
 	}

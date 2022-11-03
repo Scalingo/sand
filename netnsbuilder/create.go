@@ -4,12 +4,13 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"syscall"
+
+	"github.com/docker/docker/pkg/reexec"
+	"github.com/pkg/errors"
+	"golang.org/x/sys/unix"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
-	"github.com/docker/docker/pkg/reexec"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -60,8 +61,8 @@ func (m *manager) createNS(ctx context.Context, path string) error {
 		Stdout: os.Stdout,
 		Stderr: os.Stderr,
 	}
-	cmd.SysProcAttr = &syscall.SysProcAttr{}
-	cmd.SysProcAttr.Cloneflags = syscall.CLONE_NEWNET
+	cmd.SysProcAttr = &unix.SysProcAttr{}
+	cmd.SysProcAttr.Cloneflags = unix.CLONE_NEWNET
 
 	if err = cmd.Run(); err != nil {
 		return errors.Wrap(err, "namespace creation reexec command failed")

@@ -2,15 +2,15 @@ package netutils
 
 import (
 	"context"
-	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+	"golang.org/x/sys/unix"
 )
 
 func DeleteInterfaceIfExists(ctx context.Context, nsfd netns.NsHandle, ifname string) error {
-	nlh, err := netlink.NewHandleAt(nsfd, syscall.NETLINK_ROUTE)
+	nlh, err := netlink.NewHandleAt(nsfd, unix.NETLINK_ROUTE)
 	if err != nil {
 		return errors.Wrapf(err, "fail to get netlink handler of netns")
 	}
