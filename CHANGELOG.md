@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* fix(sand client): disable HTTP keepalives to prevent leaking file descriptors and add a default idle timeout
 * chore(go): use go 1.17
 * chore(deps): bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.4
 * chore(deps): bump github.com/Scalingo/go-utils/etcd from 1.1.0 to 1.1.1

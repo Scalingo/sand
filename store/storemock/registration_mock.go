@@ -11,30 +11,30 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
-// MockRegistration is a mock of Registration interface
+// MockRegistration is a mock of Registration interface.
 type MockRegistration struct {
 	ctrl     *gomock.Controller
 	recorder *MockRegistrationMockRecorder
 }
 
-// MockRegistrationMockRecorder is the mock recorder for MockRegistration
+// MockRegistrationMockRecorder is the mock recorder for MockRegistration.
 type MockRegistrationMockRecorder struct {
 	mock *MockRegistration
 }
 
-// NewMockRegistration creates a new mock instance
+// NewMockRegistration creates a new mock instance.
 func NewMockRegistration(ctrl *gomock.Controller) *MockRegistration {
 	mock := &MockRegistration{ctrl: ctrl}
 	mock.recorder = &MockRegistrationMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRegistration) EXPECT() *MockRegistrationMockRecorder {
 	return m.recorder
 }
 
-// EventChan mocks base method
+// EventChan mocks base method.
 func (m *MockRegistration) EventChan() <-chan *clientv3.Event {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EventChan")
@@ -42,19 +42,19 @@ func (m *MockRegistration) EventChan() <-chan *clientv3.Event {
 	return ret0
 }
 
-// EventChan indicates an expected call of EventChan
+// EventChan indicates an expected call of EventChan.
 func (mr *MockRegistrationMockRecorder) EventChan() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EventChan", reflect.TypeOf((*MockRegistration)(nil).EventChan))
 }
 
-// Unregister mocks base method
+// Unregister mocks base method.
 func (m *MockRegistration) Unregister() {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Unregister")
 }
 
-// Unregister indicates an expected call of Unregister
+// Unregister indicates an expected call of Unregister.
 func (mr *MockRegistrationMockRecorder) Unregister() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unregister", reflect.TypeOf((*MockRegistration)(nil).Unregister))

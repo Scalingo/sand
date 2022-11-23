@@ -5,9 +5,11 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
+	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/Scalingo/sand/api/params"
-	"github.com/pkg/errors"
 )
 
 func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address string) (net.Conn, error) {
@@ -27,12 +29,15 @@ func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address 
 }
 
 type HTTPRoundTripperOpts struct {
-	TLSConfig *tls.Config
+	TLSConfig         *tls.Config
+	DisableKeepAlives bool
 }
 
 func (c *client) NewHTTPRoundTripper(ctx context.Context, id string, opts HTTPRoundTripperOpts) http.RoundTripper {
 	return &http.Transport{
-		TLSClientConfig: opts.TLSConfig,
+		TLSClientConfig:   opts.TLSConfig,
+		DisableKeepAlives: opts.DisableKeepAlives,
+		IdleConnTimeout:   10 * time.Second,
 		Dial: func(n, a string) (net.Conn, error) {
 			return c.rawDialer(ctx, id, n, a)
 		},
