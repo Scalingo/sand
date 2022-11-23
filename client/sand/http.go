@@ -6,8 +6,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/Scalingo/sand/api/params"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/sand/api/params"
 )
 
 func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address string) (net.Conn, error) {
@@ -32,7 +33,8 @@ type HTTPRoundTripperOpts struct {
 
 func (c *client) NewHTTPRoundTripper(ctx context.Context, id string, opts HTTPRoundTripperOpts) http.RoundTripper {
 	return &http.Transport{
-		TLSClientConfig: opts.TLSConfig,
+		TLSClientConfig:   opts.TLSConfig,
+		DisableKeepAlives: true,
 		Dial: func(n, a string) (net.Conn, error) {
 			return c.rawDialer(ctx, id, n, a)
 		},

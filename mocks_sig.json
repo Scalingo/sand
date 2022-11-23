@@ -1,1 +1,15 @@
-{"github.com/Scalingo/sand/client/sand.Client":"01 c2 be 3e db df cc 2c 72 ec 63 ce 54 3b e5 fa 27 03 82 01","github.com/Scalingo/sand/endpoint.Repository":"da 17 fc 12 e2 b9 27 df ca c7 8f ad 56 f8 c5 05 6e 01 c0 2d","github.com/Scalingo/sand/idmanager.Manager":"65 ba ac 06 d5 e7 6d 9c d0 a8 ae 44 12 e1 f4 73 c1 18 35 19","github.com/Scalingo/sand/ipallocator.IPAllocator":"fe 71 38 71 1d 20 40 e8 da ab 7e f3 2e f7 fa 92 ff 71 8b 6c","github.com/Scalingo/sand/netlink.Handler":"58 61 61 f7 e6 c1 61 4f 76 64 f6 72 7c ae 06 de ed 99 ed ce","github.com/Scalingo/sand/netnsbuilder.Manager":"a6 09 40 c9 bd 01 75 b8 13 49 af ae c5 13 89 a2 44 c6 a8 51","github.com/Scalingo/sand/network.Repository":"2c 5f e1 70 12 c0 55 34 4f 2f 39 f7 87 1a f6 d8 c5 fa 36 56","github.com/Scalingo/sand/network/netmanager.NetManager":"d2 0d b9 f1 ec 34 14 58 fb 6c 1f a2 79 85 48 99 16 0b 03 07","github.com/Scalingo/sand/network/overlay.NetworkEndpointListener":"a3 16 5c 52 49 f3 aa d6 2e 25 ce 3e a7 18 b6 ba d2 51 a3 bd","github.com/Scalingo/sand/network/overlay.Registrar":"7b c9 b0 d5 80 be 85 99 18 e7 7b 90 9c aa e8 33 38 85 c1 8c","github.com/Scalingo/sand/store.EtcdWatcher":"34 4c fe 03 d4 33 bd 61 eb 4a be 43 47 10 12 e6 0a 70 45 a8","github.com/Scalingo/sand/store.Registration":"a6 67 4b f2 73 26 2c 2c a9 21 f8 5e 24 9a d4 e6 e3 4f d7 8d","github.com/Scalingo/sand/store.Store":"NOFILE"}
+{
+  "github.com/Scalingo/sand/client/sand.Client": "01 c2 be 3e db df cc 2c 72 ec 63 ce 54 3b e5 fa 27 03 82 01",
+  "github.com/Scalingo/sand/endpoint.Repository": "da 17 fc 12 e2 b9 27 df ca c7 8f ad 56 f8 c5 05 6e 01 c0 2d",
+  "github.com/Scalingo/sand/idmanager.Manager": "09 3d b0 fa b5 93 11 d1 40 e0 7a cf 73 1a 79 55 7b 6e 64 a3",
+  "github.com/Scalingo/sand/ipallocator.IPAllocator": "fe 71 38 71 1d 20 40 e8 da ab 7e f3 2e f7 fa 92 ff 71 8b 6c",
+  "github.com/Scalingo/sand/netlink.Handler": "a3 bd 4f a5 33 ae 5e 3c f8 03 74 01 95 ba ff d0 35 45 cd d9",
+  "github.com/Scalingo/sand/netnsbuilder.Manager": "a6 09 40 c9 bd 01 75 b8 13 49 af ae c5 13 89 a2 44 c6 a8 51",
+  "github.com/Scalingo/sand/network.Repository": "2c 5f e1 70 12 c0 55 34 4f 2f 39 f7 87 1a f6 d8 c5 fa 36 56",
+  "github.com/Scalingo/sand/network/netmanager.NetManager": "d2 0d b9 f1 ec 34 14 58 fb 6c 1f a2 79 85 48 99 16 0b 03 07",
+  "github.com/Scalingo/sand/network/overlay.NetworkEndpointListener": "83 70 98 0f 6d e3 d5 bb 28 52 f6 c5 58 9d f5 3c 45 1d 54 ca",
+  "github.com/Scalingo/sand/network/overlay.Registrar": "7b c9 b0 d5 80 be 85 99 18 e7 7b 90 9c aa e8 33 38 85 c1 8c",
+  "github.com/Scalingo/sand/store.EtcdWatcher": "34 4c fe 03 d4 33 bd 61 eb 4a be 43 47 10 12 e6 0a 70 45 a8",
+  "github.com/Scalingo/sand/store.Registration": "e4 92 43 a7 15 46 88 39 d4 7e 6a d0 8e ba a2 9f a8 ca 7c 2d",
+  "github.com/Scalingo/sand/store.Store": "e3 73 0b 3a 27 9a 00 00 54 19 d5 a3 78 0b 5e 6e 1b c5 c2 d5"
+}

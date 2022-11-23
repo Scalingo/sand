@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
-	"github.com/Scalingo/sand/client/sand"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
+
+	"github.com/Scalingo/sand/client/sand"
 )
 
 func (a *App) Curl(c *cli.Context) error {
@@ -33,6 +35,7 @@ func (a *App) Curl(c *cli.Context) error {
 	}
 
 	httpClient := &http.Client{
+		Timeout: 10 * time.Second,
 		Transport: client.NewHTTPRoundTripper(context.Background(), c.String("network"), sand.HTTPRoundTripperOpts{
 			TLSConfig: &tlsConfig,
 		}),

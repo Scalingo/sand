@@ -13,30 +13,30 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockNetworkEndpointListener is a mock of NetworkEndpointListener interface
+// MockNetworkEndpointListener is a mock of NetworkEndpointListener interface.
 type MockNetworkEndpointListener struct {
 	ctrl     *gomock.Controller
 	recorder *MockNetworkEndpointListenerMockRecorder
 }
 
-// MockNetworkEndpointListenerMockRecorder is the mock recorder for MockNetworkEndpointListener
+// MockNetworkEndpointListenerMockRecorder is the mock recorder for MockNetworkEndpointListener.
 type MockNetworkEndpointListenerMockRecorder struct {
 	mock *MockNetworkEndpointListener
 }
 
-// NewMockNetworkEndpointListener creates a new mock instance
+// NewMockNetworkEndpointListener creates a new mock instance.
 func NewMockNetworkEndpointListener(ctrl *gomock.Controller) *MockNetworkEndpointListener {
 	mock := &MockNetworkEndpointListener{ctrl: ctrl}
 	mock.recorder = &MockNetworkEndpointListenerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockNetworkEndpointListener) EXPECT() *MockNetworkEndpointListenerMockRecorder {
 	return m.recorder
 }
 
-// Add mocks base method
+// Add mocks base method.
 func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 netmanager.NetManager, arg2 types.Network) (chan struct{}, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", arg0, arg1, arg2)
@@ -45,13 +45,13 @@ func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 netmanager.
 	return ret0, ret1
 }
 
-// Add indicates an expected call of Add
+// Add indicates an expected call of Add.
 func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), arg0, arg1, arg2)
 }
 
-// Remove mocks base method
+// Remove mocks base method.
 func (m *MockNetworkEndpointListener) Remove(arg0 context.Context, arg1 types.Network) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Remove", arg0, arg1)
@@ -59,7 +59,7 @@ func (m *MockNetworkEndpointListener) Remove(arg0 context.Context, arg1 types.Ne
 	return ret0
 }
 
-// Remove indicates an expected call of Remove
+// Remove indicates an expected call of Remove.
 func (mr *MockNetworkEndpointListenerMockRecorder) Remove(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Remove), arg0, arg1)
