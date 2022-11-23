@@ -35,8 +35,7 @@ func (a *App) Curl(c *cli.Context) error {
 
 	httpClient := &http.Client{
 		Transport: client.NewHTTPRoundTripper(context.Background(), c.String("network"), sand.HTTPRoundTripperOpts{
-			TLSConfig:         &tlsConfig,
-			DisableKeepAlives: true,
+			TLSConfig: &tlsConfig,
 		}),
 	}
 

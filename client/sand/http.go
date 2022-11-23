@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -29,15 +28,13 @@ func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address 
 }
 
 type HTTPRoundTripperOpts struct {
-	TLSConfig         *tls.Config
-	DisableKeepAlives bool
+	TLSConfig *tls.Config
 }
 
 func (c *client) NewHTTPRoundTripper(ctx context.Context, id string, opts HTTPRoundTripperOpts) http.RoundTripper {
 	return &http.Transport{
 		TLSClientConfig:   opts.TLSConfig,
-		DisableKeepAlives: opts.DisableKeepAlives,
-		IdleConnTimeout:   10 * time.Second,
+		DisableKeepAlives: true,
 		Dial: func(n, a string) (net.Conn, error) {
 			return c.rawDialer(ctx, id, n, a)
 		},
