@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* fix(sand agent cli): add a timeout to the curl http client
 * fix(sand client): disable HTTP keepalives to prevent leaking file descriptors
 * chore(go): use go 1.17
 * chore(deps): bump github.com/Scalingo/go-handlers from 1.4.0 to 1.4.4
