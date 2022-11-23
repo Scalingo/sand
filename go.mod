@@ -21,8 +21,8 @@ require (
 	github.com/urfave/cli v1.22.10
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.1
-	go.etcd.io/etcd/api/v3 v3.5.4
-	go.etcd.io/etcd/client/v3 v3.5.4
+	go.etcd.io/etcd/api/v3 v3.5.6
+	go.etcd.io/etcd/client/v3 v3.5.6
 	golang.org/x/sys v0.1.0
 	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
@@ -54,7 +54,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.5.4 // indirect
+	go.etcd.io/etcd/client/pkg/v3 v3.5.6 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
