@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.0.1 - 29 nov 2022
+
 * fix(sand agent cli): add a timeout to the curl http client
 * fix(sand client): disable HTTP keepalives to prevent leaking file descriptors
 * chore(go): use go 1.17

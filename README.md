@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/Scalingo/sand.svg?branch=master)](https://travis-ci.org/Scalingo/sand)
 
-# SAND Network Daemon
+# SAND Network Daemon V1.0.1
 
 SAND is simple API designed to create overlay networks based on
 **[VXLAN](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN)** in an infrastructure, basing its
@@ -239,6 +239,9 @@ automatically use the version of the last tag created.
 ```
 goreleaser release --skip-publish --skip-announce --skip-sign  --rm-dist
 ```
+
+The title of the release should be the version number and the text of the
+release is the same as the changelog.
 
 ## Testing
 
