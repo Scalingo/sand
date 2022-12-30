@@ -8,7 +8,7 @@ github.com/Scalingo/errgo-rollbar
 # github.com/Scalingo/go-etcd-lock/v5 v5.0.6
 ## explicit; go 1.17
 github.com/Scalingo/go-etcd-lock/v5/lock
-# github.com/Scalingo/go-handlers v1.5.0
+# github.com/Scalingo/go-handlers v1.6.0
 ## explicit; go 1.17
 github.com/Scalingo/go-handlers
 # github.com/Scalingo/go-plugins-helpers v1.3.0
@@ -19,9 +19,9 @@ github.com/Scalingo/go-plugins-helpers/sdk
 # github.com/Scalingo/go-utils/crypto v1.0.0
 ## explicit; go 1.17
 github.com/Scalingo/go-utils/crypto
-# github.com/Scalingo/go-utils/errors v1.1.1
+# github.com/Scalingo/go-utils/errors/v2 v2.2.0
 ## explicit; go 1.17
-github.com/Scalingo/go-utils/errors
+github.com/Scalingo/go-utils/errors/v2
 # github.com/Scalingo/go-utils/etcd v1.1.1
 ## explicit; go 1.17
 github.com/Scalingo/go-utils/etcd
