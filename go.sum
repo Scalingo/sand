@@ -365,8 +365,9 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/cFDk=
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/Scalingo/errgo-rollbar v0.2.0 h1:Jm/7K2ymVhPGGFL8BgFGOjpPRlCk+vYRCDtT1PaUfWI=
 github.com/Scalingo/errgo-rollbar v0.2.0/go.mod h1:InPX+PbaicLpePiWdmay2bJ4gtF4anm2L8T6rITx41A=
+github.com/Scalingo/errgo-rollbar v0.2.1 h1:S2hz3FcjiSEB8yoQS2A0WzUY2Cq6tvD2IHzB4xlW4bA=
+github.com/Scalingo/errgo-rollbar v0.2.1/go.mod h1:C2wzmHChrL2NqZDhDIIWemnJtBJh5nvAbw396uVR6Kc=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6 h1:EY3wlM/Krc6Hyil+ft+viCUiyVVjMp/cwqxd5hcaQFI=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6/go.mod h1:2CZIWQI2R3E6b/NB8dDxkb5EIkPPBGtMIti4uG3Ll6Q=
 github.com/Scalingo/go-handlers v1.7.0 h1:bM4V0jBaVJY7AYfeRNi2LmMCnnf/gQ6xHxCTA1XWxCI=
