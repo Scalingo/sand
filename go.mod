@@ -1,6 +1,6 @@
 module github.com/Scalingo/sand
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.6
@@ -10,11 +10,11 @@ require (
 	github.com/Scalingo/go-utils/graceful v1.1.1
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/bits-and-blooms/bitset v1.4.0
-	github.com/docker/docker v23.0.1+incompatible
 	github.com/gofrs/uuid v4.3.1+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/magefile/mage v1.14.0
+	github.com/moby/moby v23.0.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
