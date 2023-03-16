@@ -1,2 +1,5 @@
 --ignore-dir=vendor
 --ignore-dir=_dev/docker-data/etcd
+--ignore-dir=_dev/docker-data/etcd-1
+--ignore-dir=_dev/docker-data/etcd-2
+--ignore-dir=_dev/docker-data/etcd-3
