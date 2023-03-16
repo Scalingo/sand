@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Scalingo/sand.svg?branch=master)](https://travis-ci.org/Scalingo/sand)
+[![Codeship Status for SAND](https://app.codeship.com/projects/3787f4e2-9515-4e36-aaa4-44d8e5bd1955/status?branch=master)](https://app.codeship.com/projects/425178)
 
 # SAND Network Daemon V1.0.1
 
