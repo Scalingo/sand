@@ -20,7 +20,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli v1.22.10
 	github.com/vishvananda/netlink v1.1.0
-	github.com/vishvananda/netns v0.0.1
+	github.com/vishvananda/netns v0.0.4
 	go.etcd.io/etcd/api/v3 v3.5.6
 	go.etcd.io/etcd/client/v3 v3.5.6
 	golang.org/x/sys v0.5.0
