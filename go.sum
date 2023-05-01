@@ -5,8 +5,8 @@ github.com/Scalingo/errgo-rollbar v0.2.1 h1:S2hz3FcjiSEB8yoQS2A0WzUY2Cq6tvD2IHzB
 github.com/Scalingo/errgo-rollbar v0.2.1/go.mod h1:C2wzmHChrL2NqZDhDIIWemnJtBJh5nvAbw396uVR6Kc=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6 h1:EY3wlM/Krc6Hyil+ft+viCUiyVVjMp/cwqxd5hcaQFI=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6/go.mod h1:2CZIWQI2R3E6b/NB8dDxkb5EIkPPBGtMIti4uG3Ll6Q=
-github.com/Scalingo/go-handlers v1.7.0 h1:bM4V0jBaVJY7AYfeRNi2LmMCnnf/gQ6xHxCTA1XWxCI=
-github.com/Scalingo/go-handlers v1.7.0/go.mod h1:E3G9Y+p+b2TOa4F49enfTDsA+1Uno6q8rJPz4i3m7bU=
+github.com/Scalingo/go-handlers v1.8.0 h1:9WKoJUEy3HHh/kaLTulaoG6eKhY7jeJs1xFSq75rAZU=
+github.com/Scalingo/go-handlers v1.8.0/go.mod h1:J8KabHtLtwsOhx6bM2AT2D2xMVO9/a3lgMGm9TvSgsA=
 github.com/Scalingo/go-plugins-helpers v1.3.0 h1:jaVIs+d8UT+J/7tZMaSCAZupNhh0VptRB/LY80oxvVw=
 github.com/Scalingo/go-plugins-helpers v1.3.0/go.mod h1:Z8rY7D3xK6RzNNjnlTsghe52gaVYTPda4djPbzED0ts=
 github.com/Scalingo/go-utils/crypto v1.0.0 h1:aczJ3fXjdgL4Y0qIGJR4xAqNXorID5pjx3eH4k40dt8=

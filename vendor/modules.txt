@@ -9,7 +9,7 @@ github.com/Scalingo/errgo-rollbar
 # github.com/Scalingo/go-etcd-lock/v5 v5.0.6
 ## explicit; go 1.17
 github.com/Scalingo/go-etcd-lock/v5/lock
-# github.com/Scalingo/go-handlers v1.7.0
+# github.com/Scalingo/go-handlers v1.8.0
 ## explicit; go 1.17
 github.com/Scalingo/go-handlers
 # github.com/Scalingo/go-plugins-helpers v1.3.0

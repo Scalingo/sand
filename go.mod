@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.6
-	github.com/Scalingo/go-handlers v1.7.0
+	github.com/Scalingo/go-handlers v1.8.0
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.1
 	github.com/Scalingo/go-utils/graceful v1.1.1
