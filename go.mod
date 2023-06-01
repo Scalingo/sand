@@ -16,7 +16,7 @@ require (
 	github.com/magefile/mage v1.14.0
 	github.com/moby/moby v23.0.2+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.2
 	github.com/stretchr/testify v1.8.2
 	github.com/urfave/cli v1.22.13
 	github.com/vishvananda/netlink v1.1.0
