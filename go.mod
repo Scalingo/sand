@@ -23,7 +23,7 @@ require (
 	github.com/vishvananda/netns v0.0.4
 	go.etcd.io/etcd/api/v3 v3.5.8
 	go.etcd.io/etcd/client/v3 v3.5.7
-	golang.org/x/sys v0.6.0
+	golang.org/x/sys v0.8.0
 	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
 	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
 	google.golang.org/grpc v1.54.0
