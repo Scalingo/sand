@@ -10,6 +10,7 @@ services:
       - /etc/docker/plugins:/etc/docker/plugins:shared
       - /var/run/netns:/var/run/netns:shared
       - /var/run/docker/netns:/var/run/docker/netns:shared
+      - ./_dev/go-cache:/root/.cache
     environment:
       GO_ENV: development
       ETCD_HOSTS: "https://172.17.0.1:22379,https://172.17.0.1:22381,https://172.17.0.1:22383"

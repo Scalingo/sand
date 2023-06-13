@@ -1,5 +1,6 @@
 .vagrant
 /_dev/docker-data/
+/_dev/go-cache/
 /sand-agent
 /cmd/sand-agent/sand-agent
 /cmd/sand-agent-cli/sand-agent-cli
