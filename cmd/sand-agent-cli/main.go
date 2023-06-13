@@ -5,8 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/Scalingo/sand/client/sand"
 	"github.com/urfave/cli"
+
+	"github.com/Scalingo/sand/client/sand"
 )
 
 var (
@@ -61,6 +62,7 @@ func main() {
 			Action: app.NetworkCreate,
 			Flags: []cli.Flag{
 				cli.StringFlag{Name: "name", Usage: "name of the network to create"},
+				cli.StringFlag{Name: "ip-range", Usage: "IP Range from which endpoint IP will be allocated from"},
 			},
 		}, {
 			Name:   "network-show",
