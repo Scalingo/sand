@@ -50,7 +50,7 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rollbar/rollbar-go v1.4.4 // indirect
+	github.com/rollbar/rollbar-go v1.4.5 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.9 // indirect
