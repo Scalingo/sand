@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/pkg/errors"
 
 	"github.com/Scalingo/go-utils/logger"
