@@ -10,7 +10,7 @@ require (
 	github.com/Scalingo/go-utils/graceful v1.1.1
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/bits-and-blooms/bitset v1.7.0
-	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/magefile/mage v1.14.0
@@ -45,6 +45,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-plugins-helpers v0.0.0-20200102110956-c9a8a2d92ccc // indirect
 	github.com/facebookgo/grace v0.0.0-20180706040059-75cf19382434 // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
