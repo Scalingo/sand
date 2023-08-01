@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
-github.com/Microsoft/go-winio v0.6.0/go.mod h1:cTAf44im0RAYeL23bpB+fzCyDH2MJiz2BO69KH/soAE=
+github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migciow=
+github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/Scalingo/errgo-rollbar v0.2.1 h1:S2hz3FcjiSEB8yoQS2A0WzUY2Cq6tvD2IHzB4xlW4bA=
 github.com/Scalingo/errgo-rollbar v0.2.1/go.mod h1:C2wzmHChrL2NqZDhDIIWemnJtBJh5nvAbw396uVR6Kc=
 github.com/Scalingo/go-etcd-lock/v5 v5.0.6 h1:EY3wlM/Krc6Hyil+ft+viCUiyVVjMp/cwqxd5hcaQFI=

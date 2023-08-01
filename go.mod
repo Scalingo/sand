@@ -31,7 +31,7 @@ require (
 )
 
 require (
-	github.com/Microsoft/go-winio v0.6.0 // indirect
+	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Scalingo/errgo-rollbar v0.2.1 // indirect
 	github.com/Scalingo/go-utils/crypto v1.0.0 // indirect
 	github.com/Scalingo/go-utils/errors/v2 v2.3.0 // indirect
