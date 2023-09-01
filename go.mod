@@ -13,7 +13,7 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/magefile/mage v1.14.0
+	github.com/magefile/mage v1.15.0
 	github.com/moby/moby v23.0.2+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.2
