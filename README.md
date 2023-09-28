@@ -1,6 +1,6 @@
 [![Codeship Status for SAND](https://app.codeship.com/projects/3787f4e2-9515-4e36-aaa4-44d8e5bd1955/status?branch=master)](https://app.codeship.com/projects/425178)
 
-# SAND Network Daemon V1.0.1
+# SAND Network Daemon V1.0.2
 
 SAND is simple API designed to create overlay networks based on
 **[VXLAN](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN)** in an infrastructure, basing its
@@ -229,19 +229,33 @@ services:
       - sand-network
 ```
 
-## Release
+## Release a New Version
 
-The project is using [goreleaser](https://goreleaser.com) to build its archives.
+Bump new version number in:
 
-To build locally the archives, you can use the following command, it will
-automatically use the version of the last tag created.
+- `CHANGELOG.md`
+- `README.md`
 
+Commit the new version number:
+
+```sh
+version="1.0.2"
+
+git switch --create release/${version}
+git add CHANGELOG.md README.md
+git commit -m "Bump v${version}"
+git push --set-upstream origin release/${version}
+gh pr create --reviewer=Soulou --title "$(git log -1 --pretty=%B)"
 ```
-goreleaser release --skip-publish --skip-announce --skip-sign  --rm-dist
-```
 
-The title of the release should be the version number and the text of the
-release is the same as the changelog.
+Once the pull request merged, you can compile and tag the new release.
+
+```sh
+goreleaser release --skip-publish --skip-announce --skip-sign --rm-dist
+git tag v$version
+git push origin master v$version
+gh release create v${version}
+```
 
 ## Testing
 
