@@ -2,9 +2,11 @@
 
 ## To be Released
 
-* chore(deps): bump github.com/Scalingo/go-handlers from 1.6.0 to 1.7.0
+## v1.0.2 - 28 Sep 2023
 
-## v1.0.1 - 29 nov 2022
+* chore: bump various dependencies
+
+## v1.0.1 - 29 Nov 2022
 
 * fix(sand agent cli): add a timeout to the curl http client
 * fix(sand client): disable HTTP keepalives to prevent leaking file descriptors
