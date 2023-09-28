@@ -258,7 +258,7 @@ gh release create v${version} --generate-notes --prerelease
 gh release view v${version} --web
 ```
 
-On the web interface, unset the pre-release checkbox and upload the archives in the `dist` folder.
+On the web interface, unset the pre-release checkbox, check the "Set as the latest release" checkbox, and upload the archives in the `dist` folder.
 
 If you face an issue about a missing library during the compilation, you may be missing the following packages:
 
