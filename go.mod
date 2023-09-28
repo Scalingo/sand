@@ -24,8 +24,6 @@ require (
 	go.etcd.io/etcd/api/v3 v3.5.9
 	go.etcd.io/etcd/client/v3 v3.5.9
 	golang.org/x/sys v0.12.0
-	// This shouldn't be upgraded as long as go.etcd.io/etcd/v3 has not been updated.
-	// Waiting for etcd 3.5 release: https://github.com/etcd-io/etcd/issues/12124
 	google.golang.org/grpc v1.58.2
 	gopkg.in/errgo.v1 v1.0.1
 )
