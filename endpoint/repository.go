@@ -17,6 +17,7 @@ const (
 type Repository interface {
 	List(context.Context, map[string]string) ([]types.Endpoint, error)
 	Create(context.Context, types.Network, params.EndpointCreate) (types.Endpoint, error)
+	Save(context.Context, types.Endpoint) error
 	Activate(context.Context, types.Network, types.Endpoint, params.EndpointActivate) (types.Endpoint, error)
 	Delete(context.Context, types.Network, types.Endpoint, DeleteOpts) error
 	Deactivate(context.Context, types.Network, types.Endpoint) (types.Endpoint, error)

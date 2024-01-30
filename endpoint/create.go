@@ -6,10 +6,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/Scalingo/sand/api/params"
-	"github.com/Scalingo/sand/api/types"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/sand/api/params"
+	"github.com/Scalingo/sand/api/types"
 )
 
 func (r *repository) Create(ctx context.Context, n types.Network, params params.EndpointCreate) (types.Endpoint, error) {
@@ -33,14 +34,9 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 		TargetVethMAC: macAddress,
 	}
 
-	err = r.store.Set(ctx, endpoint.StorageKey(), &endpoint)
+	err = r.Save(ctx, endpoint)
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to save endpoint %s in store", endpoint)
-	}
-
-	err = r.store.Set(ctx, endpoint.NetworkStorageKey(), &endpoint)
-	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to save endpoint %s in store network", endpoint)
+		return endpoint, errors.Wrapf(err, "fail to save endpoint")
 	}
 
 	if params.Activate {
@@ -51,6 +47,19 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 	}
 
 	return endpoint, nil
+}
+
+func (r *repository) Save(ctx context.Context, endpoint types.Endpoint) error {
+	err := r.store.Set(ctx, endpoint.StorageKey(), &endpoint)
+	if err != nil {
+		return errors.Wrapf(err, "fail to save endpoint %s in store", endpoint)
+	}
+
+	err = r.store.Set(ctx, endpoint.NetworkStorageKey(), &endpoint)
+	if err != nil {
+		return errors.Wrapf(err, "fail to save endpoint %s in store network", endpoint)
+	}
+	return nil
 }
 
 func ipv4ToMac(ipstr string) (string, error) {
