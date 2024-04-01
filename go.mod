@@ -21,8 +21,8 @@ require (
 	github.com/urfave/cli v1.22.14
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.4
-	go.etcd.io/etcd/api/v3 v3.5.12
-	go.etcd.io/etcd/client/v3 v3.5.12
+	go.etcd.io/etcd/api/v3 v3.5.13
+	go.etcd.io/etcd/client/v3 v3.5.13
 	golang.org/x/sys v0.18.0
 	google.golang.org/grpc v1.62.1
 	gopkg.in/errgo.v1 v1.0.1
@@ -50,7 +50,7 @@ require (
 	github.com/rollbar/rollbar-go v1.4.5 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.5.12 // indirect
+	go.etcd.io/etcd/client/pkg/v3 v3.5.13 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/mod v0.16.0 // indirect
