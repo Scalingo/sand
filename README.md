@@ -239,7 +239,10 @@ Bump new version number in:
 Commit the new version number:
 
 ```sh
+old_version="1.0.1"
 version="1.0.2"
+
+sed -i "s/$old_version/$version/g" config/config.go
 
 git switch --create release/${version}
 git add CHANGELOG.md README.md
