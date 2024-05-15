@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* fix(server version): update server version
+
 ## v1.0.2 - 28 Sep 2023
 
 * chore: bump various dependencies
