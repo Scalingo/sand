@@ -239,10 +239,9 @@ Bump new version number in:
 Commit the new version number:
 
 ```sh
-old_version="1.0.1"
 version="1.0.2"
 
-sed -i "s/$old_version/$version/g" config/config.go
+sed --in-place "s/var Version = \"v\([0-9.]*\)\"/var Version = \"v$version\"/g" config/config.go
 
 git switch --create release/${version}
 git add CHANGELOG.md README.md
