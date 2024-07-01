@@ -9,37 +9,35 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebookgo/grace/gracenet"
-	"gopkg.in/errgo.v1"
+	"github.com/Scalingo/go-utils/errors/v2"
+
+	"github.com/cloudflare/tableflip"
 
 	"github.com/Scalingo/go-utils/logger"
 )
 
-type service struct {
+type Service struct {
 	httpServer *http.Server
-	graceful   *gracenet.Net
+	graceful   *tableflip.Upgrader
 	wg         *sync.WaitGroup
-	stopped    chan error
 	// waitDuration is the duration which is waited for all connections to stop
 	// in order to graceful shutdown the server. If some connections are still up
 	// after this timer they'll be cut aggressively.
 	waitDuration time.Duration
 	// reloadWaitDuration is the duration the old process is waiting for
 	// connection to close when a graceful restart has been ordered. The new
-	// process is already woking as expecting.
+	// process is already working as expecting.
 	reloadWaitDuration time.Duration
 	// pidFile tracks the pid of the last child among the chain of graceful restart
 	// Required for daemon manager to track the service
 	pidFile string
 }
 
-type Option func(*service)
+type Option func(*Service)
 
-func NewService(opts ...Option) *service {
-	s := &service{
-		graceful:           &gracenet.Net{},
+func NewService(opts ...Option) *Service {
+	s := &Service{
 		wg:                 &sync.WaitGroup{},
-		stopped:            make(chan error),
 		waitDuration:       time.Minute,
 		reloadWaitDuration: 30 * time.Minute,
 	}
@@ -50,24 +48,24 @@ func NewService(opts ...Option) *service {
 }
 
 func WithWaitDuration(d time.Duration) Option {
-	return Option(func(s *service) {
+	return Option(func(s *Service) {
 		s.waitDuration = d
 	})
 }
 
 func WithReloadWaitDuration(d time.Duration) Option {
-	return Option(func(s *service) {
+	return Option(func(s *Service) {
 		s.reloadWaitDuration = d
 	})
 }
 
 func WithPIDFile(path string) Option {
-	return Option(func(s *service) {
+	return Option(func(s *Service) {
 		s.pidFile = path
 	})
 }
 
-func (s *service) ListenAndServeTLS(ctx context.Context, proto string, addr string, handler http.Handler, tlsConfig *tls.Config) error {
+func (s *Service) ListenAndServeTLS(ctx context.Context, proto string, addr string, handler http.Handler, tlsConfig *tls.Config) error {
 	httpServer := &http.Server{
 		Addr:      addr,
 		Handler:   handler,
@@ -76,7 +74,7 @@ func (s *service) ListenAndServeTLS(ctx context.Context, proto string, addr stri
 	return s.listenAndServe(ctx, proto, addr, httpServer)
 }
 
-func (s *service) ListenAndServe(ctx context.Context, proto string, addr string, handler http.Handler) error {
+func (s *Service) ListenAndServe(ctx context.Context, proto string, addr string, handler http.Handler) error {
 	httpServer := &http.Server{
 		Addr:    addr,
 		Handler: handler,
@@ -84,53 +82,80 @@ func (s *service) ListenAndServe(ctx context.Context, proto string, addr string,
 	return s.listenAndServe(ctx, proto, addr, httpServer)
 }
 
-func (s *service) listenAndServe(ctx context.Context, proto string, addr string, server *http.Server) error {
+func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, server *http.Server) error {
+	log := logger.Get(ctx)
+
 	if s.pidFile != "" {
 		pid := os.Getpid()
 		err := os.WriteFile(s.pidFile, []byte(fmt.Sprintf("%d\n", pid)), 0600)
 		if err != nil {
-			return errgo.Notef(err, "fail to write PID file")
+			return errors.Wrap(ctx, err, "fail to write PID file")
 		}
 	}
 
-	ld, err := s.graceful.Listen(proto, addr)
+	// Use tableflip to handle graceful restart requests
+	upg, err := tableflip.New(tableflip.Options{
+		UpgradeTimeout: s.reloadWaitDuration,
+		PIDFile:        s.pidFile,
+	})
 	if err != nil {
-		return errgo.Notef(err, "fail to get listener")
+		return errors.Wrap(ctx, err, "creating tableflip upgrader")
+	}
+	s.graceful = upg
+	defer upg.Stop()
+
+	// setup the signal handling
+	go s.setupSignals(ctx)
+
+	// Listen must be called before Ready
+	ln, err := upg.Listen("tcp", addr)
+	if err != nil {
+		return errors.Wrap(ctx, err, "upgrader listen")
 	}
 
 	if server.TLSConfig != nil {
-		ld = tls.NewListener(ld, server.TLSConfig)
+		ln = tls.NewListener(ln, server.TLSConfig)
 	}
 
 	s.httpServer = server
 
-	go s.setupSignals(ctx)
+	go func() {
+		err := server.Serve(ln)
+		if !errors.Is(err, http.ErrServerClosed) {
+			log.WithError(err).Error("http server serve")
+		}
+	}()
 
-	err = s.httpServer.Serve(ld)
-	if err == http.ErrServerClosed {
-		return s.waitStopped()
+	log.Info("ready")
+	if err := upg.Ready(); err != nil {
+		return errors.Wrapf(ctx, err, "upgrader notify ready")
 	}
-	if err != nil {
-		return errgo.Notef(err, "fail to serve http service")
-	}
+	<-upg.Exit()
 
 	// Normally the server should be always gracefully stopped and entering the
 	// above condition when server is closed If by any mean the serve stops
-	// without error, we're stopping the server ourself here.  This code is a
+	// without error, we're stopping the server ourselves here.  This code is a
 	// security to free resource but should be unreachable
 	ctx, cancel := context.WithTimeout(ctx, s.waitDuration)
 	defer cancel()
 	err = s.shutdown(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to shutdown server")
+		return errors.Wrapf(ctx, err, "fail to shutdown service")
 	}
-	return s.waitStopped()
+
+	// Wait for connections to drain.
+	err = server.Shutdown(ctx)
+	if err != nil {
+		return errors.Wrap(ctx, err, "server shutdown")
+	}
+
+	return nil
 }
 
 // IncConnCount has to be used when connections are hijacked because in
 // this case http.Server doesn't track these connection anymore, but you
 // may not want to cut them abrutely.
-func (s *service) IncConnCount(ctx context.Context) {
+func (s *Service) IncConnCount(ctx context.Context) {
 	log := logger.Get(ctx)
 	log.Debug("inc conn count")
 	s.wg.Add(1)
@@ -138,7 +163,7 @@ func (s *service) IncConnCount(ctx context.Context) {
 
 // DecConnCount is the same as IncConnCount, but you need to call it when
 // the hijacked connection is stopped
-func (s *service) DecConnCount(ctx context.Context) {
+func (s *Service) DecConnCount(ctx context.Context) {
 	log := logger.Get(ctx)
 	log.Debug("dec conn count")
 	s.wg.Done()
@@ -148,30 +173,26 @@ func (s *service) DecConnCount(ctx context.Context) {
 // connection to stop http.Server#Shutdown is graceful but the documentation
 // specifies hijacked connections and websockets have to be handled by the
 // developer.
-func (s *service) shutdown(ctx context.Context) error {
+func (s *Service) shutdown(ctx context.Context) error {
 	log := logger.Get(ctx)
 	log.Info("shutting down http server")
 	err := s.httpServer.Shutdown(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to shutdown http server")
+		return errors.Wrapf(ctx, err, "fail to shutdown http server")
 	}
 	log.Info("http server is stopped")
 
 	log.Info("wait hijacked connections")
 	err = s.waitHijackedConnections(ctx)
 	if err != nil {
-		return errgo.Notef(err, "fail to wait hijacked connections")
+		return errors.Wrapf(ctx, err, "fail to wait hijacked connections")
 	}
 	log.Info("no more connection running")
 
 	return nil
 }
 
-func (s *service) waitStopped() error {
-	return <-s.stopped
-}
-
-func (s *service) waitHijackedConnections(ctx context.Context) error {
+func (s *Service) waitHijackedConnections(ctx context.Context) error {
 	done := make(chan struct{})
 	go func() {
 		s.wg.Wait()
