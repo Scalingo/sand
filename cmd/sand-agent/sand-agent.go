@@ -142,7 +142,7 @@ func main() {
 			err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, handler)
 		}
 		if err != nil {
-			log.WithError(err).Error("fail to intialize docker plugin listener")
+			log.WithError(err).Error("fail to initialize docker plugin listener")
 			os.Exit(-1)
 		}
 	}
