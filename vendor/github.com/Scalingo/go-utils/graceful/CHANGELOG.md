@@ -2,6 +2,8 @@
 
 ## To be released
 
+* feat: allow multiple http servers to be started with a single graceful service
+
 ## v1.1.3
 
 * build(deps): remove patch version number from go version 1.22.4 => 1.22
