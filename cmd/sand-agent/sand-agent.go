@@ -145,7 +145,6 @@ func main() {
 			log.WithError(err).Error("fail to intialize docker plugin listener")
 			os.Exit(-1)
 		}
-		// log.Info("docker plugin stopped")
 	}
 
 	logHandler := log.WithField("service", "sand-api")
