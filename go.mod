@@ -2,27 +2,29 @@ module github.com/Scalingo/sand
 
 go 1.22
 
+toolchain go1.22.5
+
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.7
-	github.com/Scalingo/go-handlers v1.8.1
+	github.com/Scalingo/go-handlers v1.8.2
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.2
-	github.com/Scalingo/go-utils/graceful v1.1.2
+	github.com/Scalingo/go-utils/graceful v1.1.3
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/bits-and-blooms/bitset v1.13.0
 	github.com/gofrs/uuid/v5 v5.2.0
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/magefile/mage v1.15.0
-	github.com/moby/moby v27.0.3+incompatible
+	github.com/moby/moby v27.1.1+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli v1.22.15
 	github.com/vishvananda/netlink v1.1.0
 	github.com/vishvananda/netns v0.0.4
-	go.etcd.io/etcd/api/v3 v3.5.14
-	go.etcd.io/etcd/client/v3 v3.5.14
+	go.etcd.io/etcd/api/v3 v3.5.15
+	go.etcd.io/etcd/client/v3 v3.5.15
 	golang.org/x/sys v0.22.0
 	google.golang.org/grpc v1.65.0
 	gopkg.in/errgo.v1 v1.0.1
@@ -50,7 +52,7 @@ require (
 	github.com/rollbar/rollbar-go v1.4.5 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.5.14 // indirect
+	go.etcd.io/etcd/client/pkg/v3 v3.5.15 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
