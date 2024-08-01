@@ -3,14 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"os"
-	"path/filepath"
-	"sync"
-
 	"github.com/moby/moby/pkg/reexec"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/go-handlers"
@@ -109,7 +107,12 @@ func main() {
 	log.WithField("port", c.HttpPort).Info("Listening")
 	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
 
-	wg := &sync.WaitGroup{}
+	// We can only have one graceful service per process
+	numServers := 1
+	if c.EnableDockerPlugin {
+		numServers++
+	}
+	gracefulService := graceful.NewService(graceful.WithNumServers(numServers))
 
 	if c.EnableDockerPlugin {
 		log.WithField("port", c.DockerPluginHttpPort).Info("Enabling docker plugin")
@@ -133,32 +136,24 @@ func main() {
 		logDocker := log.WithField("service", "docker-plugin")
 		ctxDocker := logger.ToCtx(ctx, logDocker)
 
-		wg.Add(1)
-		go func() {
-			var err error
-
-			defer wg.Done()
-			if c.IsHttpTLSEnabled() {
-				err = tlsListener(ctxDocker, c, dockerPluginEndpoint, handler)
-			} else {
-				gracefulService := graceful.NewService()
-				err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, handler)
-			}
-			if err != nil {
-				log.WithError(err).Error("fail to intialize docker plugin listener")
-				os.Exit(-1)
-			}
-			log.Info("docker plugin stopped")
-		}()
+		if c.IsHttpTLSEnabled() {
+			err = tlsListener(ctxDocker, c, gracefulService, dockerPluginEndpoint, handler)
+		} else {
+			err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, handler)
+		}
+		if err != nil {
+			log.WithError(err).Error("fail to intialize docker plugin listener")
+			os.Exit(-1)
+		}
+		// log.Info("docker plugin stopped")
 	}
 
 	logHandler := log.WithField("service", "sand-api")
 	ctxHandler := logger.ToCtx(ctx, logHandler)
 
 	if c.IsHttpTLSEnabled() {
-		err = tlsListener(ctxHandler, c, serviceEndpoint, r)
+		err = tlsListener(ctxHandler, c, gracefulService, serviceEndpoint, r)
 	} else {
-		gracefulService := graceful.NewService()
 		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, r)
 	}
 	if err != nil {
@@ -166,19 +161,17 @@ func main() {
 		os.Exit(-1)
 	}
 	log.Info("HTTP API stopped")
-	wg.Wait()
 	log.Info("Stop watching etcd changes")
 	endpointsWatcher.Close()
 	log.Info("All APIs stopped, shutting down..")
 }
 
-func tlsListener(ctx context.Context, c *config.Config, serviceEndpoint string, handler http.Handler) error {
+func tlsListener(ctx context.Context, c *config.Config, gracefulService *graceful.Service, serviceEndpoint string, handler http.Handler) error {
 	config, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
 	if err != nil {
 		return errors.Wrapf(err, "fail to create tls configuration")
 	}
 
-	gracefulService := graceful.NewService()
 	return gracefulService.ListenAndServeTLS(ctx, "tcp", serviceEndpoint, handler, config)
 }
 

@@ -28,7 +28,7 @@ github.com/Scalingo/go-utils/errors/v2
 # github.com/Scalingo/go-utils/etcd v1.1.2
 ## explicit; go 1.20
 github.com/Scalingo/go-utils/etcd
-# github.com/Scalingo/go-utils/graceful v1.1.2
+# github.com/Scalingo/go-utils/graceful v1.1.4-0.20240801184811-e018d245a0e8
 ## explicit; go 1.22
 github.com/Scalingo/go-utils/graceful
 # github.com/Scalingo/go-utils/logger v1.2.0
