@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/moby/moby/pkg/reexec"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -28,7 +30,6 @@ import (
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/Scalingo/sand/store"
-	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
 )
 
@@ -113,10 +114,13 @@ func main() {
 	}
 	gracefulService := graceful.NewService(graceful.WithNumServers(numServers))
 
-	tlsConfig, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
-	if err != nil {
-		log.WithError(err).Error("fail to create tls configuration")
-		os.Exit(-1)
+	var tlsConfig *tls.Config
+	if c.IsHttpTLSEnabled() {
+		tlsConfig, err = apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
+		if err != nil {
+			log.WithError(err).Error("fail to create tls configuration")
+			os.Exit(-1)
+		}
 	}
 
 	if c.EnableDockerPlugin {
