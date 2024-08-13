@@ -6,7 +6,6 @@ import (
 	"github.com/moby/moby/pkg/reexec"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -92,17 +91,17 @@ func main() {
 	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
 	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository, ipAllocator)
 
-	r := handlers.NewRouter(log)
-	r.Use(handlers.ErrorMiddleware)
-	r.HandleFunc("/version", vctrl.Show).Methods("GET")
-	r.HandleFunc("/networks", nctrl.List).Methods("GET")
-	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
-	r.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
-	r.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
-	r.HandleFunc("/networks/{id}", nctrl.Connect).Methods("CONNECT")
-	r.HandleFunc("/endpoints", ectrl.Create).Methods("POST")
-	r.HandleFunc("/endpoints", ectrl.List).Methods("GET")
-	r.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
+	sandRouter := handlers.NewRouter(log)
+	sandRouter.Use(handlers.ErrorMiddleware)
+	sandRouter.HandleFunc("/version", vctrl.Show).Methods("GET")
+	sandRouter.HandleFunc("/networks", nctrl.List).Methods("GET")
+	sandRouter.HandleFunc("/networks", nctrl.Create).Methods("POST")
+	sandRouter.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
+	sandRouter.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
+	sandRouter.HandleFunc("/networks/{id}", nctrl.Connect).Methods("CONNECT")
+	sandRouter.HandleFunc("/endpoints", ectrl.Create).Methods("POST")
+	sandRouter.HandleFunc("/endpoints", ectrl.List).Methods("GET")
+	sandRouter.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
 
 	log.WithField("port", c.HttpPort).Info("Listening")
 	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
@@ -114,6 +113,12 @@ func main() {
 	}
 	gracefulService := graceful.NewService(graceful.WithNumServers(numServers))
 
+	tlsConfig, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
+	if err != nil {
+		log.WithError(err).Error("fail to create tls configuration")
+		os.Exit(-1)
+	}
+
 	if c.EnableDockerPlugin {
 		log.WithField("port", c.DockerPluginHttpPort).Info("Enabling docker plugin")
 		dockerRepository := docker.NewRepository(c, dataStore)
@@ -121,9 +126,9 @@ func main() {
 			c, networkRepository, endpointRepository, dockerRepository, ipAllocator,
 		)
 		manifest := `{"Implements": ["NetworkDriver", "IpamDriver"]}`
-		handler := dockersdk.NewHandler(log, manifest)
-		dockernetwork.ConfigureHandler(handler, plugin.DockerNetworkPlugin)
-		dockeripam.ConfigureHandler(handler, plugin.DockerIPAMPlugin)
+		dockerPluginRouter := dockersdk.NewHandler(log, manifest)
+		dockernetwork.ConfigureHandler(dockerPluginRouter, plugin.DockerNetworkPlugin)
+		dockeripam.ConfigureHandler(dockerPluginRouter, plugin.DockerIPAMPlugin)
 
 		err = docker.WritePluginSpecsOnDisk(ctx, c)
 		if err != nil {
@@ -137,9 +142,9 @@ func main() {
 		ctxDocker := logger.ToCtx(ctx, logDocker)
 
 		if c.IsHttpTLSEnabled() {
-			err = tlsListener(ctxDocker, c, gracefulService, dockerPluginEndpoint, handler)
+			err = gracefulService.ListenAndServeTLS(ctxDocker, "tcp", dockerPluginEndpoint, dockerPluginRouter, tlsConfig)
 		} else {
-			err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, handler)
+			err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, dockerPluginRouter)
 		}
 		if err != nil {
 			log.WithError(err).Error("fail to initialize docker plugin listener")
@@ -151,9 +156,9 @@ func main() {
 	ctxHandler := logger.ToCtx(ctx, logHandler)
 
 	if c.IsHttpTLSEnabled() {
-		err = tlsListener(ctxHandler, c, gracefulService, serviceEndpoint, r)
+		err = gracefulService.ListenAndServeTLS(ctxHandler, "tcp", serviceEndpoint, sandRouter, tlsConfig)
 	} else {
-		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, r)
+		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, sandRouter)
 	}
 	if err != nil {
 		log.WithError(err).Error("fail to listen and serve")
@@ -163,15 +168,6 @@ func main() {
 	log.Info("Stop watching etcd changes")
 	endpointsWatcher.Close()
 	log.Info("All APIs stopped, shutting down..")
-}
-
-func tlsListener(ctx context.Context, c *config.Config, gracefulService *graceful.Service, serviceEndpoint string, handler http.Handler) error {
-	config, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
-	if err != nil {
-		return errors.Wrapf(err, "fail to create tls configuration")
-	}
-
-	return gracefulService.ListenAndServeTLS(ctx, "tcp", serviceEndpoint, handler, config)
 }
 
 func ensureNetworks(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) error {

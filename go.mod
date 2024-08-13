@@ -9,7 +9,7 @@ require (
 	github.com/Scalingo/go-handlers v1.8.2
 	github.com/Scalingo/go-plugins-helpers v1.3.0
 	github.com/Scalingo/go-utils/etcd v1.1.2
-	github.com/Scalingo/go-utils/graceful v1.1.4-0.20240801184811-e018d245a0e8
+	github.com/Scalingo/go-utils/graceful v1.1.4-0.20240813150622-91051c00f3ee
 	github.com/Scalingo/go-utils/logger v1.2.0
 	github.com/bits-and-blooms/bitset v1.13.0
 	github.com/gofrs/uuid/v5 v5.2.0

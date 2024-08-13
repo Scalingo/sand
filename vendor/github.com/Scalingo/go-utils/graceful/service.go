@@ -83,7 +83,7 @@ func (s *Service) initTableflipUpgrader(ctx context.Context) error {
 			PIDFile:        s.pidFile,
 		})
 		if err != nil {
-			return errors.Wrap(ctx, err, "creating tableflip upgrader")
+			return errors.Wrap(ctx, err, "create tableflip upgrader")
 		}
 	}
 	s.mx.Unlock()
@@ -115,15 +115,15 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 
 	log := logger.Get(ctx)
 
-	curServerCount := len(s.httpServers)
-	s.httpServers = append(s.httpServers, server)
-	if curServerCount == 0 {
+	if len(s.httpServers) == 0 {
 		err := s.prepare(ctx)
 		if err != nil {
 			// purposefully do not wrap error here, as it is wrapped in prepare
 			return err
 		}
 	}
+
+	s.httpServers = append(s.httpServers, server)
 
 	// Listen must be called before Ready
 	ln, err := s.upg.Listen("tcp", addr)
@@ -138,11 +138,11 @@ func (s *Service) listenAndServe(ctx context.Context, _ string, addr string, ser
 	go func() {
 		err := server.Serve(ln)
 		if !errors.Is(err, http.ErrServerClosed) {
-			log.WithError(err).Error("http server serve")
+			log.WithError(err).Error("Http server serve")
 		}
 	}()
 
-	if curServerCount+1 == s.numServers {
+	if len(s.httpServers) == s.numServers {
 		err := s.finalize(ctx)
 		if err != nil {
 			// purposefully do not wrap error here, as it is wrapped in finalize
@@ -158,7 +158,7 @@ func (s *Service) prepare(ctx context.Context) error {
 	if s.pidFile != "" {
 		err := os.Remove(s.pidFile)
 		if err != nil && !os.IsNotExist(err) {
-			return errors.Wrap(ctx, err, "fail to remove PID file")
+			return errors.Wrap(ctx, err, "remove PID file")
 		}
 	}
 
@@ -174,12 +174,14 @@ func (s *Service) finalize(ctx context.Context) error {
 
 	defer s.upg.Stop()
 
-	log.Info("ready")
+	log.Info("Ready")
 	if err := s.upg.Ready(); err != nil {
 		return errors.Wrapf(ctx, err, "upgrader notify ready")
 	}
+
+	// Once the service has started, it will be blocked here until a signal is received.
 	<-s.upg.Exit()
-	log.Info("upgrader finished")
+	log.Info("Upgrader finished")
 
 	// Normally the server should be always gracefully stopped and entering the
 	// above condition when server is closed If by any mean the serve stops
@@ -251,13 +253,13 @@ func (s *Service) shutdown(ctx context.Context) error {
 			if len(s.httpServers) > 1 {
 				log = log.WithField("index", i)
 			}
-			log.Info("shutting down http server")
+			log.Info("Shutting down http server")
 			err := httpServer.Shutdown(ctx)
 			if err != nil {
 				log.WithError(err).Error("fail to shutdown http server")
-				errChan <- errors.Wrapf(ctx, err, "fail to shutdown http server %d", i)
+				errChan <- errors.Wrapf(ctx, err, "shutdown http server %d", i)
 			} else {
-				log.Info("http server is stopped")
+				log.Info("Http server is stopped")
 			}
 		}(i, httpServer)
 	}
@@ -278,12 +280,12 @@ func (s *Service) shutdown(ctx context.Context) error {
 		return shutdownErr
 	}
 
-	log.Info("wait hijacked connections")
+	log.Info("Wait hijacked connections")
 	err := s.waitHijackedConnections(ctx)
 	if err != nil {
 		return errors.Wrapf(ctx, err, "fail to wait hijacked connections")
 	}
-	log.Info("no more connection running")
+	log.Info("No more connection running")
 
 	return nil
 }
