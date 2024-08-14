@@ -7,6 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/moby/moby/pkg/reexec"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/go-handlers"
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
@@ -28,9 +32,6 @@ import (
 	"github.com/Scalingo/sand/store"
 	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
-	"github.com/moby/moby/pkg/reexec"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
