@@ -4,10 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	apptls "github.com/Scalingo/sand/utils/tls"
-	"github.com/moby/moby/pkg/reexec"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 
@@ -30,7 +26,11 @@ import (
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
 	"github.com/Scalingo/sand/store"
+	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
+	"github.com/moby/moby/pkg/reexec"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
