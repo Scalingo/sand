@@ -2,6 +2,8 @@
 
 ## To be released
 
+## v.1.2.0
+
 * feat: allow multiple http servers to be started with a single graceful service
 
 ## v1.1.3
