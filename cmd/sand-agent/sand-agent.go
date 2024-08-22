@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/moby/moby/pkg/reexec"
 	"github.com/pkg/errors"
@@ -94,22 +93,36 @@ func main() {
 	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
 	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository, ipAllocator)
 
-	r := handlers.NewRouter(log)
-	r.Use(handlers.ErrorMiddleware)
-	r.HandleFunc("/version", vctrl.Show).Methods("GET")
-	r.HandleFunc("/networks", nctrl.List).Methods("GET")
-	r.HandleFunc("/networks", nctrl.Create).Methods("POST")
-	r.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
-	r.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
-	r.HandleFunc("/networks/{id}", nctrl.Connect).Methods("CONNECT")
-	r.HandleFunc("/endpoints", ectrl.Create).Methods("POST")
-	r.HandleFunc("/endpoints", ectrl.List).Methods("GET")
-	r.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
+	sandRouter := handlers.NewRouter(log)
+	sandRouter.Use(handlers.ErrorMiddleware)
+	sandRouter.HandleFunc("/version", vctrl.Show).Methods("GET")
+	sandRouter.HandleFunc("/networks", nctrl.List).Methods("GET")
+	sandRouter.HandleFunc("/networks", nctrl.Create).Methods("POST")
+	sandRouter.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
+	sandRouter.HandleFunc("/networks/{id}", nctrl.Destroy).Methods("DELETE")
+	sandRouter.HandleFunc("/networks/{id}", nctrl.Connect).Methods("CONNECT")
+	sandRouter.HandleFunc("/endpoints", ectrl.Create).Methods("POST")
+	sandRouter.HandleFunc("/endpoints", ectrl.List).Methods("GET")
+	sandRouter.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
 
 	log.WithField("port", c.HttpPort).Info("Listening")
 	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
 
-	wg := &sync.WaitGroup{}
+	// We can only have one graceful service per process since graceful 1.2.0
+	numServers := 1
+	if c.EnableDockerPlugin {
+		numServers++
+	}
+	gracefulService := graceful.NewService(graceful.WithNumServers(numServers))
+
+	var tlsConfig *tls.Config
+	if c.IsHttpTLSEnabled() {
+		tlsConfig, err = apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
+		if err != nil {
+			log.WithError(err).Error("fail to create tls configuration")
+			os.Exit(-1)
+		}
+	}
 
 	if c.EnableDockerPlugin {
 		log.WithField("port", c.DockerPluginHttpPort).Info("Enabling docker plugin")
@@ -118,9 +131,9 @@ func main() {
 			c, networkRepository, endpointRepository, dockerRepository, ipAllocator,
 		)
 		manifest := `{"Implements": ["NetworkDriver", "IpamDriver"]}`
-		handler := dockersdk.NewHandler(log, manifest)
-		dockernetwork.ConfigureHandler(handler, plugin.DockerNetworkPlugin)
-		dockeripam.ConfigureHandler(handler, plugin.DockerIPAMPlugin)
+		dockerPluginRouter := dockersdk.NewHandler(log, manifest)
+		dockernetwork.ConfigureHandler(dockerPluginRouter, plugin.DockerNetworkPlugin)
+		dockeripam.ConfigureHandler(dockerPluginRouter, plugin.DockerIPAMPlugin)
 
 		err = docker.WritePluginSpecsOnDisk(ctx, c)
 		if err != nil {
@@ -133,53 +146,33 @@ func main() {
 		logDocker := log.WithField("service", "docker-plugin")
 		ctxDocker := logger.ToCtx(ctx, logDocker)
 
-		wg.Add(1)
-		go func() {
-			var err error
-
-			defer wg.Done()
-			if c.IsHttpTLSEnabled() {
-				err = tlsListener(ctxDocker, c, dockerPluginEndpoint, handler)
-			} else {
-				gracefulService := graceful.NewService()
-				err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, handler)
-			}
-			if err != nil {
-				log.WithError(err).Error("fail to intialize docker plugin listener")
-				os.Exit(-1)
-			}
-			log.Info("docker plugin stopped")
-		}()
+		if c.IsHttpTLSEnabled() {
+			err = gracefulService.ListenAndServeTLS(ctxDocker, "tcp", dockerPluginEndpoint, dockerPluginRouter, tlsConfig)
+		} else {
+			err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, dockerPluginRouter)
+		}
+		if err != nil {
+			log.WithError(err).Error("fail to initialize docker plugin listener")
+			os.Exit(-1)
+		}
 	}
 
 	logHandler := log.WithField("service", "sand-api")
 	ctxHandler := logger.ToCtx(ctx, logHandler)
 
 	if c.IsHttpTLSEnabled() {
-		err = tlsListener(ctxHandler, c, serviceEndpoint, r)
+		err = gracefulService.ListenAndServeTLS(ctxHandler, "tcp", serviceEndpoint, sandRouter, tlsConfig)
 	} else {
-		gracefulService := graceful.NewService()
-		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, r)
+		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, sandRouter)
 	}
 	if err != nil {
 		log.WithError(err).Error("fail to listen and serve")
 		os.Exit(-1)
 	}
 	log.Info("HTTP API stopped")
-	wg.Wait()
 	log.Info("Stop watching etcd changes")
 	endpointsWatcher.Close()
 	log.Info("All APIs stopped, shutting down..")
-}
-
-func tlsListener(ctx context.Context, c *config.Config, serviceEndpoint string, handler http.Handler) error {
-	config, err := apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
-	if err != nil {
-		return errors.Wrapf(err, "fail to create tls configuration")
-	}
-
-	gracefulService := graceful.NewService()
-	return gracefulService.ListenAndServeTLS(ctx, "tcp", serviceEndpoint, handler, config)
 }
 
 func ensureNetworks(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) error {

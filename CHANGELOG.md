@@ -2,6 +2,7 @@
 
 ## To be Released
 
+* fix: bump graceful version to v1.2.0 to allow multiple http servers to be started with a single graceful service
 * fix(server version): update server version
 
 ## v1.0.2 - 28 Sep 2023
