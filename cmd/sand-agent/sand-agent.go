@@ -108,7 +108,7 @@ func main() {
 	log.WithField("port", c.HttpPort).Info("Listening")
 	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
 
-	// We can only have one graceful service per process
+	// We can only have one graceful service per process since graceful 1.2.0
 	numServers := 1
 	if c.EnableDockerPlugin {
 		numServers++
