@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var Version = "v1.0.2"
+var Version = "v1.0.3"
 
 type Config struct {
 	RollbarToken   string

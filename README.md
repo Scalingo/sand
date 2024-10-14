@@ -1,6 +1,6 @@
 [![Codeship Status for SAND](https://app.codeship.com/projects/3787f4e2-9515-4e36-aaa4-44d8e5bd1955/status?branch=master)](https://app.codeship.com/projects/425178)
 
-# SAND Network Daemon V1.0.2
+# SAND Network Daemon V1.0.3
 
 SAND is simple API designed to create overlay networks based on
 **[VXLAN](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN)** in an infrastructure, basing its
@@ -239,13 +239,13 @@ Bump new version number in:
 Commit the new version number:
 
 ```sh
-version="1.0.2"
+version="1.0.3"
 
 sed --in-place "s/var Version = \"v\([0-9.]*\)\"/var Version = \"v$version\"/g" config/config.go
 
 git switch --create release/${version}
-git add CHANGELOG.md README.md
-git commit -m "Bump v${version}"
+git add CHANGELOG.md README.md config/config.go
+git commit --message="Bump v${version}"
 git push --set-upstream origin release/${version}
 gh pr create --reviewer=leo-scalingo --title "$(git log -1 --pretty=%B)"
 ```
