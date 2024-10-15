@@ -6,7 +6,7 @@ builds:
     binary: sand-agent
     main: ./cmd/sand-agent
     env:
-      - CGO_ENABLED=1
+      - CGO_ENABLED=0
     goarch:
       - 386
       - amd64
@@ -29,21 +29,21 @@ builds:
 archives:
   - format: tar.gz
     builds:
-    - sand-agent
-    - sand-agent-cli
+      - sand-agent
+      - sand-agent-cli
     name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     wrap_in_directory: true
     files:
-    - LICENSE
-    - README.md
-    - CHANGELOG.md
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
