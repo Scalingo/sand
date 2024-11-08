@@ -15,7 +15,7 @@ services:
       ETCD_HOSTS: "https://172.17.0.1:22379,https://172.17.0.1:22381,https://172.17.0.1:22383"
       ENABLE_DOCKER_PLUGIN: "true"
       PUBLIC_HOSTNAME: "dev.172.17.0.1.xip.st-sc.fr"
-    command: reflex -r '\.go$$' --inverse-regex='cmd/sand-agent-cli' -s -- sh -c 'go install -buildvcs=false -race github.com/Scalingo/sand/cmd/sand-agent && /go/bin/sand-agent'
+    command: reflex -r '\.go$$' --inverse-regex='cmd/sand-agent-cli' -s -- sh -c 'go install -buildvcs=false github.com/Scalingo/sand/cmd/sand-agent && /go/bin/sand-agent'
 
   test:
     build: .
