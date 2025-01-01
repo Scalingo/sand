@@ -7,15 +7,16 @@ import (
 	"sync"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type NetworkEndpointListener interface {
