@@ -1,7 +1,6 @@
 module github.com/Scalingo/sand
 
-go 1.22
-toolchain go1.22.9
+go 1.23.6
 
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.8
