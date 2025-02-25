@@ -83,13 +83,13 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 		return -1, errors.Wrapf(err, "fail to get list of items with prefix %s from store", m.prefix)
 	}
 
-	// Generating a "set" of existing VNIs
+	// Generating a "set" of existing IDs
 	ids := map[int]bool{}
 	for _, item := range items {
 		ids[int(item[m.field].(float64))] = true
 	}
 
-	// Searching for the first available VNI
+	// Searching for the first available ID until the maximum
 	for i := 1; i <= m.config.MaxVNI; i++ {
 		if !ids[i] {
 			return i, nil
