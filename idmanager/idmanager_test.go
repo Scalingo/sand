@@ -109,6 +109,41 @@ func TestManager_Generate(t *testing.T) {
 		require.Error(t, err)
 		require.ErrorContains(t, err, "fail to get list of items")
 	})
+	t.Run("maxVNI should be allocable", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		existedIDs := []int{1, 2, 3, 4}
+		expectedID := 5
+
+		store := storemock.NewMockStore(ctrl)
+		manager := &manager{
+			field:  "value",
+			prefix: "/test-id",
+			store:  store,
+			config: &config.Config{
+				MaxVNI: 5,
+			},
+		}
+
+		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
+			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+				require.True(t, ok)
+				for _, id := range existedIDs {
+					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+				}
+			},
+		).Return(nil)
+
+		// When
+		newID, err := manager.Generate(ctx)
+
+		// Then
+		require.NoError(t, err)
+		assert.Equal(t, expectedID, newID)
+	})
 	t.Run("it should return an error if there are no more available IDs", func(t *testing.T) {
 		// Given
 		ctx := context.Background()
