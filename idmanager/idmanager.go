@@ -13,6 +13,8 @@ import (
 	"github.com/Scalingo/sand/store"
 )
 
+var NoIDAvailableErr = errors.New("no new ID available")
+
 type Manager interface {
 	Lock(context.Context) (Unlocker, error)
 	Generate(context.Context) (int, error)
@@ -72,6 +74,7 @@ func (l lock) Unlock(ctx context.Context) error {
 func (m *manager) Generate(ctx context.Context) (int, error) {
 	var items []map[string]interface{}
 
+	// Retrieving the list of networks as a map of etcd keys to network objects
 	err := m.store.Get(ctx, m.prefix, true, &items)
 	if err == store.ErrNotFound {
 		return 1, nil
@@ -80,16 +83,17 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 		return -1, errors.Wrapf(err, "fail to get list of items with prefix %s from store", m.prefix)
 	}
 
+	// Generating a "set" of existing VNIs
 	ids := map[int]bool{}
 	for _, item := range items {
 		ids[int(item[m.field].(float64))] = true
 	}
 
-	for i := 1; ; i++ {
+	// Searching for the first available VNI
+	for i := 1; i <= m.config.MaxVNI; i++ {
 		if !ids[i] {
 			return i, nil
 		}
 	}
-
-	// unreachable
+	return -1, NoIDAvailableErr
 }

@@ -2,94 +2,146 @@ package idmanager
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
-	"github.com/Scalingo/sand/store"
-	"github.com/Scalingo/sand/store/storemock"
 	"github.com/golang/mock/gomock"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/store/storemock"
 )
 
 func TestManager_Generate(t *testing.T) {
-	examples := map[string]struct {
-		items    []int
-		expected []int
-		err      string
-	}{
-		"when no item, it should return 1, then 2": {
-			items:    []int{},
-			expected: []int{1, 2},
-		},
-		"when 1 is present, it should return 2, then 3": {
-			items:    []int{1},
-			expected: []int{2, 3},
-		},
-		"when 2 and 3 are present, it should return 1, then 4": {
-			items:    []int{2, 3},
-			expected: []int{1, 4},
-		},
-		"when 1 is present twice (data anomaly), it shouhld return 2, then 3": {
-			items:    []int{1, 1},
-			expected: []int{2, 3},
-		},
-		"when listing fails, it should return an error": {
-			err: store.ErrNotFound.Error(),
-		},
-	}
+	t.Run("it should return the next available ID", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		existedIDs := []int{1, 2}
+		expectedID := 3
 
-	ctx := context.Background()
-	for title, e := range examples {
-		t.Run(title, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
+		store := storemock.NewMockStore(ctrl)
+		manager := &manager{
+			field:  "value",
+			prefix: "/test-id",
+			store:  store,
+			config: &config.Config{
+				MaxVNI: 5,
+			},
+		}
 
-			store := storemock.NewMockStore(ctrl)
-
-			manager := &manager{
-				field:  "value",
-				prefix: "/test-id",
-				store:  store,
-			}
-
-			var items []map[string]interface{}
-			if e.items != nil {
-				for _, i := range e.items {
-					items = append(items, map[string]interface{}{manager.field: float64(i)})
+		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
+			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+				require.True(t, ok)
+				for _, id := range existedIDs {
+					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
 				}
-			}
-			stub := store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
-				func(_ context.Context, _ string, _ bool, ptritems interface{}) {
-					reflect.ValueOf(ptritems).Elem().Set(reflect.ValueOf(items))
-				},
-			)
-			if e.err != "" {
-				stub.Return(errors.New(e.err))
-			}
+			},
+		).Return(nil)
 
-			lock, err := manager.Lock(ctx)
-			require.NoError(t, err)
+		// When
+		newID, err := manager.Generate(ctx)
 
-			id, err := manager.Generate(ctx)
-			require.NoError(t, lock.Unlock(ctx))
-			if e.err != "" {
-				require.Error(t, err)
-				return
-			}
-			require.Equal(t, e.expected[0], id)
+		// Then
+		require.NoError(t, err)
+		assert.Equal(t, expectedID, newID)
+	})
+	t.Run("it should return the next available ID even if there is an anomaly", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		existedIDs := []int{1, 1}
+		expectedID := 2
 
-			// Add to the mock result the newly generated ID to prevent generating it again
-			items = append(items, map[string]interface{}{manager.field: float64(e.expected[0])})
-			store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
-				func(_ context.Context, _ string, _ bool, ptritems interface{}) {
-					reflect.ValueOf(ptritems).Elem().Set(reflect.ValueOf(items))
-				},
-			)
-			id, err = manager.Generate(ctx)
-			require.NoError(t, err)
-			assert.Equal(t, e.expected[1], id)
-		})
-	}
+		store := storemock.NewMockStore(ctrl)
+		manager := &manager{
+			field:  "value",
+			prefix: "/test-id",
+			store:  store,
+			config: &config.Config{
+				MaxVNI: 5,
+			},
+		}
+
+		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
+			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+				require.True(t, ok)
+				for _, id := range existedIDs {
+					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+				}
+			},
+		).Return(nil)
+
+		// When
+		newID, err := manager.Generate(ctx)
+
+		// Then
+		require.NoError(t, err)
+		assert.Equal(t, expectedID, newID)
+	})
+	t.Run("it should return an error if the store fails to list the items", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		store := storemock.NewMockStore(ctrl)
+		manager := &manager{
+			field:  "value",
+			prefix: "/test-id",
+			store:  store,
+			config: &config.Config{
+				MaxVNI: 5,
+			},
+		}
+
+		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Return(assert.AnError)
+
+		// When
+		newID, err := manager.Generate(ctx)
+
+		// Then
+		require.Equal(t, -1, newID)
+		require.Error(t, err)
+		require.ErrorContains(t, err, "fail to get list of items")
+	})
+	t.Run("it should return an error if there are no more available IDs", func(t *testing.T) {
+		// Given
+		ctx := context.Background()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		existedIDs := []int{1, 2, 3, 4, 5}
+
+		store := storemock.NewMockStore(ctrl)
+		manager := &manager{
+			field:  "value",
+			prefix: "/test-id",
+			store:  store,
+			config: &config.Config{
+				MaxVNI: 5,
+			},
+		}
+
+		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
+			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+				require.True(t, ok)
+				for _, id := range existedIDs {
+					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+				}
+			},
+		).Return(nil)
+
+		// When
+		newID, err := manager.Generate(ctx)
+
+		// Then
+		require.Equal(t, -1, newID)
+		require.Error(t, err)
+		require.ErrorIs(t, err, NoIDAvailableErr)
+	})
 }
