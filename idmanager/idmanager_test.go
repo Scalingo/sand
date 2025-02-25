@@ -142,6 +142,6 @@ func TestManager_Generate(t *testing.T) {
 		// Then
 		require.Equal(t, -1, newID)
 		require.Error(t, err)
-		require.ErrorIs(t, err, NoIDAvailableErr)
+		require.ErrorIs(t, err, ErrNoIDAvailable)
 	})
 }

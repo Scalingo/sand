@@ -13,7 +13,7 @@ import (
 	"github.com/Scalingo/sand/store"
 )
 
-var NoIDAvailableErr = errors.New("no new ID available")
+var ErrNoIDAvailable = errors.New("no new ID available")
 
 type Manager interface {
 	Lock(context.Context) (Unlocker, error)
@@ -95,5 +95,5 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 			return i, nil
 		}
 	}
-	return -1, NoIDAvailableErr
+	return -1, ErrNoIDAvailable
 }
