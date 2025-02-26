@@ -15,5 +15,5 @@ const (
 )
 
 func NewVNIGenerator(ctx context.Context, config *config.Config, store store.Store) idmanager.Manager {
-	return idmanager.New(config, store, IDManagerName, VxLANField, StoreCollectionPrefix)
+	return idmanager.New(config.MaxVNI, store, IDManagerName, VxLANField, StoreCollectionPrefix)
 }

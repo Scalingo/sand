@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 
 	etcdlock "github.com/Scalingo/go-etcd-lock/v5/lock"
-	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/store"
 )
@@ -25,11 +24,11 @@ type Unlocker interface {
 }
 
 type manager struct {
-	store  store.Store
-	config *config.Config
-	field  string
-	name   string
-	prefix string
+	store      store.Store
+	maxIDValue int
+	field      string
+	name       string
+	prefix     string
 }
 
 type lock struct {
@@ -37,8 +36,8 @@ type lock struct {
 	lockingBackend io.Closer
 }
 
-func New(c *config.Config, s store.Store, name string, field string, prefix string) Manager {
-	return &manager{config: c, store: s, field: field, name: name, prefix: prefix}
+func New(maxIDValue int, s store.Store, name string, field string, prefix string) Manager {
+	return &manager{maxIDValue: maxIDValue, store: s, field: field, name: name, prefix: prefix}
 }
 
 func (m *manager) Lock(ctx context.Context) (Unlocker, error) {
@@ -90,7 +89,7 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 	}
 
 	// Searching for the first available ID until the maximum
-	for i := 1; i <= m.config.MaxVNI; i++ {
+	for i := 1; i <= m.maxIDValue; i++ {
 		if !ids[i] {
 			return i, nil
 		}

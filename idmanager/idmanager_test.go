@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/store/storemock"
 )
 
@@ -23,12 +22,10 @@ func TestManager_Generate(t *testing.T) {
 
 		store := storemock.NewMockStore(ctrl)
 		manager := &manager{
-			field:  "value",
-			prefix: "/test-id",
-			store:  store,
-			config: &config.Config{
-				MaxVNI: 5,
-			},
+			field:      "value",
+			prefix:     "/test-id",
+			store:      store,
+			maxIDValue: 5,
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
@@ -58,12 +55,10 @@ func TestManager_Generate(t *testing.T) {
 
 		store := storemock.NewMockStore(ctrl)
 		manager := &manager{
-			field:  "value",
-			prefix: "/test-id",
-			store:  store,
-			config: &config.Config{
-				MaxVNI: 5,
-			},
+			field:      "value",
+			prefix:     "/test-id",
+			store:      store,
+			maxIDValue: 5,
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
@@ -91,12 +86,10 @@ func TestManager_Generate(t *testing.T) {
 
 		store := storemock.NewMockStore(ctrl)
 		manager := &manager{
-			field:  "value",
-			prefix: "/test-id",
-			store:  store,
-			config: &config.Config{
-				MaxVNI: 5,
-			},
+			field:      "value",
+			prefix:     "/test-id",
+			store:      store,
+			maxIDValue: 5,
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Return(assert.AnError)
@@ -119,12 +112,10 @@ func TestManager_Generate(t *testing.T) {
 
 		store := storemock.NewMockStore(ctrl)
 		manager := &manager{
-			field:  "value",
-			prefix: "/test-id",
-			store:  store,
-			config: &config.Config{
-				MaxVNI: 5,
-			},
+			field:      "value",
+			prefix:     "/test-id",
+			store:      store,
+			maxIDValue: 5,
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
@@ -153,12 +144,10 @@ func TestManager_Generate(t *testing.T) {
 
 		store := storemock.NewMockStore(ctrl)
 		manager := &manager{
-			field:  "value",
-			prefix: "/test-id",
-			store:  store,
-			config: &config.Config{
-				MaxVNI: 5,
-			},
+			field:      "value",
+			prefix:     "/test-id",
+			store:      store,
+			maxIDValue: 5,
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
