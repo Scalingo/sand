@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/store"
 )
@@ -11,6 +13,7 @@ import (
 type Repository interface {
 	SaveNetwork(context.Context, DockerPluginNetwork) error
 	SaveEndpoint(context.Context, DockerPluginEndpoint) error
+	ListEndpoints(context.Context) ([]DockerPluginEndpoint, error)
 	GetNetworkByDockerID(context.Context, string) (DockerPluginNetwork, error)
 	GetEndpointByDockerID(context.Context, string) (DockerPluginEndpoint, error)
 	DeleteNetwork(context.Context, DockerPluginNetwork) error
@@ -63,6 +66,15 @@ func (r repository) GetEndpointByDockerID(ctx context.Context, id string) (Docke
 	e := DockerPluginEndpoint{DockerEndpointID: id}
 	err := r.store.Get(ctx, e.StorageKey(), false, &e)
 	return e, err
+}
+
+func (r repository) ListEndpoints(ctx context.Context) ([]DockerPluginEndpoint, error) {
+	res := make([]DockerPluginEndpoint, 0)
+	err := r.store.Get(ctx, "/docker-endpoints/", true, &res)
+	if err != nil {
+		return nil, errors.Wrap(err, "query etcd for docker endpoints")
+	}
+	return res, nil
 }
 
 func (r repository) DeleteEndpoint(ctx context.Context, e DockerPluginEndpoint) error {
