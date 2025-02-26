@@ -33,6 +33,8 @@ type Config struct {
 
 	EnableDockerPlugin   bool `envconfig:"ENABLE_DOCKER_PLUGIN"`
 	DockerPluginHttpPort int  `default:"9998"`
+
+	MaxVNI int `envconfig:"MAX_VNI" default:"999_999"`
 }
 
 func Build() (*Config, error) {
