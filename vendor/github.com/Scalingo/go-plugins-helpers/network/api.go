@@ -5,9 +5,10 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/Scalingo/go-plugins-helpers/sdk"
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/sirupsen/logrus"
 )
 
 const (

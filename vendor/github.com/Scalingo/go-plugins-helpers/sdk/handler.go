@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Scalingo/go-handlers"
 	"github.com/sirupsen/logrus"
+
+	"github.com/Scalingo/go-handlers"
 )
 
 const activatePath = "/Plugin.Activate"
