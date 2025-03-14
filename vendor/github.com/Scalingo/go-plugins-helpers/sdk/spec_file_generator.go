@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -39,7 +38,11 @@ func createPluginSpecDirWindows(name, address, daemonRoot string) (string, error
 }
 
 func createPluginSpecDirUnix(name, address string) (string, error) {
-	pluginSpecDir := PluginSpecDir("/etc/docker")
+	myPluginSpecDir := os.Getenv("PLUGIN_SPEC_DIR")
+	if myPluginSpecDir == "" {
+		myPluginSpecDir = "/etc/docker"
+	}
+	pluginSpecDir := PluginSpecDir(myPluginSpecDir)
 	if err := os.MkdirAll(pluginSpecDir, 0755); err != nil {
 		return "", err
 	}
@@ -50,7 +53,7 @@ func writeSpecFile(name, address, pluginSpecDir string, proto protocol) (string,
 	specFileDir := filepath.Join(pluginSpecDir, name+".spec")
 
 	url := string(proto) + "://" + address
-	if err := ioutil.WriteFile(specFileDir, []byte(url), 0644); err != nil {
+	if err := os.WriteFile(specFileDir, []byte(url), 0644); err != nil {
 		return "", err
 	}
 
