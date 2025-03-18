@@ -48,7 +48,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	// Ability to list all networks with node hostname as prefix
 	err := c.store.Set(
 		ctx,
-		fmt.Sprintf("/nodes/%s/networks/%s", c.config.PublicHostname, network.ID),
+		fmt.Sprintf("/nodes/%s/networks/%s", c.config.GetPeerHostname(), network.ID),
 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
@@ -58,7 +58,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	// Ability to list nodes present in a network
 	err = c.store.Set(
 		ctx,
-		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.PublicHostname),
+		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.GetPeerHostname()),
 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {

@@ -7,8 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Scalingo/sand/config"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/sand/config"
 )
 
 const (
@@ -46,7 +47,7 @@ func WritePluginSpecsOnDisk(ctx context.Context, c *config.Config) error {
 
 	spec := PluginSpec{
 		Name: DockerPluginName,
-		Addr: fmt.Sprintf("%s://%s:%d", scheme, c.PublicHostname, c.DockerPluginHttpPort),
+		Addr: fmt.Sprintf("%s://%s:%d", scheme, c.GetPeerHostname(), c.DockerPluginHttpPort),
 	}
 
 	if c.HttpTLSCA != "" {

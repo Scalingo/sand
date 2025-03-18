@@ -3,14 +3,15 @@ package endpoint
 import (
 	"context"
 
+	"github.com/pkg/errors"
+
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
 )
 
 func (r *repository) Exists(ctx context.Context, id string) (types.Endpoint, bool, error) {
 	endpoint := types.Endpoint{
-		Hostname: r.config.PublicHostname,
+		Hostname: r.config.GetPeerHostname(),
 		ID:       id,
 	}
 	err := r.store.Get(ctx, endpoint.StorageKey(), false, &endpoint)

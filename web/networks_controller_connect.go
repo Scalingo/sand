@@ -12,7 +12,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
-	"gopkg.in/errgo.v1"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
@@ -40,7 +39,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 
 	network, ok, err := c.NetworkRepository.Exists(ctx, urlparams["id"])
 	if err != nil {
-		return errors.Wrapf(err, "fail to query store")
+		return errors.Wrapf(err, "query store")
 	} else if !ok {
 		w.WriteHeader(404)
 		return errors.New("network not found")
@@ -48,7 +47,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 
 	endpoints, err := c.EndpointRepository.List(ctx, map[string]string{"network_id": network.ID})
 	if err != nil {
-		return errors.Wrapf(err, "fail to list endpoints for network %v", network)
+		return errors.Wrapf(err, "list endpoints for network %v", network)
 	}
 
 	activeEndpoints := []types.Endpoint{}
@@ -56,7 +55,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	for _, e := range endpoints {
 		if e.Active {
 			activeEndpoints = append(activeEndpoints, e)
-			if e.HostIP == c.Config.PublicIP {
+			if e.HostIP == c.Config.GetPeerIP() {
 				localEndpoint = e
 			}
 		}
@@ -75,7 +74,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	}
 	socket, _, err := h.Hijack()
 	if err != nil {
-		return errors.Wrapf(err, "fail to hijack http connection")
+		return errors.Wrapf(err, "hijack http connection")
 	}
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
@@ -99,7 +98,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 				return errors.Wrapf(err, "network connection error when forwarding to %v", localEndpoint)
 			}
 		} else if err != nil {
-			return errors.Wrapf(err, "fail to hijack and forward connection to %v", localEndpoint)
+			return errors.Wrapf(err, "hijack and forward connection to %v", localEndpoint)
 		}
 		return nil
 	}
@@ -113,11 +112,11 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		config, err := sand.TlsConfig(c.Config.HttpTLSCA, c.Config.HttpTLSCert, c.Config.HttpTLSKey)
 		if err != nil {
 			socket.Close()
-			return errgo.Notef(err, "fail to generate TLS configuration")
+			return errors.Wrap(err, "generate TLS configuration")
 		}
 		options = append(options, sand.WithTlsConfig(config))
 	}
-	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.HostIP, c.Config.HttpPort)
+	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.APIHostname, c.Config.HttpPort)
 	options = append(options, sand.WithURL(url))
 	client := sand.NewClient(options...)
 
@@ -125,7 +124,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	dstConn, err := client.NetworkConnect(ctx, network.ID, params.NetworkConnect{IP: ip, Port: port})
 	if err != nil {
 		socket.Close()
-		return errors.Wrapf(err, "fail to connect sand %v", url)
+		return errors.Wrapf(err, "connect sand %v", url)
 	}
 
 	// The two following conditions should never be wrong, but who knows, the two only
@@ -133,12 +132,12 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	src, ok := socket.(netutils.Conn)
 	if !ok {
 		socket.Close()
-		return errors.Wrapf(err, "src socket does not implement netutils.Conn")
+		return errors.Wrap(err, "src socket does not implement netutils.Conn")
 	}
 	dst, ok := dstConn.(netutils.Conn)
 	if !ok {
 		socket.Close()
-		return errors.Wrapf(err, "dst socket does not implement netutils.Conn")
+		return errors.Wrap(err, "dst socket does not implement netutils.Conn")
 	}
 
 	wg := &sync.WaitGroup{}
