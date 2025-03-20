@@ -7,14 +7,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store/storemock"
 	"github.com/Scalingo/sand/test/mocks/network/netmanagermock"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestRepository_Ensure(t *testing.T) {
@@ -105,7 +106,7 @@ func TestRepository_Ensure(t *testing.T) {
 			defer ctrl.Finish()
 
 			config, err := config.Build()
-			config.PublicHostname = "test-hostname"
+			config.PeerHostname = "test-hostname"
 
 			require.NoError(t, err)
 

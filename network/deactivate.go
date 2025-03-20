@@ -6,9 +6,10 @@ import (
 
 	"gopkg.in/errgo.v1"
 
+	"github.com/pkg/errors"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/pkg/errors"
 )
 
 func (c *repository) Deactivate(ctx context.Context, network types.Network) error {
@@ -29,7 +30,7 @@ func (c *repository) Deactivate(ctx context.Context, network types.Network) erro
 		return errors.New("unknown network type")
 	}
 
-	err := c.deleteNodeFromStore(ctx, c.config.PublicHostname, network)
+	err := c.deleteNodeFromStore(ctx, c.config.GetPeerHostname(), network)
 	if err != nil {
 		return errors.Wrapf(err, "fail to delete network from store")
 	}

@@ -45,7 +45,7 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 	log := logger.Get(ctx)
 
 	// No rule to add for endpoint located on the current server
-	if endpoint.HostIP == m.config.PublicIP {
+	if endpoint.HostIP == m.config.GetPeerIP() {
 		return nil
 	}
 

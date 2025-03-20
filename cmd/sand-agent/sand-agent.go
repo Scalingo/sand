@@ -181,12 +181,12 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 
 	log.Info("Ensure networks on node")
 
-	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.PublicHostname})
+	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.GetPeerHostname()})
 	if err == store.ErrNotFound {
 		return nil
 	}
 	if err != nil {
-		return errors.Wrapf(err, "fail to list endpoints of %v", c.PublicHostname)
+		return errors.Wrapf(err, "fail to list endpoints of %v", c.GetPeerHostname())
 	}
 
 	for _, endpoint := range endpoints {

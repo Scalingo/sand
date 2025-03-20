@@ -12,14 +12,29 @@ import (
 var Version = "v1.0.3"
 
 type Config struct {
-	RollbarToken   string
-	GoEnv          string `default:"development"`
-	Version        string `ignore:"true"`
-	NetnsPrefix    string `default:"sc-ns-"`
-	NetnsPath      string `default:"/var/run/netns"`
-	HttpPort       int    `default:"9999"`
+	RollbarToken string
+	GoEnv        string `default:"development"`
+	Version      string `ignore:"true"`
+	NetnsPrefix  string `default:"sc-ns-"`
+	NetnsPath    string `default:"/var/run/netns"`
+	HttpPort     int    `default:"9999"`
+
+	// Deprecated: use PeerHostname
 	PublicHostname string `envconfig:"PUBLIC_HOSTNAME"`
-	PublicIP       string `envconfig:"PUBLIC_IP"`
+	// Deprecated: use PeerIP
+	PublicIP string `envconfig:"PUBLIC_IP"`
+
+	// PeerHostname and PeerIP are the hostname and IP address of the current node
+	// in the network. It is used to build the overlay network and communicate
+	// with other nodes in the network.
+	//
+	// Use Getter GetPeerHostname() and GetPeerIP() for retrocompat with PublicHostname and PublicIP
+	PeerHostname string `envconfig:"PEER_HOSTNAME"`
+	PeerIP       string `envconfig:"PEER_IP"`
+
+	// APIHostname is the hostname which should be used to contact a SAND endpoint
+	// to communicate with its API
+	APIHostname string `envconfig:"API_HOSTNAME"`
 
 	EtcdPrefix    string `default:"/sc-net"`
 	EtcdHosts     string `envconfig:"ETCD_HOSTS" default:"http://127.0.0.1:2379"`
@@ -74,4 +89,18 @@ func (c *Config) CreateDirectories() error {
 
 func (c *Config) IsHttpTLSEnabled() bool {
 	return c.HttpTLSCA != "" && c.HttpTLSCert != "" && c.HttpTLSKey != ""
+}
+
+func (c *Config) GetPeerHostname() string {
+	if c.PeerHostname == "" {
+		return c.PublicHostname
+	}
+	return c.PeerHostname
+}
+
+func (c *Config) GetPeerIP() string {
+	if c.PeerIP == "" {
+		return c.PublicIP
+	}
+	return c.PeerIP
 }

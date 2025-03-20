@@ -15,6 +15,7 @@ type Endpoint struct {
 	NetworkID       string    `json:"network_id"`
 	Hostname        string    `json:"hostname"`
 	HostIP          string    `json:"host_ip"`
+	APIHostname     string    `json:"api_hostname"`
 	CreatedAt       time.Time `json:"created_at"`
 	TargetNetnsPath string    `json:"target_netns_path"`
 	OverlayVethName string    `json:"overlay_veth_name"`
