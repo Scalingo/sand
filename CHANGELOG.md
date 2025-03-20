@@ -2,6 +2,9 @@
 
 ## To be Released
 
+* feat: Separate Peer Hostname from API Hostname, the first is used to define
+  endpoint and configure vxlan network, other is how to call the SAND API.
+
 ## v1.0.3 - 14 Oct 2024
 
 * fix: bump graceful version to v1.2.0 to allow multiple http servers to be started with a single graceful service
