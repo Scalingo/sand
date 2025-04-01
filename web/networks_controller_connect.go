@@ -109,14 +109,14 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	if c.Config.IsHttpTLSEnabled() {
 		scheme = "https"
 
-		config, err := sand.TlsConfig(c.Config.HttpTLSCA, c.Config.HttpTLSCert, c.Config.HttpTLSKey)
+		config, err := sand.TlsConfig(c.Config.HTTPTLSCA, c.Config.HTTPTLSCert, c.Config.HTTPTLSKey)
 		if err != nil {
 			socket.Close()
 			return errors.Wrap(err, "generate TLS configuration")
 		}
 		options = append(options, sand.WithTlsConfig(config))
 	}
-	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.APIHostname, c.Config.HttpPort)
+	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.APIHostname, c.Config.HTTPPort)
 	options = append(options, sand.WithURL(url))
 	client := sand.NewClient(options...)
 

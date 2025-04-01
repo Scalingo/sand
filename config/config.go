@@ -17,7 +17,7 @@ type Config struct {
 	Version      string `ignore:"true"`
 	NetnsPrefix  string `default:"sc-ns-"`
 	NetnsPath    string `default:"/var/run/netns"`
-	HttpPort     int    `default:"9999"`
+	HTTPPort     int    `envconfig:"PORT" default:"9999"`
 
 	// Deprecated: use PeerHostname
 	PublicHostname string `envconfig:"PUBLIC_HOSTNAME"`
@@ -42,9 +42,9 @@ type Config struct {
 	EtcdTLSKey    string `envconfig:"ETCD_TLS_KEY"`
 	EtcdTLSCert   string `envconfig:"ETCD_TLS_CERT"`
 
-	HttpTLSCert string `envconfig:"HTTP_TLS_CERT"`
-	HttpTLSKey  string `envconfig:"HTTP_TLS_KEY"`
-	HttpTLSCA   string `envconfig:"HTTP_TLS_CA"`
+	HTTPTLSCert string `envconfig:"HTTP_TLS_CERT"`
+	HTTPTLSKey  string `envconfig:"HTTP_TLS_KEY"`
+	HTTPTLSCA   string `envconfig:"HTTP_TLS_CA"`
 
 	EnableDockerPlugin   bool `envconfig:"ENABLE_DOCKER_PLUGIN"`
 	DockerPluginHttpPort int  `default:"9998"`
@@ -88,7 +88,7 @@ func (c *Config) CreateDirectories() error {
 }
 
 func (c *Config) IsHttpTLSEnabled() bool {
-	return c.HttpTLSCA != "" && c.HttpTLSCert != "" && c.HttpTLSKey != ""
+	return c.HTTPTLSCA != "" && c.HTTPTLSCert != "" && c.HTTPTLSKey != ""
 }
 
 func (c *Config) GetPeerHostname() string {

@@ -105,8 +105,8 @@ func main() {
 	sandRouter.HandleFunc("/endpoints", ectrl.List).Methods("GET")
 	sandRouter.HandleFunc("/endpoints/{id}", ectrl.Destroy).Methods("DELETE")
 
-	log.WithField("port", c.HttpPort).Info("Listening")
-	serviceEndpoint := fmt.Sprintf(":%d", c.HttpPort)
+	log.WithField("port", c.HTTPPort).Info("Listening")
+	serviceEndpoint := fmt.Sprintf(":%d", c.HTTPPort)
 
 	// We can only have one graceful service per process since graceful 1.2.0
 	numServers := 1
@@ -117,7 +117,7 @@ func main() {
 
 	var tlsConfig *tls.Config
 	if c.IsHttpTLSEnabled() {
-		tlsConfig, err = apptls.NewConfig(c.HttpTLSCA, c.HttpTLSCert, c.HttpTLSKey, true)
+		tlsConfig, err = apptls.NewConfig(c.HTTPTLSCA, c.HTTPTLSCert, c.HTTPTLSKey, true)
 		if err != nil {
 			log.WithError(err).Error("fail to create tls configuration")
 			os.Exit(-1)
