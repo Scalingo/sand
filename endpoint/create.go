@@ -30,8 +30,9 @@ func (r *repository) Create(ctx context.Context, n types.Network, params params.
 
 	endpoint = types.Endpoint{
 		ID:            uuid.Must(uuid.NewV4()).String(),
-		Hostname:      r.config.PublicHostname,
-		HostIP:        r.config.PublicIP,
+		Hostname:      r.config.GetPeerHostname(),
+		HostIP:        r.config.GetPeerIP(),
+		APIHostname:   r.config.APIHostname,
 		NetworkID:     n.ID,
 		CreatedAt:     time.Now(),
 		TargetVethIP:  params.IPv4Address,

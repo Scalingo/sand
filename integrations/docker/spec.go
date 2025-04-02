@@ -7,8 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Scalingo/sand/config"
 	"github.com/pkg/errors"
+
+	"github.com/Scalingo/sand/config"
 )
 
 const (
@@ -40,19 +41,19 @@ func WritePluginSpecsOnDisk(ctx context.Context, c *config.Config) error {
 	defer fd.Close()
 
 	scheme := "http"
-	if c.HttpTLSCA != "" {
+	if c.HTTPTLSCA != "" {
 		scheme = "https"
 	}
 
 	spec := PluginSpec{
 		Name: DockerPluginName,
-		Addr: fmt.Sprintf("%s://%s:%d", scheme, c.PublicHostname, c.DockerPluginHttpPort),
+		Addr: fmt.Sprintf("%s://%s:%d", scheme, c.GetPeerHostname(), c.DockerPluginHttpPort),
 	}
 
-	if c.HttpTLSCA != "" {
-		spec.TLSConfig.CAFile = c.HttpTLSCA
-		spec.TLSConfig.CertFile = c.HttpTLSCert
-		spec.TLSConfig.KeyFile = c.HttpTLSKey
+	if c.HTTPTLSCA != "" {
+		spec.TLSConfig.CAFile = c.HTTPTLSCA
+		spec.TLSConfig.CertFile = c.HTTPTLSCert
+		spec.TLSConfig.KeyFile = c.HTTPTLSKey
 	}
 
 	err = json.NewEncoder(fd).Encode(&spec)
