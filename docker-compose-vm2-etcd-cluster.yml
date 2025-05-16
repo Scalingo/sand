@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    pid: "host"
+    network_mode: "host"
+    privileged: true
+    volumes:
+      - ./:/go/src/github.com/Scalingo/sand
+      - /var/run/netns:/var/run/netns:shared
+      - /var/run/docker/netns:/var/run/docker/netns:shared
+      - /etc/docker/plugins:/etc/docker/plugins:shared
+    environment:
+      GO_ENV: development
+      ETCD_HOSTS: "https://192.168.56.2:22379,https://192.168.56.2:22381,https://192.168.56.2:22383"
+      PEER_IP: "192.168.56.3"
+      ENABLE_DOCKER_PLUGIN: "true"
+    ports:
+      - 9999:9999
+      - 9998:9998
+    command: reflex -r '\.go$$' -s -- sh -c 'go install -buildvcs=false github.com/Scalingo/sand/cmd/sand-agent && /go/bin/sand-agent'

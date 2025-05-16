@@ -268,12 +268,33 @@ If you face an issue about a missing library during the compilation, you may be 
 sudo apt-get install build-essentials gcc-multilib g++-multilib
 ```
 
-## Testing
+## Development Evnrionment
 
-* Single node with `docker-compose`, just run `docker-compose up` and you can
-start using SAND.
+### Single node through docker-compose
 
-* Multinodes using `vagrant`, just run `vagrant up` to start two nodes with
-Docker installed and SAND code mounted in them.
+Just run `docker-compose up` and you can start using SAND.
 
-* More tests and mocking of `netlink` commands
+Uasge of `etcdctl`:
+
+```
+etcdctl --insecure-transport=true --insecure-skip-tls-verify=true --cacert ./_dev/ssl/ca.pem --cert ./_dev/ssl/client.pem --key ./_dev/ssl/client-key.pem --endpoints https://172.17.0.1:22379 get --prefix /
+```
+
+### Multi-nodes setup with vagrant
+
+Just run `vagrant up` to start two nodes with Docker installed and SAND code mounted in them.
+
+For each node:
+
+```
+vagrant ssh docker-[1-2]
+cd /opt/sand
+sudo docker compose up
+```
+
+Usage of `etcdctl`:
+
+```
+sudo docker compose exec etcd-1 etcdctl --cert /data/etcd/fixtures/client/cert.pem --key /data/etcd/fixtures/client/key.pem --endpoints https://172.17.0.1:22379,https://172.17.0.1:22381,https://172.17.0.1:22383 --insecure-transport=true --insecure-skip-tls-verify=true member list
+```
+
