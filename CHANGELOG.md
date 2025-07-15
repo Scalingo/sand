@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.1.1 - 15 Jul 2025
+
+* chore(deps): go-utils/logger to 1.6.1 - clean dependencies
+
 ## v1.1.0 - 11 Jul 2025
 
 * chore(go): use go 1.24
