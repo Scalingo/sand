@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.1.0 - 11 Jul 2025
+
 * chore(go): use go 1.24
 * feat: Separate Peer Hostname from API Hostname, the first is used to define
   endpoint and configure vxlan network, other is how to call the SAND API.
