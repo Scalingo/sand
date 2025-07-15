@@ -31,8 +31,8 @@ github.com/Scalingo/go-utils/etcd
 # github.com/Scalingo/go-utils/graceful v1.3.1
 ## explicit; go 1.24
 github.com/Scalingo/go-utils/graceful
-# github.com/Scalingo/go-utils/logger v1.9.0
-## explicit; go 1.24.3
+# github.com/Scalingo/go-utils/logger v1.6.1
+## explicit; go 1.24
 github.com/Scalingo/go-utils/logger
 github.com/Scalingo/go-utils/logger/plugins/rollbarplugin
 # github.com/Scalingo/go-utils/security v1.1.1
