@@ -17,8 +17,8 @@ github.com/Scalingo/go-utils/etcd v1.2.1 h1:3cNNLYLxUTGdP1c+XA5VNH052uaCjRwN9Y1N
 github.com/Scalingo/go-utils/etcd v1.2.1/go.mod h1:mrwfLv05Ddy1ssNPweCPhnygsHacQD3aBiP7y9LuaFQ=
 github.com/Scalingo/go-utils/graceful v1.3.1 h1:gfD2RHlP8HbTFKlcc5mK6V/au+ikVS6jLt+RQPwiUhI=
 github.com/Scalingo/go-utils/graceful v1.3.1/go.mod h1:25evQMTQBwolsT0duT+0rXnNks+tCFUaX+KgEVau40M=
-github.com/Scalingo/go-utils/logger v1.9.0 h1:djr3YaA7LourAjsZmkgQebtMHQLnHwJz8M1vj9+/8R4=
-github.com/Scalingo/go-utils/logger v1.9.0/go.mod h1:2wzJAC2aOGzpEtKs+PcWhecSe/wVJua8wguDajbk0j0=
+github.com/Scalingo/go-utils/logger v1.6.1 h1:vnehqPhuLHdrarHxeA/4NKy43UhA80aMKzEljMQMG8E=
+github.com/Scalingo/go-utils/logger v1.6.1/go.mod h1:O+r4jyS6/TVcGgqvvUoruNAhtSI5OtUzsJjZpQvgcnM=
 github.com/Scalingo/go-utils/security v1.1.1 h1:vkKYotWqLKfJ/ONVHgXdIDF/Jprzn89Dglk9OmZojng=
 github.com/Scalingo/go-utils/security v1.1.1/go.mod h1:p2kM/nul115ENZA1jrt4y1CXw5YqFlu73h1TZTzZ65Q=
 github.com/Scalingo/logrus-rollbar v1.4.2 h1:j4eeX7eYvy8zQTW2MBX4hQuqDFphDGS3MIw7cuwriKY=

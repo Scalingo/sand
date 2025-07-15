@@ -1,6 +1,6 @@
 module github.com/Scalingo/sand
 
-go 1.24.3
+go 1.24
 
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.8
@@ -8,7 +8,7 @@ require (
 	github.com/Scalingo/go-plugins-helpers v1.4.0
 	github.com/Scalingo/go-utils/etcd v1.2.1
 	github.com/Scalingo/go-utils/graceful v1.3.1
-	github.com/Scalingo/go-utils/logger v1.9.0
+	github.com/Scalingo/go-utils/logger v1.6.1
 	github.com/bits-and-blooms/bitset v1.22.0
 	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/golang/mock v1.6.0
