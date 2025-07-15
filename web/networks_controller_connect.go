@@ -63,11 +63,13 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 
 	if len(activeEndpoints) == 0 {
 		w.WriteHeader(400)
-		json.NewEncoder(w).Encode(map[string]string{"error": "no active endpoint in network " + network.ID})
+		jsonerr := json.NewEncoder(w).Encode(map[string]string{"error": "no active endpoint in network " + network.ID})
+		if jsonerr != nil {
+			log.WithError(jsonerr).Error("Fail to encode error response")
+		}
 		return nil
 	}
 
-	log.Infof("Hijacking http connection and forward to %v", localEndpoint.Hostname)
 	h, ok := w.(http.Hijacker)
 	if !ok {
 		return errors.New("invalid response writer")
@@ -116,11 +118,11 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		}
 		options = append(options, sand.WithTlsConfig(config))
 	}
-	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.APIHostname, c.Config.HTTPPort)
+	url := fmt.Sprintf("%s://%s:%d", scheme, endpoint.GetAPIHostname(), c.Config.HTTPPort)
 	options = append(options, sand.WithURL(url))
 	client := sand.NewClient(options...)
 
-	log.Infof("forwarding connection to %v", url)
+	log.Infof("Forwarding connection to %v", url)
 	dstConn, err := client.NetworkConnect(ctx, network.ID, params.NetworkConnect{IP: ip, Port: port})
 	if err != nil {
 		socket.Close()

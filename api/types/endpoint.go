@@ -26,6 +26,13 @@ type Endpoint struct {
 	Active          bool      `json:"active"`
 }
 
+func (e Endpoint) GetAPIHostname() string {
+	if e.APIHostname != "" {
+		return e.APIHostname
+	}
+	return e.Hostname
+}
+
 func (e Endpoint) String() string {
 	return fmt.Sprintf("Endpoint[%s|%s|Network(%s)|Active(%v)]", e.ID, e.TargetNetnsPath, e.NetworkID, e.Active)
 }
