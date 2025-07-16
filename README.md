@@ -1,6 +1,6 @@
 [![Codeship Status for SAND](https://app.codeship.com/projects/3787f4e2-9515-4e36-aaa4-44d8e5bd1955/status?branch=master)](https://app.codeship.com/projects/425178)
 
-# SAND Network Daemon V1.1.1
+# SAND Network Daemon V1.1.2
 
 SAND is simple API designed to create overlay networks based on
 **[VXLAN](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN)** in an infrastructure, basing its
@@ -239,7 +239,7 @@ Bump new version number in:
 Commit the new version number:
 
 ```sh
-version="1.1.1"
+version="1.1.2"
 
 sed --in-place "s/var Version = \"v\([0-9.]*\)\"/var Version = \"v$version\"/g" config/config.go
 
