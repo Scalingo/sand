@@ -30,6 +30,7 @@ func (e Endpoint) GetAPIHostname() string {
 	if e.APIHostname != "" {
 		return e.APIHostname
 	}
+        // Return legacy field for endpoints created before APIHostname was existing
 	return e.Hostname
 }
 
