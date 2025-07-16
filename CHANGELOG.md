@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.1.2 - 16 Jul 2025
+
+* feat(retrocompat): Ensure network#connect works as expected using previously created field `hostname` if `api_hostname` 
+
 ## v1.1.1 - 15 Jul 2025
 
 * chore(deps): go-utils/logger to 1.6.1 - clean dependencies
