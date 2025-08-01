@@ -8,23 +8,23 @@ require (
 	github.com/Scalingo/go-plugins-helpers v1.4.0
 	github.com/Scalingo/go-utils/etcd v1.2.1
 	github.com/Scalingo/go-utils/graceful v1.3.1
-	github.com/Scalingo/go-utils/logger v1.6.1
+	github.com/Scalingo/go-utils/logger v1.9.1
 	github.com/bits-and-blooms/bitset v1.22.0
 	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/magefile/mage v1.15.0
-	github.com/moby/moby v28.3.0+incompatible
+	github.com/moby/moby v28.3.3+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli v1.22.17
 	github.com/vishvananda/netlink v1.3.1
 	github.com/vishvananda/netns v0.0.5
-	go.etcd.io/etcd/api/v3 v3.6.1
-	go.etcd.io/etcd/client/v3 v3.6.1
-	golang.org/x/sys v0.33.0
-	google.golang.org/grpc v1.73.0
+	go.etcd.io/etcd/api/v3 v3.6.4
+	go.etcd.io/etcd/client/v3 v3.6.4
+	golang.org/x/sys v0.34.0
+	google.golang.org/grpc v1.74.2
 	gopkg.in/errgo.v1 v1.0.1
 )
 
@@ -50,11 +50,11 @@ require (
 	github.com/rollbar/rollbar-go v1.4.8 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.6.1 // indirect
+	go.etcd.io/etcd/client/pkg/v3 v3.6.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
