@@ -1,4 +1,4 @@
-# SAND Network Daemon V1.1.2
+# SAND Network Daemon V1.1.3
 
 SAND is simple API designed to create overlay networks based on
 **[VXLAN](https://en.wikipedia.org/wiki/Virtual_Extensible_LAN)** in an infrastructure, basing its
@@ -237,7 +237,7 @@ Bump new version number in:
 Commit the new version number:
 
 ```sh
-version="1.1.2"
+version="1.1.3"
 
 sed --in-place "s/var Version = \"v\([0-9.]*\)\"/var Version = \"v$version\"/g" config/config.go
 
