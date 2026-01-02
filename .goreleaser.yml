@@ -33,16 +33,16 @@ archives:
     ids:
       - sand-agent
       - sand-agent-cli
-    version_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     wrap_in_directory: true
     files:
       - LICENSE
       - README.md
       - CHANGELOG.md
 checksum:
-  version_template: "checksums.txt"
+  name_template: "checksums.txt"
 snapshot:
-  version_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
