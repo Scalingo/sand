@@ -2,9 +2,13 @@
 
 ## To be Released
 
+## v1.1.3 - 30 Dec 2025
+
+* chore: bump various dependencies
+
 ## v1.1.2 - 16 Jul 2025
 
-* feat(retrocompat): Ensure network#connect works as expected using previously created field `hostname` if `api_hostname` 
+* feat(retrocompat): Ensure network#connect works as expected using previously created field `hostname` if `api_hostname`
 
 ## v1.1.1 - 15 Jul 2025
 
