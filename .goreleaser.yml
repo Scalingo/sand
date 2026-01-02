@@ -29,7 +29,7 @@ builds:
     ldflags:
       - -X main.Version={{.Version}}
 archives:
-  - format: tar.gz
+  - formats: [ tar.gz ]
     builds:
       - sand-agent
       - sand-agent-cli
