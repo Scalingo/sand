@@ -30,7 +30,7 @@ builds:
       - -X main.Version={{.Version}}
 archives:
   - formats: [ tar.gz ]
-    builds:
+    ids:
       - sand-agent
       - sand-agent-cli
     version_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
