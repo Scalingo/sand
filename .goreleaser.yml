@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -27,8 +29,8 @@ builds:
     ldflags:
       - -X main.Version={{.Version}}
 archives:
-  - format: tar.gz
-    builds:
+  - formats: [ tar.gz ]
+    ids:
       - sand-agent
       - sand-agent-cli
     name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
@@ -40,7 +42,7 @@ archives:
 checksum:
   name_template: "checksums.txt"
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
