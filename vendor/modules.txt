@@ -31,8 +31,8 @@ github.com/Scalingo/go-utils/errors/v3
 # github.com/Scalingo/go-utils/etcd v1.2.1
 ## explicit; go 1.24
 github.com/Scalingo/go-utils/etcd
-# github.com/Scalingo/go-utils/graceful v1.3.1
-## explicit; go 1.24
+# github.com/Scalingo/go-utils/graceful v1.3.2
+## explicit; go 1.24.0
 github.com/Scalingo/go-utils/graceful
 # github.com/Scalingo/go-utils/logger v1.12.0
 ## explicit; go 1.25
@@ -174,12 +174,12 @@ go.etcd.io/etcd/client/v3/internal/resolver
 ## explicit; go 1.24.0
 go.opentelemetry.io/auto/sdk
 go.opentelemetry.io/auto/sdk/internal/telemetry
-# go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.64.0
+# go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.65.0
 ## explicit; go 1.24.0
 go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux
 go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/internal/request
 go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/internal/semconv
-# go.opentelemetry.io/otel v1.39.0
+# go.opentelemetry.io/otel v1.40.0
 ## explicit; go 1.24.0
 go.opentelemetry.io/otel
 go.opentelemetry.io/otel/attribute
@@ -191,13 +191,14 @@ go.opentelemetry.io/otel/internal/baggage
 go.opentelemetry.io/otel/internal/global
 go.opentelemetry.io/otel/propagation
 go.opentelemetry.io/otel/semconv/v1.37.0
-go.opentelemetry.io/otel/semconv/v1.37.0/httpconv
-# go.opentelemetry.io/otel/metric v1.39.0
+go.opentelemetry.io/otel/semconv/v1.39.0
+go.opentelemetry.io/otel/semconv/v1.39.0/httpconv
+# go.opentelemetry.io/otel/metric v1.40.0
 ## explicit; go 1.24.0
 go.opentelemetry.io/otel/metric
 go.opentelemetry.io/otel/metric/embedded
 go.opentelemetry.io/otel/metric/noop
-# go.opentelemetry.io/otel/trace v1.39.0
+# go.opentelemetry.io/otel/trace v1.40.0
 ## explicit; go 1.24.0
 go.opentelemetry.io/otel/trace
 go.opentelemetry.io/otel/trace/embedded
@@ -218,16 +219,17 @@ go.uber.org/zap/internal/pool
 go.uber.org/zap/internal/stacktrace
 go.uber.org/zap/zapcore
 go.uber.org/zap/zapgrpc
-# golang.org/x/net v0.48.0
-## explicit; go 1.24.0
+# golang.org/x/net v0.51.0
+## explicit; go 1.25.0
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
+golang.org/x/net/internal/httpsfv
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.40.0
+# golang.org/x/sys v0.41.0
 ## explicit; go 1.24.0
 golang.org/x/sys/unix
 golang.org/x/sys/windows
