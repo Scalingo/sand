@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Scalingo/sand/config"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.uber.org/mock/gomock"
+
+	"github.com/Scalingo/sand/config"
 )
 
 func TestWatcher_Register(t *testing.T) {
