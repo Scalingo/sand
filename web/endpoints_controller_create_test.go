@@ -6,15 +6,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
+
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/test/mocks/endpointmock"
 	"github.com/Scalingo/sand/test/mocks/ipallocatormock"
 	"github.com/Scalingo/sand/test/mocks/networkmock"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestEndpointsController_Create(t *testing.T) {

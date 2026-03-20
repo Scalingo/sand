@@ -1,3 +1,4 @@
+//go:build mage
 // +build mage
 
 package main
@@ -107,12 +108,12 @@ func InstallDeps() error {
 
 // Install test dependencies like gomock/mockgen
 func InstallTestDeps() error {
-	cmd := exec.Command("go", "get", "github.com/golang/mock/gomock")
+	cmd := exec.Command("go", "get", "go.uber.org/mock/gomock")
 	err := cmd.Run()
 	if err != nil {
 		return err
 	}
-	cmd = exec.Command("go", "get", "github.com/golang/mock/mockgen")
+	cmd = exec.Command("go", "get", "go.uber.org/mock/mockgen")
 	return cmd.Run()
 }
 

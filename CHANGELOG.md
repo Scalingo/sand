@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* deps: replace github.com/golang/mock by go.uber.org/mock
+
 ## v1.1.3 - 30 Dec 2025
 
 * chore: bump various dependencies

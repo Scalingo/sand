@@ -8,8 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
+	gomock "go.uber.org/mock/gomock"
+
 	types "github.com/Scalingo/sand/api/types"
-	gomock "github.com/golang/mock/gomock"
 )
 
 // MockNetworkEndpointListener is a mock of NetworkEndpointListener interface

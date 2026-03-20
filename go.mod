@@ -11,7 +11,6 @@ require (
 	github.com/Scalingo/go-utils/logger v1.12.0
 	github.com/bits-and-blooms/bitset v1.24.4
 	github.com/gofrs/uuid/v5 v5.4.0
-	github.com/golang/mock v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/magefile/mage v1.15.0
 	github.com/moby/moby v28.5.2+incompatible
@@ -23,6 +22,7 @@ require (
 	github.com/vishvananda/netns v0.0.5
 	go.etcd.io/etcd/api/v3 v3.6.8
 	go.etcd.io/etcd/client/v3 v3.6.8
+	go.uber.org/mock v0.6.0
 	golang.org/x/sys v0.41.0
 	google.golang.org/grpc v1.79.3
 	gopkg.in/errgo.v1 v1.0.1
