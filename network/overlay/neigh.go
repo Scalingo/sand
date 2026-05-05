@@ -15,14 +15,17 @@ import (
 )
 
 func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network, endpoints []types.Endpoint) error {
-	log := logger.Get(ctx)
 	for _, endpoint := range endpoints {
-		log = log.WithFields(logrus.Fields{
+		ctx, log := logger.WithFieldsToCtx(ctx, logrus.Fields{
 			"endpoint_id":              endpoint.ID,
 			"endpoint_target_ip":       endpoint.TargetVethIP,
 			"endpoint_target_hostname": endpoint.Hostname,
 		})
-		ctx = logger.ToCtx(ctx, log)
+		if !shouldReplayEndpointNeigh(endpoint) {
+			log.Info("skip inactive endpoint ARP/FDB replay")
+			continue
+		}
+
 		err := m.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
 			return errors.Wrapf(err, "fail to add endpoint ARP/FDB neigh rules")
@@ -32,7 +35,12 @@ func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network
 }
 
 func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, endpoint types.Endpoint) error {
-	ctx = logger.ToCtx(ctx, logger.Get(ctx).WithField("neighbor_action", "add"))
+	ctx, log := logger.WithFieldToCtx(ctx, "neighbor_action", "add")
+	if !shouldReplayEndpointNeigh(endpoint) {
+		log.Info("skip inactive endpoint ARP/FDB replay")
+		return nil
+	}
+
 	return m.endpointNeighAction(ctx, network, endpoint, (*netlink.Handle).NeighSet)
 }
 
@@ -103,4 +111,8 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 		return errors.Wrapf(err, "could not modify neighbor entry: %+v", nlnh)
 	}
 	return nil
+}
+
+func shouldReplayEndpointNeigh(endpoint types.Endpoint) bool {
+	return endpoint.Active
 }

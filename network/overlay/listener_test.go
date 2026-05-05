@@ -1,12 +1,11 @@
 package overlay
 
 import (
-	"context"
 	"testing"
 	"time"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	etcdv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,7 +31,7 @@ func TestListener_Add(t *testing.T) {
 			Name:       "it should start listening to message and stop when there is no more message",
 			ExpectDone: true,
 			ExpectRegistration: func(r *storemock.MockRegistration) {
-				c := make(chan *clientv3.Event)
+				c := make(chan *etcdv3.Event)
 				close(c)
 				r.EXPECT().EventChan().Return(c)
 			},
@@ -40,12 +39,13 @@ func TestListener_Add(t *testing.T) {
 			Name:       "it should handle PUT message with an Endpoint and add it as neighbor",
 			ExpectDone: true,
 			ExpectRegistration: func(r *storemock.MockRegistration) {
-				c := make(chan *clientv3.Event, 1)
-				c <- &clientv3.Event{
+				c := make(chan *etcdv3.Event, 1)
+				c <- &etcdv3.Event{
 					Type: mvccpb.PUT,
 					Kv: &mvccpb.KeyValue{
 						Value: []byte(`{
 							"id": "1",
+							"active": true,
 							"target_veth_ip": "10.0.0.1",
 							"hostname": "src-node.example.com"
 						}`),
@@ -56,7 +56,31 @@ func TestListener_Add(t *testing.T) {
 			},
 			ExpectNetManager: func(m *netmanagermock.MockNetManager, n types.Network) {
 				m.EXPECT().AddEndpointNeigh(gomock.Any(), n, types.Endpoint{
-					ID: "1", TargetVethIP: "10.0.0.1", Hostname: "src-node.example.com",
+					ID: "1", Active: true, TargetVethIP: "10.0.0.1", Hostname: "src-node.example.com",
+				}).Return(nil)
+			},
+		}, {
+			Name:       "it should forward PUT message with an inactive endpoint to neighbor manager",
+			ExpectDone: true,
+			ExpectRegistration: func(r *storemock.MockRegistration) {
+				c := make(chan *etcdv3.Event, 1)
+				c <- &etcdv3.Event{
+					Type: mvccpb.PUT,
+					Kv: &mvccpb.KeyValue{
+						Value: []byte(`{
+							"id": "1",
+							"active": false,
+							"target_veth_ip": "10.0.0.1",
+							"hostname": "src-node.example.com"
+						}`),
+					},
+				}
+				close(c)
+				r.EXPECT().EventChan().Return(c)
+			},
+			ExpectNetManager: func(m *netmanagermock.MockNetManager, n types.Network) {
+				m.EXPECT().AddEndpointNeigh(gomock.Any(), n, types.Endpoint{
+					ID: "1", Active: false, TargetVethIP: "10.0.0.1", Hostname: "src-node.example.com",
 				}).Return(nil)
 			},
 		},
@@ -76,7 +100,7 @@ func TestListener_Add(t *testing.T) {
 			network := types.Network{ID: "1"}
 			registrar.EXPECT().Register("/network-endpoints/1").Return(registration, nil)
 
-			listener := NewNetworkEndpointListener(context.Background(), config, registrar, store)
+			listener := NewNetworkEndpointListener(t.Context(), config, registrar, store)
 
 			if c.ExpectStore != nil {
 				c.ExpectStore(store, network, registrar)
@@ -90,7 +114,7 @@ func TestListener_Add(t *testing.T) {
 				c.ExpectNetManager(nm, network)
 			}
 
-			done, err := listener.Add(context.Background(), nm, network)
+			done, err := listener.Add(t.Context(), nm, network)
 			if c.Error != "" {
 				require.Error(t, err)
 				assert.Contains(t, err.Error(), c.Error)
