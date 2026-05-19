@@ -1,11 +1,11 @@
 module github.com/Scalingo/sand
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.0.11
 	github.com/Scalingo/go-handlers v1.11.1
-	github.com/Scalingo/go-plugins-helpers v1.4.0
+	github.com/Scalingo/go-plugins-helpers/v2 v2.5.1
 	github.com/Scalingo/go-utils/etcd v1.2.2
 	github.com/Scalingo/go-utils/graceful v1.3.3
 	github.com/Scalingo/go-utils/logger v1.12.2
@@ -23,7 +23,7 @@ require (
 	go.etcd.io/etcd/api/v3 v3.6.10
 	go.etcd.io/etcd/client/v3 v3.6.10
 	go.uber.org/mock v0.6.0
-	golang.org/x/sys v0.43.0
+	golang.org/x/sys v0.44.0
 	google.golang.org/grpc v1.80.0
 	gopkg.in/errgo.v1 v1.0.1
 )
@@ -41,7 +41,7 @@ require (
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.7.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -51,7 +51,7 @@ require (
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/moby/sys/reexec v0.1.0 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rollbar/rollbar-go v1.4.8 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/negroni/v3 v3.1.1 // indirect

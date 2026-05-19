@@ -7,16 +7,13 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/Scalingo/go-plugins-helpers/sdk"
+	"github.com/Scalingo/go-plugins-helpers/v2/sdk"
 	"github.com/Scalingo/go-utils/logger"
 )
 
 const (
-	manifest = `{"Implements": ["NetworkDriver"]}`
-	// LocalScope is the correct scope response for a local scope driver
-	LocalScope = `local`
-	// GlobalScope is the correct scope response for a global scope driver
-	GlobalScope = `global`
+	// ImplementationName is the name of the interface all network plugins implement
+	ImplementationName sdk.DriverImplementationName = "NetworkDriver"
 
 	capabilitiesPath    = "/NetworkDriver.GetCapabilities"
 	allocateNetworkPath = "/NetworkDriver.AllocateNetwork"
@@ -36,26 +33,38 @@ const (
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
-	GetCapabilities(context.Context) (*CapabilitiesResponse, error)
-	CreateNetwork(context.Context, *CreateNetworkRequest) error
-	AllocateNetwork(context.Context, *AllocateNetworkRequest) (*AllocateNetworkResponse, error)
-	DeleteNetwork(context.Context, *DeleteNetworkRequest) error
-	FreeNetwork(context.Context, *FreeNetworkRequest) error
-	CreateEndpoint(context.Context, *CreateEndpointRequest) (*CreateEndpointResponse, error)
-	DeleteEndpoint(context.Context, *DeleteEndpointRequest) error
-	EndpointInfo(context.Context, *InfoRequest) (*InfoResponse, error)
-	Join(context.Context, *JoinRequest) (*JoinResponse, error)
-	Leave(context.Context, *LeaveRequest) error
-	DiscoverNew(context.Context, *DiscoveryNotification) error
-	DiscoverDelete(context.Context, *DiscoveryNotification) error
-	ProgramExternalConnectivity(context.Context, *ProgramExternalConnectivityRequest) error
-	RevokeExternalConnectivity(context.Context, *RevokeExternalConnectivityRequest) error
+	// GetCapabilities returns the driver capabilities
+	// https://github.com/moby/moby/blob/master/libnetwork/docs/remote.md#set-capability
+	GetCapabilities(ctx context.Context) (*CapabilitiesResponse, error)
+	CreateNetwork(ctx context.Context, req *CreateNetworkRequest) error
+	AllocateNetwork(ctx context.Context, req *AllocateNetworkRequest) (*AllocateNetworkResponse, error)
+	DeleteNetwork(ctx context.Context, req *DeleteNetworkRequest) error
+	FreeNetwork(ctx context.Context, req *FreeNetworkRequest) error
+	CreateEndpoint(ctx context.Context, req *CreateEndpointRequest) (*CreateEndpointResponse, error)
+	DeleteEndpoint(ctx context.Context, req *DeleteEndpointRequest) error
+	EndpointInfo(ctx context.Context, req *InfoRequest) (*InfoResponse, error)
+	Join(ctx context.Context, req *JoinRequest) (*JoinResponse, error)
+	Leave(ctx context.Context, req *LeaveRequest) error
+	DiscoverNew(ctx context.Context, req *DiscoveryNotification) error
+	DiscoverDelete(ctx context.Context, req *DiscoveryNotification) error
+	ProgramExternalConnectivity(ctx context.Context, req *ProgramExternalConnectivityRequest) error
+	RevokeExternalConnectivity(ctx context.Context, req *RevokeExternalConnectivityRequest) error
 }
+
+type CapabilitiesResponseScope string
+
+const (
+	// LocalScope is the correct scope response for a local scope driver
+	LocalScope CapabilitiesResponseScope = "local"
+	// GlobalScope is the correct scope response for a global scope driver
+	GlobalScope CapabilitiesResponseScope = "global"
+)
 
 // CapabilitiesResponse returns whether or not this network is global or local
 type CapabilitiesResponse struct {
-	Scope             string
-	ConnectivityScope string
+	Scope             CapabilitiesResponseScope
+	ConnectivityScope CapabilitiesResponseScope
+	GwAllocChecker    bool
 }
 
 // AllocateNetworkRequest requests allocation of new network by manager
@@ -87,9 +96,15 @@ type FreeNetworkRequest struct {
 // CreateNetworkRequest is sent by the daemon when a network needs to be created
 type CreateNetworkRequest struct {
 	NetworkID string
-	Options   map[string]interface{}
+	Options   CreateNetworkRequestOptions
 	IPv4Data  []*IPAMData
 	IPv6Data  []*IPAMData
+}
+
+type CreateNetworkRequestOptions struct {
+	Generic    map[string]string `json:"com.docker.network.generic"`
+	EnableIPv4 bool              `json:"com.docker.network.enable_ipv4"`
+	EnableIPv6 bool              `json:"com.docker.network.enable_ipv6"`
 }
 
 // IPAMData contains IPv4 or IPv6 addressing information
@@ -179,11 +194,6 @@ type LeaveRequest struct {
 	EndpointID string
 }
 
-// ErrorResponse is a formatted error message that libnetwork can understand
-type ErrorResponse struct {
-	Err string
-}
-
 // DiscoveryNotification is sent by the daemon when a new discovery event occurs
 type DiscoveryNotification struct {
 	DiscoveryType int
@@ -205,11 +215,6 @@ type RevokeExternalConnectivityRequest struct {
 	EndpointID string
 }
 
-// NewErrorResponse creates an ErrorResponse with the provided message
-func NewErrorResponse(msg string) *ErrorResponse {
-	return &ErrorResponse{Err: msg}
-}
-
 // Handler forwards requests and responses between the docker daemon and the plugin.
 type Handler struct {
 	driver Driver
@@ -218,7 +223,9 @@ type Handler struct {
 
 // NewHandler initializes the request handler with a driver implementation.
 func NewHandler(logger logrus.FieldLogger, driver Driver) *Handler {
-	h := &Handler{driver, sdk.NewHandler(logger, manifest)}
+	h := &Handler{driver, sdk.NewHandler(logger, sdk.Manifest{
+		Implements: []sdk.DriverImplementationName{ImplementationName},
+	})}
 	h.initMux()
 	return h
 }
@@ -233,15 +240,12 @@ func (h *Handler) initMux() {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		res, err := h.driver.GetCapabilities(r.Context())
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
 		if res == nil {
-			err := errors.New("Network driver must implement GetCapabilities")
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
-			return err
+			return errors.New("network driver must implement GetCapabilities")
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(createNetworkPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -255,10 +259,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.driver.CreateNetwork(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(allocateNetworkPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -272,10 +275,9 @@ func (h *Handler) initMux() {
 		}))
 		res, err := h.driver.AllocateNetwork(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(deleteNetworkPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -289,10 +291,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.driver.DeleteNetwork(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(freeNetworkPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -306,10 +307,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.driver.FreeNetwork(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(createEndpointPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -324,10 +324,9 @@ func (h *Handler) initMux() {
 		}))
 		res, err := h.driver.CreateEndpoint(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(deleteEndpointPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -342,10 +341,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.driver.DeleteEndpoint(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(endpointInfoPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -360,10 +358,9 @@ func (h *Handler) initMux() {
 		}))
 		res, err := h.driver.EndpointInfo(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(joinPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -378,10 +375,9 @@ func (h *Handler) initMux() {
 		}))
 		res, err := h.driver.Join(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(leavePath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -396,10 +392,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.driver.Leave(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(discoverNewPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -410,10 +405,9 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.DiscoverNew(r.Context(), req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(discoverDeletePath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -424,10 +418,9 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.DiscoverDelete(r.Context(), req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(programExtConnPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -438,10 +431,9 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.ProgramExternalConnectivity(r.Context(), req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(revokeExtConnPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -452,10 +444,9 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.RevokeExternalConnectivity(r.Context(), req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 }

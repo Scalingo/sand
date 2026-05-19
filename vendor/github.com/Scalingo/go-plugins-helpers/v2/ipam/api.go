@@ -6,12 +6,13 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/Scalingo/go-plugins-helpers/sdk"
+	"github.com/Scalingo/go-plugins-helpers/v2/sdk"
 	"github.com/Scalingo/go-utils/logger"
 )
 
 const (
-	manifest = `{"Implements": ["IpamDriver"]}`
+	// ImplementationName is the name of the interface all IPAM plugins implement
+	ImplementationName sdk.DriverImplementationName = "IpamDriver"
 
 	capabilitiesPath   = "/IpamDriver.GetCapabilities"
 	addressSpacesPath  = "/IpamDriver.GetDefaultAddressSpaces"
@@ -23,17 +24,18 @@ const (
 
 // Ipam represent the interface a driver must fulfill.
 type Ipam interface {
-	GetCapabilities(context.Context) (*CapabilitiesResponse, error)
-	GetDefaultAddressSpaces(context.Context) (*AddressSpacesResponse, error)
-	RequestPool(context.Context, *RequestPoolRequest) (*RequestPoolResponse, error)
-	ReleasePool(context.Context, *ReleasePoolRequest) error
-	RequestAddress(context.Context, *RequestAddressRequest) (*RequestAddressResponse, error)
-	ReleaseAddress(context.Context, *ReleaseAddressRequest) error
+	GetCapabilities(ctx context.Context) (*CapabilitiesResponse, error)
+	GetDefaultAddressSpaces(ctx context.Context) (*AddressSpacesResponse, error)
+	RequestPool(ctx context.Context, req *RequestPoolRequest) (*RequestPoolResponse, error)
+	ReleasePool(ctx context.Context, req *ReleasePoolRequest) error
+	RequestAddress(ctx context.Context, req *RequestAddressRequest) (*RequestAddressResponse, error)
+	ReleaseAddress(ctx context.Context, req *ReleaseAddressRequest) error
 }
 
 // CapabilitiesResponse returns whether or not this IPAM required pre-made MAC
 type CapabilitiesResponse struct {
-	RequiresMACAddress bool
+	RequiresMACAddress    bool
+	RequiresRequestReplay bool
 }
 
 // AddressSpacesResponse returns the default local and global address space names for this IPAM
@@ -67,8 +69,18 @@ type ReleasePoolRequest struct {
 type RequestAddressRequest struct {
 	PoolID  string
 	Address string
-	Options map[string]string
+	Options RequestAddressRequestOptions
 }
+
+type RequestAddressRequestOptions struct {
+	RequestAddressType RequestAddressType `json:"RequestAddressType"`
+}
+
+type RequestAddressType string
+
+const (
+	RequestAddressTypeGateway RequestAddressType = "com.docker.network.gateway"
+)
 
 // RequestAddressResponse is formed with allocated address by IPAM
 type RequestAddressResponse struct {
@@ -82,16 +94,6 @@ type ReleaseAddressRequest struct {
 	Address string
 }
 
-// ErrorResponse is a formatted error message that libnetwork can understand
-type ErrorResponse struct {
-	Err string
-}
-
-// NewErrorResponse creates an ErrorResponse with the provided message
-func NewErrorResponse(msg string) *ErrorResponse {
-	return &ErrorResponse{Err: msg}
-}
-
 // Handler forwards requests and responses between the docker daemon and the plugin.
 type Handler struct {
 	ipam Ipam
@@ -100,7 +102,9 @@ type Handler struct {
 
 // NewHandler initializes the request handler with a driver implementation.
 func NewHandler(logger logrus.FieldLogger, driver Ipam) *Handler {
-	h := &Handler{driver, sdk.NewHandler(logger, manifest)}
+	h := &Handler{driver, sdk.NewHandler(logger, sdk.Manifest{
+		Implements: []sdk.DriverImplementationName{ImplementationName},
+	})}
 	h.initMux()
 	return h
 }
@@ -115,19 +119,17 @@ func (h *Handler) initMux() {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		res, err := h.ipam.GetCapabilities(r.Context())
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(addressSpacesPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
 		res, err := h.ipam.GetDefaultAddressSpaces(r.Context())
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(requestPoolPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -143,10 +145,9 @@ func (h *Handler) initMux() {
 		}))
 		res, err := h.ipam.RequestPool(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(releasePoolPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -160,10 +161,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.ipam.ReleasePool(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 	h.HandleFunc(requestAddressPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -178,10 +178,9 @@ func (h *Handler) initMux() {
 		}))
 		res, err := h.ipam.RequestAddress(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, res, false)
+		sdk.EncodeResponse(w, res)
 		return nil
 	})
 	h.HandleFunc(releaseAddressPath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -196,10 +195,9 @@ func (h *Handler) initMux() {
 		}))
 		err = h.ipam.ReleaseAddress(ctx, req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return err
 		}
-		sdk.EncodeResponse(w, struct{}{}, false)
+		sdk.EncodeResponse(w, struct{}{})
 		return nil
 	})
 }

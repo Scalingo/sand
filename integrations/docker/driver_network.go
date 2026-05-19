@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/Scalingo/go-plugins-helpers/network"
+	"github.com/Scalingo/go-plugins-helpers/v2/network"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/endpoint"
@@ -30,17 +30,15 @@ func (p *dockerNetworkPlugin) CreateNetwork(ctx context.Context, req *network.Cr
 	log := logger.Get(ctx)
 	log.Info("Create network by docker integration")
 
-	opts, ok := req.Options["com.docker.network.generic"].(map[string]interface{})
-	if !ok {
-		return errors.Errorf("invalid generic options: %+v, not a map[string]interface{}", req.Options["com.docker.network.generic"])
+	if req.Options.Generic == nil {
+		return errors.New("generic options must be defined")
 	}
 
-	id, ok := opts["sand-id"].(string)
-	if !ok {
-		return errors.New("sand-id should be a string")
+	id := req.Options.Generic["sand-id"]
+	if id == "" {
+		return errors.New("sand-id must be defined")
 	}
-	log = log.WithField("network_id", id)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, log = logger.WithFieldToCtx(ctx, "network_id", id)
 
 	network, ok, err := p.networkRepository.Exists(ctx, id)
 	if err != nil {
@@ -66,8 +64,7 @@ func (p *dockerNetworkPlugin) AllocateNetwork(ctx context.Context, req *network.
 }
 
 func (p *dockerNetworkPlugin) DeleteNetwork(ctx context.Context, req *network.DeleteNetworkRequest) error {
-	log := logger.Get(ctx).WithField("docker_network_id", req.NetworkID)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, log := logger.WithFieldToCtx(ctx, "docker_network_id", req.NetworkID)
 	log.Info("Delete network by docker integration")
 
 	dpn, err := p.dockerPluginRepository.GetNetworkByDockerID(ctx, req.NetworkID)
@@ -75,8 +72,7 @@ func (p *dockerNetworkPlugin) DeleteNetwork(ctx context.Context, req *network.De
 		return errors.Wrapf(err, "fail to get docker id binding")
 	}
 
-	log = log.WithField("network_id", dpn.SandNetworkID)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, log = logger.WithFieldToCtx(ctx, "network_id", dpn.SandNetworkID)
 
 	network, ok, err := p.networkRepository.Exists(ctx, dpn.SandNetworkID)
 	if err != nil {
@@ -105,16 +101,15 @@ func (p *dockerNetworkPlugin) FreeNetwork(ctx context.Context, req *network.Free
 }
 
 func (p *dockerNetworkPlugin) CreateEndpoint(ctx context.Context, req *network.CreateEndpointRequest) (*network.CreateEndpointResponse, error) {
-	log := logger.Get(ctx).WithField("docker_network_id", req.NetworkID)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, log := logger.WithFieldToCtx(ctx, "docker_network_id", req.NetworkID)
 	log.Info("Create endpoint by docker integration")
+
 	dpn, err := p.dockerPluginRepository.GetNetworkByDockerID(ctx, req.NetworkID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to get docker id binding")
 	}
+	ctx, _ = logger.WithFieldToCtx(ctx, "network_id", dpn.SandNetworkID)
 
-	log = log.WithField("network_id", dpn.SandNetworkID)
-	ctx = logger.ToCtx(ctx, log)
 	n, ok, err := p.networkRepository.Exists(ctx, dpn.SandNetworkID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to get network %v", dpn.SandNetworkID)
@@ -136,8 +131,7 @@ func (p *dockerNetworkPlugin) CreateEndpoint(ctx context.Context, req *network.C
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to create endpoint")
 	}
-	log = log.WithField("endpoint_id", e.ID)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, log = logger.WithFieldToCtx(ctx, "endpoint_id", e.ID)
 
 	err = p.dockerPluginRepository.SaveEndpoint(ctx, DockerPluginEndpoint{
 		DockerPluginNetwork: dpn,
@@ -159,7 +153,7 @@ func (p *dockerNetworkPlugin) CreateEndpoint(ctx context.Context, req *network.C
 }
 
 func (p *dockerNetworkPlugin) DeleteEndpoint(ctx context.Context, req *network.DeleteEndpointRequest) error {
-	log := logger.Get(ctx).WithField("docker_endpoint_id", req.EndpointID)
+	ctx, log := logger.WithFieldToCtx(ctx, "docker_endpoint_id", req.EndpointID)
 	log.Info("Delete endpoint by docker integration")
 
 	dpe, err := p.dockerPluginRepository.GetEndpointByDockerID(ctx, req.EndpointID)
@@ -167,11 +161,10 @@ func (p *dockerNetworkPlugin) DeleteEndpoint(ctx context.Context, req *network.D
 		return errors.Wrapf(err, "fail to get docker id binding")
 	}
 
-	log = log.WithFields(logrus.Fields{
+	ctx, log = logger.WithFieldsToCtx(ctx, logrus.Fields{
 		"endpoint_id": dpe.SandEndpointID,
 		"network_id":  dpe.SandNetworkID,
 	})
-	ctx = logger.ToCtx(ctx, log)
 
 	n, ok, err := p.networkRepository.Exists(ctx, dpe.SandNetworkID)
 	if err != nil {

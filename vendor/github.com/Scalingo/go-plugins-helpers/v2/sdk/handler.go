@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -20,14 +19,22 @@ type Handler struct {
 	mux *handlers.Router
 }
 
+type DriverImplementationName string
+
+type Manifest struct {
+	Implements []DriverImplementationName `json:"Implements"`
+}
+
 // NewHandler creates a new Handler with an http mux.
-func NewHandler(logger logrus.FieldLogger, manifest string) Handler {
+// It configures a single default route for the plugin activation and adds a bunch of middlewares.
+func NewHandler(logger logrus.FieldLogger, manifest Manifest) Handler {
 	mux := handlers.NewRouter(logger)
 	mux.Use(handlers.ErrorMiddleware)
+	mux.Use(errorMiddleware)
+	mux.Use(contentTypeMiddleware)
 
 	mux.HandleFunc(activatePath, func(w http.ResponseWriter, r *http.Request, p map[string]string) error {
-		w.Header().Set("Content-Type", DefaultContentTypeV1_1)
-		fmt.Fprintln(w, manifest)
+		EncodeResponse(w, manifest)
 		return nil
 	})
 
@@ -90,6 +97,12 @@ func (h Handler) ServeWindows(addr, pluginName, daemonDir string, pipeConfig *Wi
 		defer os.Remove(spec)
 	}
 	return h.Serve(l)
+}
+
+// Use adds a middleware at the beginning of the middleware stack. The lastly added middleware is called first.
+// All the middlewares MUST wrap the `http.ResponseWriter` into a `negroni.ResponseWriter` so that one can call `ResponseWriter.Status()` and `ResponseWriter.Size()` in the various middlewares.
+func (h Handler) Use(m handlers.Middleware) {
+	h.mux.Use(m)
 }
 
 // HandleFunc registers a function to handle a request path with.

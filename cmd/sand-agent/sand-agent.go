@@ -13,9 +13,9 @@ import (
 
 	"github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/go-handlers"
-	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
-	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
-	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
+	dockerpluginsipam "github.com/Scalingo/go-plugins-helpers/v2/ipam"
+	dockerpluginsnetwork "github.com/Scalingo/go-plugins-helpers/v2/network"
+	dockerpluginssdk "github.com/Scalingo/go-plugins-helpers/v2/sdk"
 	"github.com/Scalingo/go-utils/graceful"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/logger/plugins/rollbarplugin"
@@ -130,10 +130,15 @@ func main() {
 		plugin := docker.NewDockerPlugin(
 			c, networkRepository, endpointRepository, dockerRepository, ipAllocator,
 		)
-		manifest := `{"Implements": ["NetworkDriver", "IpamDriver"]}`
-		dockerPluginRouter := dockersdk.NewHandler(log, manifest)
-		dockernetwork.ConfigureHandler(dockerPluginRouter, plugin.DockerNetworkPlugin)
-		dockeripam.ConfigureHandler(dockerPluginRouter, plugin.DockerIPAMPlugin)
+		manifest := dockerpluginssdk.Manifest{
+			Implements: []dockerpluginssdk.DriverImplementationName{
+				dockerpluginsnetwork.ImplementationName,
+				dockerpluginsipam.ImplementationName,
+			},
+		}
+		dockerPluginRouter := dockerpluginssdk.NewHandler(log, manifest)
+		dockerpluginsnetwork.ConfigureHandler(dockerPluginRouter, plugin.DockerNetworkPlugin)
+		dockerpluginsipam.ConfigureHandler(dockerPluginRouter, plugin.DockerIPAMPlugin)
 
 		err = docker.WritePluginSpecsOnDisk(ctx, c)
 		if err != nil {
