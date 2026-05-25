@@ -16,15 +16,11 @@ import (
 
 func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network, endpoints []types.Endpoint) error {
 	for _, endpoint := range endpoints {
-		ctx, log := logger.WithFieldsToCtx(ctx, logrus.Fields{
+		ctx, _ = logger.WithFieldsToCtx(ctx, logrus.Fields{
 			"endpoint_id":              endpoint.ID,
 			"endpoint_target_ip":       endpoint.TargetVethIP,
 			"endpoint_target_hostname": endpoint.Hostname,
 		})
-		if !shouldReplayEndpointNeigh(endpoint) {
-			log.Info("skip inactive endpoint ARP/FDB replay")
-			continue
-		}
 
 		err := m.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
@@ -36,8 +32,8 @@ func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network
 
 func (m manager) AddEndpointNeigh(ctx context.Context, network types.Network, endpoint types.Endpoint) error {
 	ctx, log := logger.WithFieldToCtx(ctx, "neighbor_action", "add")
-	if !shouldReplayEndpointNeigh(endpoint) {
-		log.Info("skip inactive endpoint ARP/FDB replay")
+	if !endpoint.Active {
+		log.Info("Skip inactive endpoint ARP/FDB replay")
 		return nil
 	}
 
@@ -113,6 +109,3 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 	return nil
 }
 
-func shouldReplayEndpointNeigh(endpoint types.Endpoint) bool {
-	return endpoint.Active
-}
