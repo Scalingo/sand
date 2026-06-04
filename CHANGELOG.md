@@ -2,6 +2,10 @@
 
 ## To be Released
 
+## v1.1.5 - 04 Jun 2026
+
+* fix: fix overlay neighbor replay for inactive endpoints
+
 ## v1.1.4 - 20 Mar 2026
 
 * deps: replace github.com/golang/mock by go.uber.org/mock
