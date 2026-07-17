@@ -16,6 +16,7 @@ import (
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
 	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
+	"github.com/Scalingo/go-utils/cronsetup"
 	"github.com/Scalingo/go-utils/graceful"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/logger/plugins/rollbarplugin"
@@ -88,6 +89,12 @@ func main() {
 		log.WithError(err).Error("fail to ensure existing networks")
 		os.Exit(-1)
 	}
+	stopEndpointEnsureCron, err := setupEndpointEnsureCron(ctx, c, networkRepository, endpointRepository)
+	if err != nil {
+		log.WithError(err).Error("fail to setup endpoint ensure cron")
+		os.Exit(-1)
+	}
+	defer stopEndpointEnsureCron()
 
 	vctrl := web.NewVersionController(c)
 	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
@@ -240,4 +247,19 @@ func ensureNetworks(ctx context.Context, c *config.Config, repo network.Reposito
 		}
 	}
 	return nil
+}
+
+func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) (func(), error) {
+	return cronsetup.Setup(ctx, cronsetup.SetupOpts{
+		WithoutTelemetry: true,
+		Jobs: []cronsetup.Job{
+			{
+				Name:   "ensure network endpoints",
+				Rhythm: "@every " + c.EndpointEnsureInterval.String(),
+				Func: func(ctx context.Context) error {
+					return ensureNetworks(ctx, c, repo, erepo)
+				},
+			},
+		},
+	})
 }

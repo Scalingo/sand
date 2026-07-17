@@ -19,6 +19,10 @@ github.com/Scalingo/go-handlers
 github.com/Scalingo/go-plugins-helpers/ipam
 github.com/Scalingo/go-plugins-helpers/network
 github.com/Scalingo/go-plugins-helpers/sdk
+# github.com/Scalingo/go-utils/cronsetup v1.6.0
+## explicit; go 1.24.0
+github.com/Scalingo/go-utils/cronsetup
+github.com/Scalingo/go-utils/cronsetup/internal/cron
 # github.com/Scalingo/go-utils/crypto v1.1.1
 ## explicit; go 1.24
 github.com/Scalingo/go-utils/crypto

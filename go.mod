@@ -6,6 +6,7 @@ require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.1.0
 	github.com/Scalingo/go-handlers v1.11.1
 	github.com/Scalingo/go-plugins-helpers v1.4.0
+	github.com/Scalingo/go-utils/cronsetup v1.6.0
 	github.com/Scalingo/go-utils/etcd v1.2.2
 	github.com/Scalingo/go-utils/graceful v1.3.3
 	github.com/Scalingo/go-utils/logger v1.12.2
