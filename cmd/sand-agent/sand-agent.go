@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/moby/moby/pkg/reexec"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/Scalingo/go-etcd-lock/v5/lock"
@@ -20,7 +19,6 @@ import (
 	"github.com/Scalingo/go-utils/graceful"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/logger/plugins/rollbarplugin"
-	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/endpoint"
@@ -30,6 +28,7 @@ import (
 	"github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/node"
 	"github.com/Scalingo/sand/store"
 	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
@@ -84,7 +83,7 @@ func main() {
 	endpointRepository := endpoint.NewRepository(c, dataStore, managers)
 	networkRepository := network.NewRepository(c, dataStore, managers)
 
-	err = ensureNetworks(ctx, c, networkRepository, endpointRepository)
+	err = node.EnsureNetworkEndpoints(ctx, c, networkRepository, endpointRepository)
 	if err != nil {
 		log.WithError(err).Error("fail to ensure existing networks")
 		os.Exit(-1)
@@ -103,6 +102,7 @@ func main() {
 	sandRouter := handlers.NewRouter(log)
 	sandRouter.Use(handlers.ErrorMiddleware)
 	sandRouter.HandleFunc("/version", vctrl.Show).Methods("GET")
+	sandRouter.HandleFunc("/node/ensure-network-endpoints", nctrl.EnsureNetworkEndpoints).Methods("POST")
 	sandRouter.HandleFunc("/networks", nctrl.List).Methods("GET")
 	sandRouter.HandleFunc("/networks", nctrl.Create).Methods("POST")
 	sandRouter.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
@@ -182,73 +182,6 @@ func main() {
 	log.Info("All APIs stopped, shutting down..")
 }
 
-func ensureNetworks(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) error {
-	log := logger.Get(ctx)
-	ctx = logger.ToCtx(ctx, log)
-
-	log.Info("Ensure networks on node")
-
-	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.GetPeerHostname()})
-	if err == store.ErrNotFound {
-		return nil
-	}
-	if err != nil {
-		return errors.Wrapf(err, "fail to list endpoints of %v", c.GetPeerHostname())
-	}
-
-	for _, endpoint := range endpoints {
-		log = log.WithField("endpoint_id", endpoint.ID)
-		ctx = logger.ToCtx(ctx, log)
-		if !endpoint.Active {
-			log.Debug("skip inactive endpoint")
-			continue
-		}
-		log = log.WithFields(logrus.Fields{
-			"network_id":          endpoint.NetworkID,
-			"endpoint_id":         endpoint.ID,
-			"endpoint_netns_path": endpoint.TargetNetnsPath,
-		})
-		log.Info("restoring endpoint")
-
-		network, ok, err := repo.Exists(ctx, endpoint.NetworkID)
-		if err != nil {
-			return errors.Wrapf(err, "fail to get network")
-		}
-		if !ok {
-			log.WithError(errors.Errorf("network not found for %v", endpoint))
-			continue
-		}
-
-		log.Info("ensuring network")
-		err = repo.Ensure(ctx, network)
-		if err != nil {
-			log.WithError(err).Error("fail to ensure network")
-			continue
-		}
-
-		endpoint, err = erepo.Activate(ctx, network, endpoint, params.EndpointActivate{
-			NSHandlePath: endpoint.TargetNetnsPath,
-			SetAddr:      true,
-			MoveVeth:     true,
-		})
-		if err != nil {
-			// if we can't activate the endpoint because the netns path doesn't exist anymore, we
-			// just deactivate it. Otherwise we raise an error.
-			if os.IsNotExist(errors.Cause(err)) {
-				endpoint, err = erepo.Deactivate(ctx, network, endpoint)
-				if err != nil {
-					log.WithError(err).Error("fail to deactivate endpoint")
-					continue
-				}
-			} else {
-				log.WithError(err).Error("fail to ensure endpoint")
-				continue
-			}
-		}
-	}
-	return nil
-}
-
 func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) (func(), error) {
 	return cronsetup.Setup(ctx, cronsetup.SetupOpts{
 		WithoutTelemetry: true,
@@ -257,7 +190,7 @@ func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network
 				Name:   "ensure network endpoints",
 				Rhythm: "@every " + c.EndpointEnsureInterval.String(),
 				Func: func(ctx context.Context) error {
-					return ensureNetworks(ctx, c, repo, erepo)
+					return node.EnsureNetworkEndpoints(ctx, c, repo, erepo)
 				},
 			},
 		},
