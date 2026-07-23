@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/config"
@@ -22,48 +22,46 @@ func EnsureNetworkEndpoints(ctx context.Context, c *config.Config, repo network.
 	log.Info("Ensure networks on node")
 
 	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.GetPeerHostname()})
-	if errors.Cause(err) == store.ErrNotFound {
+	if errors.Is(err, store.ErrNotFound) {
 		return nil
 	}
 	if err != nil {
-		return errors.Wrapf(err, "failed to list endpoints of %v", c.GetPeerHostname())
+		return errors.Wrapf(ctx, err, "list endpoints of %v", c.GetPeerHostname())
 	}
 
 	for _, endpoint := range endpoints {
-		endpointLog := log.WithFields(logrus.Fields{
+		ctx, log := logger.WithFieldsToCtx(ctx, logrus.Fields{
 			"endpoint_id": endpoint.ID,
 		})
-		endpointCtx := logger.ToCtx(ctx, endpointLog)
 
 		if !endpoint.Active {
-			endpointLog.Debug("skip inactive endpoint")
+			log.Debug("skip inactive endpoint")
 			continue
 		}
 
-		endpointLog = endpointLog.WithFields(logrus.Fields{
+		ctx, log = logger.WithFieldsToCtx(ctx, logrus.Fields{
 			"network_id":          endpoint.NetworkID,
 			"endpoint_netns_path": endpoint.TargetNetnsPath,
 		})
-		endpointCtx = logger.ToCtx(ctx, endpointLog)
-		endpointLog.Info("restoring endpoint")
+		log.Info("restoring endpoint")
 
-		network, ok, err := repo.Exists(endpointCtx, endpoint.NetworkID)
+		network, ok, err := repo.Exists(ctx, endpoint.NetworkID)
 		if err != nil {
-			return errors.Wrapf(err, "failed to get network")
+			return errors.Wrapf(ctx, err, "get network")
 		}
 		if !ok {
-			endpointLog.WithError(errors.Errorf("network not found for %v", endpoint)).Error("skip endpoint")
+			log.WithError(errors.Errorf(ctx, "network not found for %v", endpoint)).Error("skip endpoint")
 			continue
 		}
 
-		endpointLog.Info("ensuring network")
-		err = repo.Ensure(endpointCtx, network)
+		log.Info("ensuring network")
+		err = repo.Ensure(ctx, network)
 		if err != nil {
-			endpointLog.WithError(err).Error("failed to ensure network")
+			log.WithError(err).Error("failed to ensure network")
 			continue
 		}
 
-		_, err = erepo.Activate(endpointCtx, network, endpoint, params.EndpointActivate{
+		_, err = erepo.Activate(ctx, network, endpoint, params.EndpointActivate{
 			NSHandlePath: endpoint.TargetNetnsPath,
 			SetAddr:      true,
 			MoveVeth:     true,
@@ -71,14 +69,14 @@ func EnsureNetworkEndpoints(ctx context.Context, c *config.Config, repo network.
 		if err != nil {
 			// If the netns path no longer exists, deactivate the endpoint. Other
 			// activation errors should not prevent the remaining endpoints from being ensured.
-			if os.IsNotExist(errors.Cause(err)) {
-				_, err = erepo.Deactivate(endpointCtx, network, endpoint)
+			if errors.Is(err, os.ErrNotExist) {
+				_, err = erepo.Deactivate(ctx, network, endpoint)
 				if err != nil {
-					endpointLog.WithError(err).Error("failed to deactivate endpoint")
+					log.WithError(err).Error("failed to deactivate endpoint")
 					continue
 				}
 			} else {
-				endpointLog.WithError(err).Error("failed to ensure endpoint")
+				log.WithError(err).Error("failed to ensure endpoint")
 				continue
 			}
 		}

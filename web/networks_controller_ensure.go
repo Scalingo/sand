@@ -3,8 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/pkg/errors"
-
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/sand/node"
 )
 
@@ -13,7 +12,7 @@ func (c NetworksController) EnsureNetworkEndpoints(w http.ResponseWriter, r *htt
 
 	err := node.EnsureNetworkEndpoints(r.Context(), c.Config, c.NetworkRepository, c.EndpointRepository)
 	if err != nil {
-		return errors.Wrap(err, "ensure network endpoints")
+		return errors.Wrap(r.Context(), err, "ensure network endpoints")
 	}
 
 	w.WriteHeader(http.StatusNoContent)
