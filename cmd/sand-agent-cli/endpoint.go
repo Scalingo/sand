@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/urfave/cli/v3"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/urfave/cli"
 )
 
 type CliEndpoint types.Endpoint
@@ -18,12 +20,12 @@ func (e CliEndpoint) String() string {
 	return fmt.Sprintf("* [PASSIVE] ID=%s networkID=%s hostname=%s IP=%s", e.ID, e.NetworkID, e.Hostname, e.TargetVethIP)
 }
 
-func (a *App) EndpointCreate(c *cli.Context) error {
-	client, err := a.sandClient(c)
+func (a *App) EndpointCreate(ctx context.Context, c *cli.Command) error {
+	client, err := a.sandClient(ctx, c)
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "create sand client")
 	}
-	endpoint, err := client.EndpointCreate(context.Background(), params.EndpointCreate{
+	endpoint, err := client.EndpointCreate(ctx, params.EndpointCreate{
 		NetworkID:   c.String("network"),
 		IPv4Address: c.String("ip"),
 		Activate:    true,
@@ -32,17 +34,17 @@ func (a *App) EndpointCreate(c *cli.Context) error {
 		},
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "create endpoint")
 	}
 	fmt.Println("New endpoint created:")
 	fmt.Println(CliEndpoint(endpoint))
 	return nil
 }
 
-func (a *App) EndpointsList(c *cli.Context) error {
-	client, err := a.sandClient(c)
+func (a *App) EndpointsList(ctx context.Context, c *cli.Command) error {
+	client, err := a.sandClient(ctx, c)
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "create sand client")
 	}
 
 	var hostname string
@@ -52,12 +54,12 @@ func (a *App) EndpointsList(c *cli.Context) error {
 		hostname = c.String("hostname")
 	}
 
-	endpoints, err := client.EndpointsList(context.Background(), params.EndpointsList{
+	endpoints, err := client.EndpointsList(ctx, params.EndpointsList{
 		NetworkID: c.String("network"),
 		Hostname:  hostname,
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "list endpoints")
 	}
 	fmt.Println("List of endpoints:")
 	for _, endpoint := range endpoints {
@@ -66,15 +68,15 @@ func (a *App) EndpointsList(c *cli.Context) error {
 	return nil
 }
 
-func (a *App) EndpointDelete(c *cli.Context) error {
-	client, err := a.sandClient(c)
+func (a *App) EndpointDelete(ctx context.Context, c *cli.Command) error {
+	client, err := a.sandClient(ctx, c)
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "create sand client")
 	}
 
-	err = client.EndpointDelete(context.Background(), c.String("endpoint"))
+	err = client.EndpointDelete(ctx, c.String("endpoint"))
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "delete endpoint")
 	}
 
 	fmt.Printf("Endpoint '%s' deleted.\n", c.String("endpoint"))

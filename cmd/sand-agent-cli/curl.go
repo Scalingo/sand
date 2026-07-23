@@ -9,24 +9,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/sand/client/sand"
 )
 
-func (a *App) Curl(c *cli.Context) error {
-	client, err := a.sandClient(c)
+func (a *App) Curl(ctx context.Context, c *cli.Command) error {
+	client, err := a.sandClient(ctx, c)
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "create sand client")
 	}
 
 	if c.String("network") == "" {
-		return errors.New("network flag is mandatory")
+		return errors.New(ctx, "network flag is mandatory")
 	}
 
 	if c.NArg() == 0 {
-		return errors.New("URL is mandatory")
+		return errors.New(ctx, "URL is mandatory")
 	}
 
 	tlsConfig := tls.Config{}
@@ -36,7 +36,7 @@ func (a *App) Curl(c *cli.Context) error {
 
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second,
-		Transport: client.NewHTTPRoundTripper(context.Background(), c.String("network"), sand.HTTPRoundTripperOpts{
+		Transport: client.NewHTTPRoundTripper(ctx, c.String("network"), sand.HTTPRoundTripperOpts{
 			TLSConfig: &tlsConfig,
 		}),
 	}
@@ -49,7 +49,7 @@ func (a *App) Curl(c *cli.Context) error {
 
 	req, err := http.NewRequest(c.String("method"), c.Args().Get(0), body)
 	if err != nil {
-		return errors.Wrap(err, "fail to build request")
+		return errors.Wrap(ctx, err, "fail to build request")
 	}
 
 	for _, header := range c.StringSlice("header") {
@@ -59,11 +59,11 @@ func (a *App) Curl(c *cli.Context) error {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return errors.Wrap(err, "fail to make HTTP request")
+		return errors.Wrap(ctx, err, "fail to make HTTP request")
 	}
 	_, err = io.Copy(os.Stdout, resp.Body)
 	if err != nil {
-		return errors.Wrap(err, "fail to copy response body")
+		return errors.Wrap(ctx, err, "fail to copy response body")
 	}
 	return nil
 }

@@ -16,6 +16,7 @@ import (
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
 	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
 	"github.com/Scalingo/go-utils/cronsetup"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/graceful"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/logger/plugins/rollbarplugin"
@@ -190,7 +191,11 @@ func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network
 				Name:   "ensure network endpoints",
 				Rhythm: "@every " + c.EndpointEnsureInterval.String(),
 				Func: func(ctx context.Context) error {
-					return node.EnsureNetworkEndpoints(ctx, c, repo, erepo)
+					err := node.EnsureNetworkEndpoints(ctx, c, repo, erepo)
+					if err != nil {
+						return errors.Wrap(ctx, err, "ensure network endpoints")
+					}
+					return nil
 				},
 			},
 		},

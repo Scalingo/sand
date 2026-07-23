@@ -6,28 +6,28 @@ import (
 	"net"
 	"sync"
 
-	"github.com/pkg/errors"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 )
 
-func (a *App) NetworkConnect(c *cli.Context) error {
+func (a *App) NetworkConnect(ctx context.Context, c *cli.Command) error {
 	log := logger.Default()
 
-	client, err := a.sandClient(c)
+	client, err := a.sandClient(ctx, c)
 	if err != nil {
-		return err
+		return errors.Wrap(ctx, err, "create sand client")
 	}
 
 	if c.String("network") == "" || c.String("ip") == "" || c.String("port") == "" {
-		return errors.New("network, ip and port flags are mandatory")
+		return errors.New(ctx, "network, ip and port flags are mandatory")
 	}
 
 	listener, err := net.Listen("tcp", ":")
 	if err != nil {
-		return errors.Wrapf(err, "fail to bind a socket")
+		return errors.Wrapf(ctx, err, "fail to bind a socket")
 	}
 	defer listener.Close()
 
@@ -36,11 +36,11 @@ func (a *App) NetworkConnect(c *cli.Context) error {
 	for {
 		localConn, err := listener.Accept()
 		if err != nil {
-			return errors.Wrapf(err, "fail to accept connection")
+			return errors.Wrapf(ctx, err, "fail to accept connection")
 		}
 
 		go func(localConn net.Conn) {
-			conn, err := client.NetworkConnect(context.Background(), c.String("network"), params.NetworkConnect{
+			conn, err := client.NetworkConnect(ctx, c.String("network"), params.NetworkConnect{
 				IP:   c.String("ip"),
 				Port: c.String("port"),
 			})
