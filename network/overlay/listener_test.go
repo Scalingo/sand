@@ -13,6 +13,7 @@ import (
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay/overlaymock"
 	"github.com/Scalingo/sand/store/storemock"
 	"github.com/Scalingo/sand/test/mocks/network/netmanagermock"
@@ -57,7 +58,7 @@ func TestListener_Add(t *testing.T) {
 			ExpectNetManager: func(m *netmanagermock.MockNetManager, n types.Network) {
 				m.EXPECT().AddEndpointNeigh(gomock.Any(), n, types.Endpoint{
 					ID: "1", Active: true, TargetVethIP: "10.0.0.1", Hostname: "src-node.example.com",
-				}).Return(nil)
+				}).Return(netmanager.EndpointNeighResults{AddedARPEntry: true, AddedFDBEntry: true}, nil)
 			},
 		}, {
 			Name:       "it should forward PUT message with an inactive endpoint to neighbor manager",
@@ -81,7 +82,7 @@ func TestListener_Add(t *testing.T) {
 			ExpectNetManager: func(m *netmanagermock.MockNetManager, n types.Network) {
 				m.EXPECT().AddEndpointNeigh(gomock.Any(), n, types.Endpoint{
 					ID: "1", Active: false, TargetVethIP: "10.0.0.1", Hostname: "src-node.example.com",
-				}).Return(nil)
+				}).Return(netmanager.EndpointNeighResults{}, nil)
 			},
 		},
 	}

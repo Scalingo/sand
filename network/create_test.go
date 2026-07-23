@@ -25,7 +25,7 @@ func TestRepository_Ensure(t *testing.T) {
 			m.EXPECT().EnsureEndpointsNeigh(gomock.Any(), n, gomock.Any()).Do(func(ctx context.Context, n types.Network, eps []types.Endpoint) {
 				require.Len(t, eps, 1)
 				require.Equal(t, eps[0].ID, "ep-1")
-			}).Return(err)
+			}).Return(netmanager.EnsureEndpointsNeighResults{AddedARPEntries: 1, AddedFDBEntries: 1}, err)
 			if err == nil {
 				m.EXPECT().ListenNetworkChange(gomock.Any(), n).Return(nil)
 			}
@@ -134,13 +134,17 @@ func TestRepository_Ensure(t *testing.T) {
 				c.ExpectStore(t, store, network)
 			}
 
-			err = r.Ensure(context.Background(), network)
+			results, err := r.Ensure(t.Context(), network)
 			if c.Error != "" {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), c.Error)
 				return
 			}
 			require.NoError(t, err)
+			if c.ExpectNetManager != nil {
+				require.Equal(t, 1, results.AddedARPEntries)
+				require.Equal(t, 1, results.AddedFDBEntries)
+			}
 		})
 	}
 }

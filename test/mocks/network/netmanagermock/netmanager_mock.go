@@ -17,6 +17,7 @@ import (
 
 	params "github.com/Scalingo/sand/api/params"
 	types "github.com/Scalingo/sand/api/types"
+	netmanager "github.com/Scalingo/sand/network/netmanager"
 )
 
 // MockNetManager is a mock of NetManager interface.
@@ -44,11 +45,12 @@ func (m *MockNetManager) EXPECT() *MockNetManagerMockRecorder {
 }
 
 // AddEndpointNeigh mocks base method.
-func (m *MockNetManager) AddEndpointNeigh(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) error {
+func (m *MockNetManager) AddEndpointNeigh(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) (netmanager.EndpointNeighResults, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddEndpointNeigh", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(netmanager.EndpointNeighResults)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // AddEndpointNeigh indicates an expected call of AddEndpointNeigh.
@@ -115,11 +117,12 @@ func (mr *MockNetManagerMockRecorder) EnsureEndpoint(arg0, arg1, arg2, arg3 any)
 }
 
 // EnsureEndpointsNeigh mocks base method.
-func (m *MockNetManager) EnsureEndpointsNeigh(arg0 context.Context, arg1 types.Network, arg2 []types.Endpoint) error {
+func (m *MockNetManager) EnsureEndpointsNeigh(arg0 context.Context, arg1 types.Network, arg2 []types.Endpoint) (netmanager.EnsureEndpointsNeighResults, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EnsureEndpointsNeigh", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(netmanager.EnsureEndpointsNeighResults)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // EnsureEndpointsNeigh indicates an expected call of EnsureEndpointsNeigh.
@@ -143,11 +146,12 @@ func (mr *MockNetManagerMockRecorder) ListenNetworkChange(arg0, arg1 any) *gomoc
 }
 
 // RemoveEndpointNeigh mocks base method.
-func (m *MockNetManager) RemoveEndpointNeigh(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) error {
+func (m *MockNetManager) RemoveEndpointNeigh(arg0 context.Context, arg1 types.Network, arg2 types.Endpoint) (netmanager.EndpointNeighResults, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RemoveEndpointNeigh", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(netmanager.EndpointNeighResults)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // RemoveEndpointNeigh indicates an expected call of RemoveEndpointNeigh.

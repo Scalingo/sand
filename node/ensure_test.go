@@ -10,6 +10,7 @@ import (
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
+	networkpkg "github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/test/mocks/endpointmock"
 	"github.com/Scalingo/sand/test/mocks/networkmock"
 )
@@ -42,7 +43,7 @@ func TestEnsureNetworkEndpoints(t *testing.T) {
 				network := types.Network{ID: "network-1"}
 
 				r.EXPECT().Exists(gomock.Any(), "network-1").Return(network, true, nil)
-				r.EXPECT().Ensure(gomock.Any(), network).Return(nil)
+				r.EXPECT().Ensure(gomock.Any(), network).Return(networkpkg.EnsureResults{AddedARPEntries: 1, AddedFDBEntries: 1}, nil)
 			},
 		}, {
 			Name: "skip inactive endpoints",
@@ -76,7 +77,7 @@ func TestEnsureNetworkEndpoints(t *testing.T) {
 				network := types.Network{ID: "network-1"}
 
 				r.EXPECT().Exists(gomock.Any(), "network-1").Return(network, true, nil)
-				r.EXPECT().Ensure(gomock.Any(), network).Return(nil)
+				r.EXPECT().Ensure(gomock.Any(), network).Return(networkpkg.EnsureResults{}, nil)
 			},
 		},
 	}
@@ -97,7 +98,7 @@ func TestEnsureNetworkEndpoints(t *testing.T) {
 				c.ExpectEndpointRepository(endpointRepo)
 			}
 
-			err := EnsureNetworkEndpoints(t.Context(), &config.Config{PeerHostname: "node-1"}, networkRepo, endpointRepo)
+			err := EnsureNetworkEndpoints(t.Context(), &config.Config{PeerHostname: "node-1"}, networkRepo, endpointRepo, nil)
 			require.NoError(t, err)
 		})
 	}

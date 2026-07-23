@@ -25,6 +25,7 @@ import (
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/integrations/docker"
 	"github.com/Scalingo/sand/ipallocator"
+	"github.com/Scalingo/sand/metrics"
 	"github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
@@ -68,14 +69,20 @@ func main() {
 	}
 	peerListener := overlay.NewNetworkEndpointListener(ctx, c, endpointsWatcher, dataStore)
 
-	managers := netmanager.NewManagerMap()
-	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
-
 	etcdClient, err := etcd.NewClient()
 	if err != nil {
 		log.WithError(err).Error("fail to initialize etcd client")
 		os.Exit(-1)
 	}
+
+	metricsExporter, err := metrics.Register(ctx)
+	if err != nil {
+		log.WithError(err).Error("register metrics")
+		os.Exit(-1)
+	}
+
+	managers := netmanager.NewManagerMap()
+	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
 
 	locker := lock.NewEtcdLocker(etcdClient)
 	ipAllocator := ipallocator.New(c, dataStore, locker)
@@ -83,12 +90,12 @@ func main() {
 	endpointRepository := endpoint.NewRepository(c, dataStore, managers)
 	networkRepository := network.NewRepository(c, dataStore, managers)
 
-	err = node.EnsureNetworkEndpoints(ctx, c, networkRepository, endpointRepository)
+	err = node.EnsureNetworkEndpoints(ctx, c, networkRepository, endpointRepository, metricsExporter)
 	if err != nil {
 		log.WithError(err).Error("fail to ensure existing networks")
 		os.Exit(-1)
 	}
-	stopEndpointEnsureCron, err := setupEndpointEnsureCron(ctx, c, networkRepository, endpointRepository)
+	stopEndpointEnsureCron, err := setupEndpointEnsureCron(ctx, c, networkRepository, endpointRepository, metricsExporter)
 	if err != nil {
 		log.WithError(err).Error("fail to setup endpoint ensure cron")
 		os.Exit(-1)
@@ -96,7 +103,7 @@ func main() {
 	defer stopEndpointEnsureCron()
 
 	vctrl := web.NewVersionController(c)
-	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
+	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator, metricsExporter)
 	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository, ipAllocator)
 
 	sandRouter := handlers.NewRouter(log)
@@ -182,15 +189,14 @@ func main() {
 	log.Info("All APIs stopped, shutting down..")
 }
 
-func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) (func(), error) {
+func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository, metricsExporter metrics.Exporter) (func(), error) {
 	return cronsetup.Setup(ctx, cronsetup.SetupOpts{
-		WithoutTelemetry: true,
 		Jobs: []cronsetup.Job{
 			{
 				Name:   "ensure network endpoints",
 				Rhythm: "@every " + c.EndpointEnsureInterval.String(),
 				Func: func(ctx context.Context) error {
-					return node.EnsureNetworkEndpoints(ctx, c, repo, erepo)
+					return node.EnsureNetworkEndpoints(ctx, c, repo, erepo, metricsExporter)
 				},
 			},
 		},

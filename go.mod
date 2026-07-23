@@ -8,6 +8,7 @@ require (
 	github.com/Scalingo/go-plugins-helpers v1.4.0
 	github.com/Scalingo/go-utils/cronsetup v1.6.0
 	github.com/Scalingo/go-utils/etcd v1.2.2
+	github.com/Scalingo/go-utils/errors/v3 v3.2.1
 	github.com/Scalingo/go-utils/graceful v1.3.3
 	github.com/Scalingo/go-utils/logger v1.12.2
 	github.com/bits-and-blooms/bitset v1.24.5
@@ -23,6 +24,8 @@ require (
 	github.com/vishvananda/netns v0.0.5
 	go.etcd.io/etcd/api/v3 v3.6.12
 	go.etcd.io/etcd/client/v3 v3.6.12
+	go.opentelemetry.io/otel v1.44.0
+	go.opentelemetry.io/otel/metric v1.44.0
 	go.uber.org/mock v0.6.0
 	golang.org/x/sys v0.46.0
 	google.golang.org/grpc v1.82.0
@@ -34,7 +37,6 @@ require (
 	github.com/Scalingo/errgo-rollbar v0.2.1 // indirect
 	github.com/Scalingo/go-utils/crypto v1.1.1 // indirect
 	github.com/Scalingo/go-utils/errors/v2 v2.5.1 // indirect
-	github.com/Scalingo/go-utils/errors/v3 v3.2.1 // indirect
 	github.com/Scalingo/go-utils/security v1.2.2 // indirect
 	github.com/Scalingo/logrus-rollbar v1.4.4 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -59,8 +61,6 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.6.12 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.69.0 // indirect
-	go.opentelemetry.io/otel v1.44.0 // indirect
-	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect

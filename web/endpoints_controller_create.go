@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/ipallocator"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -61,7 +62,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 	}
 	params.IPv4Address = allocatedIP
 
-	err = c.NetworkRepository.Ensure(ctx, network)
+	_, err = c.NetworkRepository.Ensure(ctx, network)
 	if err != nil {
 		return errors.Wrapf(err, "fail to ensure network %s", network)
 	}

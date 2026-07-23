@@ -229,7 +229,7 @@ func (p *dockerNetworkPlugin) Join(ctx context.Context, req *network.JoinRequest
 		return nil, errors.New("sand endpoint not found")
 	}
 
-	err = p.networkRepository.Ensure(ctx, n)
+	_, err = p.networkRepository.Ensure(ctx, n)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to ensure network")
 	}
