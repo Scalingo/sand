@@ -7,15 +7,16 @@ import (
 	"sync"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type NetworkEndpointListener interface {
@@ -114,7 +115,7 @@ func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm ne
 		log.Info("registration got new endpoint")
 		ctx = logger.ToCtx(ctx, log)
 
-		err = nm.AddEndpointNeigh(ctx, network, endpoint)
+		_, err = nm.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
 			log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
 		}
@@ -134,7 +135,7 @@ func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm ne
 		log.Info("etcd watch got deleted endpoint")
 		ctx = logger.ToCtx(ctx, log)
 
-		err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
+		_, err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
 			log.WithError(err).Error("fail to remove endpoint ARP/FDB neigh rules")
 		}

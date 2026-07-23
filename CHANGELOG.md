@@ -2,8 +2,12 @@
 
 ## To be Released
 
+* feat(node-ensure/delete-untracked/metrics) Ensure there is no extra ARP/FDB configuration when ensuring node endpoints, build OTEL metrics out of control loop
+
 ## v1.1.5 - 04 Jun 2026
 
+* feat(ensure-networks): Add API endpoint and CLI command to trigger it manually without restartng the service (19 minutes ago)
+* feat(control-loop/ensure-networks): Add notion of control loop, ensure every 30 minutes (34 minutes ago)
 * fix: fix overlay neighbor replay for inactive endpoints
 
 ## v1.1.4 - 20 Mar 2026

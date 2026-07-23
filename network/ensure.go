@@ -12,9 +12,10 @@ import (
 	"github.com/Scalingo/sand/store"
 )
 
-func (c *repository) Ensure(ctx context.Context, network types.Network) error {
+func (c *repository) Ensure(ctx context.Context, network types.Network) (EnsureResults, error) {
 	log := logger.Get(ctx)
 	log.Info("Ensure network setup")
+	results := EnsureResults{}
 
 	m := c.managers.Get(network.Type)
 
@@ -22,27 +23,29 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	case types.OverlayNetworkType:
 		err := m.Ensure(ctx, network)
 		if err != nil {
-			return errors.Wrapf(err, "fail to ensure overlay network %s", network)
+			return results, errors.Wrapf(err, "fail to ensure overlay network %s", network)
 		}
 		var endpoints []types.Endpoint
 		err = c.store.Get(ctx, network.EndpointsStorageKey(""), true, &endpoints)
 		if err != nil && err != store.ErrNotFound {
-			return errors.Wrapf(err, "fail to get network endpoints")
+			return results, errors.Wrapf(err, "fail to get network endpoints")
 		}
 
-		if len(endpoints) > 0 {
-			err = m.EnsureEndpointsNeigh(ctx, network, endpoints)
-			if err != nil {
-				return errors.Wrapf(err, "fail to ensure neighbors (ARP/FDB)")
-			}
+		neighResults, err := m.EnsureEndpointsNeigh(ctx, network, endpoints)
+		if err != nil {
+			return results, errors.Wrapf(err, "fail to ensure neighbors (ARP/FDB)")
 		}
+		results.AddedARPEntries = neighResults.AddedARPEntries
+		results.AddedFDBEntries = neighResults.AddedFDBEntries
+		results.RemovedARPEntries = neighResults.RemovedARPEntries
+		results.RemovedFDBEntries = neighResults.RemovedFDBEntries
 
 		err = m.ListenNetworkChange(ctx, network)
 		if err != nil {
-			return errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
+			return results, errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
 		}
 	default:
-		return errors.New("invalid network type")
+		return results, errors.New("invalid network type")
 	}
 
 	// Ability to list all networks with node hostname as prefix
@@ -52,7 +55,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
-		return errors.Wrapf(err, "err to store nodes link to network %s", network)
+		return results, errors.Wrapf(err, "err to store nodes link to network %s", network)
 	}
 
 	// Ability to list nodes present in a network
@@ -62,9 +65,9 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
-		return errors.Wrapf(err, "err to store network %s link to hostname", network)
+		return results, errors.Wrapf(err, "err to store network %s link to hostname", network)
 	}
 
 	log.Info("Network setup ensured")
-	return nil
+	return results, nil
 }

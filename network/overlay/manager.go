@@ -1,8 +1,6 @@
 package overlay
 
-import (
-	"github.com/Scalingo/sand/config"
-)
+import "github.com/Scalingo/sand/config"
 
 type manager struct {
 	config   *config.Config

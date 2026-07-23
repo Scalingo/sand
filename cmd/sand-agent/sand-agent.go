@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/moby/moby/pkg/reexec"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/Scalingo/go-etcd-lock/v5/lock"
@@ -16,19 +15,21 @@ import (
 	dockeripam "github.com/Scalingo/go-plugins-helpers/ipam"
 	dockernetwork "github.com/Scalingo/go-plugins-helpers/network"
 	dockersdk "github.com/Scalingo/go-plugins-helpers/sdk"
+	"github.com/Scalingo/go-utils/cronsetup"
 	"github.com/Scalingo/go-utils/graceful"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/go-utils/logger/plugins/rollbarplugin"
-	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/endpoint"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/integrations/docker"
 	"github.com/Scalingo/sand/ipallocator"
+	"github.com/Scalingo/sand/metrics"
 	"github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/network/overlay"
+	"github.com/Scalingo/sand/node"
 	"github.com/Scalingo/sand/store"
 	apptls "github.com/Scalingo/sand/utils/tls"
 	"github.com/Scalingo/sand/web"
@@ -68,14 +69,20 @@ func main() {
 	}
 	peerListener := overlay.NewNetworkEndpointListener(ctx, c, endpointsWatcher, dataStore)
 
-	managers := netmanager.NewManagerMap()
-	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
-
 	etcdClient, err := etcd.NewClient()
 	if err != nil {
 		log.WithError(err).Error("fail to initialize etcd client")
 		os.Exit(-1)
 	}
+
+	metricsExporter, err := metrics.Register(ctx)
+	if err != nil {
+		log.WithError(err).Error("register metrics")
+		os.Exit(-1)
+	}
+
+	managers := netmanager.NewManagerMap()
+	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
 
 	locker := lock.NewEtcdLocker(etcdClient)
 	ipAllocator := ipallocator.New(c, dataStore, locker)
@@ -83,19 +90,26 @@ func main() {
 	endpointRepository := endpoint.NewRepository(c, dataStore, managers)
 	networkRepository := network.NewRepository(c, dataStore, managers)
 
-	err = ensureNetworks(ctx, c, networkRepository, endpointRepository)
+	err = node.EnsureNetworkEndpoints(ctx, c, networkRepository, endpointRepository, metricsExporter)
 	if err != nil {
 		log.WithError(err).Error("fail to ensure existing networks")
 		os.Exit(-1)
 	}
+	stopEndpointEnsureCron, err := setupEndpointEnsureCron(ctx, c, networkRepository, endpointRepository, metricsExporter)
+	if err != nil {
+		log.WithError(err).Error("fail to setup endpoint ensure cron")
+		os.Exit(-1)
+	}
+	defer stopEndpointEnsureCron()
 
 	vctrl := web.NewVersionController(c)
-	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator)
+	nctrl := web.NewNetworksController(c, networkRepository, endpointRepository, ipAllocator, metricsExporter)
 	ectrl := web.NewEndpointsController(c, networkRepository, endpointRepository, ipAllocator)
 
 	sandRouter := handlers.NewRouter(log)
 	sandRouter.Use(handlers.ErrorMiddleware)
 	sandRouter.HandleFunc("/version", vctrl.Show).Methods("GET")
+	sandRouter.HandleFunc("/node/ensure-network-endpoints", nctrl.EnsureNetworkEndpoints).Methods("POST")
 	sandRouter.HandleFunc("/networks", nctrl.List).Methods("GET")
 	sandRouter.HandleFunc("/networks", nctrl.Create).Methods("POST")
 	sandRouter.HandleFunc("/networks/{id}", nctrl.Show).Methods("GET")
@@ -175,69 +189,16 @@ func main() {
 	log.Info("All APIs stopped, shutting down..")
 }
 
-func ensureNetworks(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) error {
-	log := logger.Get(ctx)
-	ctx = logger.ToCtx(ctx, log)
-
-	log.Info("Ensure networks on node")
-
-	endpoints, err := erepo.List(ctx, map[string]string{"hostname": c.GetPeerHostname()})
-	if err == store.ErrNotFound {
-		return nil
-	}
-	if err != nil {
-		return errors.Wrapf(err, "fail to list endpoints of %v", c.GetPeerHostname())
-	}
-
-	for _, endpoint := range endpoints {
-		log = log.WithField("endpoint_id", endpoint.ID)
-		ctx = logger.ToCtx(ctx, log)
-		if !endpoint.Active {
-			log.Debug("skip inactive endpoint")
-			continue
-		}
-		log = log.WithFields(logrus.Fields{
-			"network_id":          endpoint.NetworkID,
-			"endpoint_id":         endpoint.ID,
-			"endpoint_netns_path": endpoint.TargetNetnsPath,
-		})
-		log.Info("restoring endpoint")
-
-		network, ok, err := repo.Exists(ctx, endpoint.NetworkID)
-		if err != nil {
-			return errors.Wrapf(err, "fail to get network")
-		}
-		if !ok {
-			log.WithError(errors.Errorf("network not found for %v", endpoint))
-			continue
-		}
-
-		log.Info("ensuring network")
-		err = repo.Ensure(ctx, network)
-		if err != nil {
-			log.WithError(err).Error("fail to ensure network")
-			continue
-		}
-
-		endpoint, err = erepo.Activate(ctx, network, endpoint, params.EndpointActivate{
-			NSHandlePath: endpoint.TargetNetnsPath,
-			SetAddr:      true,
-			MoveVeth:     true,
-		})
-		if err != nil {
-			// if we can't activate the endpoint because the netns path doesn't exist anymore, we
-			// just deactivate it. Otherwise we raise an error.
-			if os.IsNotExist(errors.Cause(err)) {
-				endpoint, err = erepo.Deactivate(ctx, network, endpoint)
-				if err != nil {
-					log.WithError(err).Error("fail to deactivate endpoint")
-					continue
-				}
-			} else {
-				log.WithError(err).Error("fail to ensure endpoint")
-				continue
-			}
-		}
-	}
-	return nil
+func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository, metricsExporter metrics.Exporter) (func(), error) {
+	return cronsetup.Setup(ctx, cronsetup.SetupOpts{
+		Jobs: []cronsetup.Job{
+			{
+				Name:   "ensure network endpoints",
+				Rhythm: "@every " + c.EndpointEnsureInterval.String(),
+				Func: func(ctx context.Context) error {
+					return node.EnsureNetworkEndpoints(ctx, c, repo, erepo, metricsExporter)
+				},
+			},
+		},
+	})
 }

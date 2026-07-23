@@ -13,6 +13,7 @@ import (
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
+	networkpkg "github.com/Scalingo/sand/network"
 	"github.com/Scalingo/sand/test/mocks/endpointmock"
 	"github.com/Scalingo/sand/test/mocks/ipallocatormock"
 	"github.com/Scalingo/sand/test/mocks/networkmock"
@@ -70,7 +71,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
 				r.EXPECT().Exists(gomock.Any(), "1").Return(network, true, nil)
-				r.EXPECT().Ensure(gomock.Any(), network).Return(errors.New("fail to ensure network"))
+				r.EXPECT().Ensure(gomock.Any(), network).Return(networkpkg.EnsureResults{}, errors.New("fail to ensure network"))
 			},
 		}, {
 			Name:   "error if endpoint creation fails",
@@ -86,7 +87,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
 				r.EXPECT().Exists(gomock.Any(), "1").Return(network, true, nil)
-				r.EXPECT().Ensure(gomock.Any(), network).Return(nil)
+				r.EXPECT().Ensure(gomock.Any(), network).Return(networkpkg.EnsureResults{}, nil)
 			},
 			ExpectEndpointRepository: func(r *endpointmock.MockRepository) {
 				network := types.Network{ID: "1"}

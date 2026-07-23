@@ -9,6 +9,8 @@ github.com/Scalingo/go-handlers v1.11.1 h1:c1BnZe2EhCebIzfygoOmcl7iZlUdn5OYuG/4x
 github.com/Scalingo/go-handlers v1.11.1/go.mod h1:FP+IibVd+yWkSY9B+rzcIi629MMk/7kNfcEjIZUhMq4=
 github.com/Scalingo/go-plugins-helpers v1.4.0 h1:TXysHoesEcH5Q4JBCo0prxWLFY0/yp2Q2WFBGa+Curo=
 github.com/Scalingo/go-plugins-helpers v1.4.0/go.mod h1:pPivLa4FeG8iB0nff7NwI7gIZ4bMr62u/prYXktoWIo=
+github.com/Scalingo/go-utils/cronsetup v1.6.0 h1:mbaZXF1e1tTuZVb6D7nbwxFQVi+fjiEzByZ+vwnUfB8=
+github.com/Scalingo/go-utils/cronsetup v1.6.0/go.mod h1:KOVhrti0nmP/szDhNAvdGpivJtXoNwXDfuU8Ywpqhyg=
 github.com/Scalingo/go-utils/crypto v1.1.1 h1:+F4JqC/8Lu8b1MDJwdQjT19yzLhShWPk+K93cUv7KVg=
 github.com/Scalingo/go-utils/crypto v1.1.1/go.mod h1:29dsjRaXxNI6tUG2ZbNWs4A5pqmwCAztdgfudGQDuhY=
 github.com/Scalingo/go-utils/errors/v2 v2.5.1 h1:1tfJW6/ZxTgrRmFTlKQCOtArQquOW0/XdZQzx8wMHoM=
@@ -21,6 +23,8 @@ github.com/Scalingo/go-utils/graceful v1.3.3 h1:N1Gcw6nnu3Sid2icxE7G25c8JwKjBh4M
 github.com/Scalingo/go-utils/graceful v1.3.3/go.mod h1:d22EgSLL6g0uIeqQrsFAQbWqw5Qb5UPpgT0bTVf/e0s=
 github.com/Scalingo/go-utils/logger v1.12.2 h1:9vm83/gqjCIy5t+OuNYjkVOUrJtdMy78XNIv8E+OCCU=
 github.com/Scalingo/go-utils/logger v1.12.2/go.mod h1:vaeFcI5LMHiRRmMfJbbnblbj3RXRJIzxUcyEjZpMFpg=
+github.com/Scalingo/go-utils/otel v0.8.0 h1:iLWJHjjpmYHmzly8XNsA5Kn89GpUaSk6Jie6yPRvtrc=
+github.com/Scalingo/go-utils/otel v0.8.0/go.mod h1:ZNIXMGq+HCpUa3SGYZ5i5ivZavlXwVulDm75d6m+sd0=
 github.com/Scalingo/go-utils/security v1.2.2 h1:3AkvqQm0b58wsM4mtvh6vlaOEelRJuvI1iLviMTdXX4=
 github.com/Scalingo/go-utils/security v1.2.2/go.mod h1:oGgcjK4/PtG3rspMTygnZUl0z2cu/qS+JA+HGpKY0Lk=
 github.com/Scalingo/logrus-rollbar v1.4.4 h1:zi+0LJaHlDm9HcArOh8Gmqt0scNFC77wn4c9ePSNof0=
@@ -60,6 +64,8 @@ github.com/gofrs/uuid/v5 v5.4.0 h1:EfbpCTjqMuGyq5ZJwxqzn3Cbr2d0rUZU7v5ycAk/e/0=
 github.com/gofrs/uuid/v5 v5.4.0/go.mod h1:CDOjlDMVAtN56jqyRUZh58JT31Tiw7/oQyEXZV+9bD8=
 github.com/gogo/protobuf v1.3.2 h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
+github.com/golang/mock v1.6.0 h1:ErTB+efbowRARo13NNdxyJji2egdxLGQhRaY+DUumQc=
+github.com/golang/mock v1.6.0/go.mod h1:p6yTPP+5HYm5mzsMV8JkE6ZKdX+/wYM6Hr+LicevLPs=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/google/go-cmp v0.2.1-0.20190312032427-6f77996f0c42/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=

@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	apptls "github.com/Scalingo/sand/utils/tls"
-	"github.com/pkg/errors"
 
 	"crypto/tls"
 )
@@ -20,6 +21,7 @@ type Client interface {
 	NetworksList(context.Context) ([]types.Network, error)
 	NetworkCreate(context.Context, params.NetworkCreate) (types.Network, error)
 	NetworkShow(context.Context, string) (types.Network, error)
+	NodeEnsureNetworkEndpoints(context.Context) error
 	NetworkConnect(context.Context, string, params.NetworkConnect) (net.Conn, error)
 	NetworkDelete(context.Context, string) error
 	EndpointCreate(context.Context, params.EndpointCreate) (types.Endpoint, error)

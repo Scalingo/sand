@@ -14,10 +14,17 @@ import (
 type Repository interface {
 	List(ctx context.Context) ([]types.Network, error)
 	Create(ctx context.Context, params params.NetworkCreate) (types.Network, error)
-	Ensure(ctx context.Context, network types.Network) error
+	Ensure(ctx context.Context, network types.Network) (EnsureResults, error)
 	Deactivate(ctx context.Context, network types.Network) error
 	Delete(ctx context.Context, network types.Network, a ipallocator.IPAllocator) error
 	Exists(ctx context.Context, id string) (types.Network, bool, error)
+}
+
+type EnsureResults struct {
+	AddedARPEntries   int
+	AddedFDBEntries   int
+	RemovedARPEntries int
+	RemovedFDBEntries int
 }
 
 type repository struct {

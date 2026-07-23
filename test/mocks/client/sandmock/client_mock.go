@@ -149,6 +149,20 @@ func (mr *MockClientMockRecorder) NetworkShow(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NetworkShow", reflect.TypeOf((*MockClient)(nil).NetworkShow), arg0, arg1)
 }
 
+// NodeEnsureNetworkEndpoints mocks base method.
+func (m *MockClient) NodeEnsureNetworkEndpoints(arg0 context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NodeEnsureNetworkEndpoints", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// NodeEnsureNetworkEndpoints indicates an expected call of NodeEnsureNetworkEndpoints.
+func (mr *MockClientMockRecorder) NodeEnsureNetworkEndpoints(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeEnsureNetworkEndpoints", reflect.TypeOf((*MockClient)(nil).NodeEnsureNetworkEndpoints), arg0)
+}
+
 // NetworksList mocks base method.
 func (m *MockClient) NetworksList(arg0 context.Context) ([]types.Network, error) {
 	m.ctrl.T.Helper()

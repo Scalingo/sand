@@ -58,6 +58,10 @@ func main() {
 			Action: app.Version,
 		},
 		{
+			Name:   "node-ensure-network-endpoints",
+			Action: app.NodeEnsureNetworkEndpoints,
+		},
+		{
 			Name:   "network-create",
 			Action: app.NetworkCreate,
 			Flags: []cli.Flag{

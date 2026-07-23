@@ -18,6 +18,7 @@ import (
 	params "github.com/Scalingo/sand/api/params"
 	types "github.com/Scalingo/sand/api/types"
 	ipallocator "github.com/Scalingo/sand/ipallocator"
+	network "github.com/Scalingo/sand/network"
 )
 
 // MockRepository is a mock of Repository interface.
@@ -88,17 +89,18 @@ func (mr *MockRepositoryMockRecorder) Delete(ctx, network, a any) *gomock.Call {
 }
 
 // Ensure mocks base method.
-func (m *MockRepository) Ensure(ctx context.Context, network types.Network) error {
+func (m *MockRepository) Ensure(ctx context.Context, arg1 types.Network) (network.EnsureResults, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Ensure", ctx, network)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "Ensure", ctx, arg1)
+	ret0, _ := ret[0].(network.EnsureResults)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Ensure indicates an expected call of Ensure.
-func (mr *MockRepositoryMockRecorder) Ensure(ctx, network any) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) Ensure(ctx, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ensure", reflect.TypeOf((*MockRepository)(nil).Ensure), ctx, network)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ensure", reflect.TypeOf((*MockRepository)(nil).Ensure), ctx, arg1)
 }
 
 // Exists mocks base method.
