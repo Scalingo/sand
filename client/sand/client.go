@@ -21,7 +21,7 @@ type Client interface {
 	NetworksList(context.Context) ([]types.Network, error)
 	NetworkCreate(context.Context, params.NetworkCreate) (types.Network, error)
 	NetworkShow(context.Context, string) (types.Network, error)
-	NodeEnsureNetworkEndpoints(context.Context) error
+	NodeEnsureNetworkEndpoints(ctx context.Context) error
 	NetworkConnect(context.Context, string, params.NetworkConnect) (net.Conn, error)
 	NetworkDelete(context.Context, string) error
 	EndpointCreate(context.Context, params.EndpointCreate) (types.Endpoint, error)

@@ -3,7 +3,6 @@ package sand
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -12,7 +11,7 @@ import (
 )
 
 func (c *client) NodeEnsureNetworkEndpoints(ctx context.Context) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/node/ensure-network-endpoints", c.url), nil)
+	req, err := http.NewRequest("POST", c.url+"/node/ensure-network-endpoints", nil)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create HTTP request")
 	}
