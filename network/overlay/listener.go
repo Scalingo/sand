@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	etcdv3 "go.etcd.io/etcd/client/v3"
 
 	"github.com/sirupsen/logrus"
 
@@ -20,12 +20,12 @@ import (
 )
 
 type NetworkEndpointListener interface {
-	Add(context.Context, netmanager.NetManager, types.Network) (chan struct{}, error)
-	Remove(context.Context, types.Network) error
+	Add(ctx context.Context, manager netmanager.NetManager, network types.Network) (chan struct{}, error)
+	Remove(ctx context.Context, network types.Network) error
 }
 
 type Registrar interface {
-	Register(context.Context, string) (store.Registration, error)
+	Register(ctx context.Context, prefix string) (store.Registration, error)
 }
 
 type listener struct {
@@ -97,7 +97,7 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 	return done, nil
 }
 
-func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm netmanager.NetManager, network types.Network) error {
+func (l *listener) handleEvent(ctx context.Context, event *etcdv3.Event, nm netmanager.NetManager, network types.Network) error {
 	log := logger.Get(ctx)
 	switch event.Type {
 	case mvccpb.PUT:
