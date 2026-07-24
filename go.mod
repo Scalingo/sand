@@ -7,6 +7,7 @@ require (
 	github.com/Scalingo/go-handlers v1.11.1
 	github.com/Scalingo/go-plugins-helpers v1.4.0
 	github.com/Scalingo/go-utils/cronsetup v1.6.0
+	github.com/Scalingo/go-utils/errors/v3 v3.2.1
 	github.com/Scalingo/go-utils/etcd v1.2.2
 	github.com/Scalingo/go-utils/graceful v1.3.3
 	github.com/Scalingo/go-utils/logger v1.12.2
@@ -25,7 +26,7 @@ require (
 	go.etcd.io/etcd/client/v3 v3.6.12
 	go.uber.org/mock v0.6.0
 	golang.org/x/sys v0.46.0
-	google.golang.org/grpc v1.82.0
+	google.golang.org/grpc v1.82.1
 	gopkg.in/errgo.v1 v1.0.1
 )
 
@@ -34,7 +35,6 @@ require (
 	github.com/Scalingo/errgo-rollbar v0.2.1 // indirect
 	github.com/Scalingo/go-utils/crypto v1.1.1 // indirect
 	github.com/Scalingo/go-utils/errors/v2 v2.5.1 // indirect
-	github.com/Scalingo/go-utils/errors/v3 v3.2.1 // indirect
 	github.com/Scalingo/go-utils/security v1.2.2 // indirect
 	github.com/Scalingo/logrus-rollbar v1.4.4 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
