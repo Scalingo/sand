@@ -2,6 +2,9 @@
 
 ## To be Released
 
+* feat(ensure-networks): Add API endpoint and CLI command to trigger it manually without restartng the service (19 minutes ago)
+* feat(control-loop/ensure-networks): Add notion of control loop, ensure every 30 minutes (34 minutes ago)
+
 ## v1.1.5 - 04 Jun 2026
 
 * fix: fix overlay neighbor replay for inactive endpoints

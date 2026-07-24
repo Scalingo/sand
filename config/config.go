@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"time"
 
 	etcdutils "github.com/Scalingo/go-utils/etcd"
 
@@ -49,6 +50,8 @@ type Config struct {
 	EnableDockerPlugin   bool `envconfig:"ENABLE_DOCKER_PLUGIN"`
 	DockerPluginHttpPort int  `default:"9998"`
 
+	EndpointEnsureInterval time.Duration `envconfig:"ENDPOINT_ENSURE_INTERVAL" default:"30m"`
+
 	MaxVNI int `envconfig:"MAX_VNI" default:"999_999"`
 }
 
@@ -59,6 +62,9 @@ func Build() (*Config, error) {
 	err := c.checkEtcdConfig()
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to build etcd config")
+	}
+	if c.EndpointEnsureInterval <= 0 {
+		return nil, errors.New("endpoint ensure interval must be positive")
 	}
 
 	if c.PublicHostname == "" {

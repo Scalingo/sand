@@ -6,6 +6,7 @@ require (
 	github.com/Scalingo/go-etcd-lock/v5 v5.1.0
 	github.com/Scalingo/go-handlers v1.11.1
 	github.com/Scalingo/go-plugins-helpers v1.4.0
+	github.com/Scalingo/go-utils/cronsetup v1.6.0
 	github.com/Scalingo/go-utils/etcd v1.2.2
 	github.com/Scalingo/go-utils/graceful v1.3.3
 	github.com/Scalingo/go-utils/logger v1.12.2
@@ -17,7 +18,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli v1.22.17
+	github.com/urfave/cli/v3 v3.10.1
 	github.com/vishvananda/netlink v1.3.1
 	github.com/vishvananda/netns v0.0.5
 	go.etcd.io/etcd/api/v3 v3.6.12
@@ -40,7 +41,6 @@ require (
 	github.com/cloudflare/tableflip v1.2.3 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.7.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
@@ -53,7 +53,6 @@ require (
 	github.com/moby/sys/reexec v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rollbar/rollbar-go v1.4.8 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/urfave/negroni/v3 v3.1.1 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.6.12 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
