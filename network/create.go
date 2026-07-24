@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
@@ -33,7 +34,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	uuid := uuid.Must(uuid.NewV4()).String()
 	if params.ID != "" {
 		if !uuidRegexp.MatchString(params.ID) {
-			return types.Network{}, errors.Errorf("invalid UUID %v", params.ID)
+			return types.Network{}, errors.Errorf(ctx, "invalid UUID %v", params.ID)
 		}
 		uuid = params.ID
 	}
@@ -62,28 +63,28 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	case types.OverlayNetworkType:
 		idlock, err = vniGen.Lock(ctx)
 		if err != nil {
-			return network, errors.Wrapf(err, "fail to lock VNI generator for %s", network)
+			return network, errors.Wrapf(ctx, err, "lock VNI generator for %s", network)
 		}
 		vni, err := vniGen.Generate(ctx)
 		if err != nil {
-			return network, errors.Wrapf(err, "fail to generate VNI for %s", network)
+			return network, errors.Wrapf(ctx, err, "generate VNI for %s", network)
 		}
 
 		log.Debugf("vni is %v", vni)
 		network.VxLANVNI = vni
 	default:
-		return network, errors.New("invalid network type for init")
+		return network, errors.New(ctx, "invalid network type for init")
 	}
 
 	err = r.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
-		return network, errors.Wrapf(err, "fail to get network %s from store", network)
+		return network, errors.Wrapf(ctx, err, "get network %s from store", network)
 	}
 
 	if idlock != nil {
 		err := idlock.Unlock(ctx)
 		if err != nil {
-			log.WithError(err).Errorf("fail to unlock VNI generator for %s", network)
+			log.WithError(err).Errorf("Failed to unlock VNI generator for %s", network)
 		}
 	}
 

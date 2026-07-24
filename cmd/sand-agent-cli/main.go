@@ -140,7 +140,7 @@ func (a *App) sandClient(ctx context.Context, _ *cli.Command) (sand.Client, erro
 	}
 	if a.config.CaFile != "" && a.config.CertFile != "" && a.config.KeyFile != "" {
 		config, err := sand.TlsConfig(
-			a.config.CaFile, a.config.CertFile, a.config.KeyFile,
+			ctx, a.config.CaFile, a.config.CertFile, a.config.KeyFile,
 		)
 		if err != nil {
 			return nil, errors.Wrap(ctx, err, "generate TLS configuration")

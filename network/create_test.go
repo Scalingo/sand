@@ -48,9 +48,9 @@ func TestRepository_Ensure(t *testing.T) {
 		}, {
 			Name: "overlay: should return error if manager Ensure fails",
 			ExpectNetManager: func(t *testing.T, m *netmanagermock.MockNetManager, n types.Network) {
-				m.EXPECT().Ensure(gomock.Any(), n).Return(errors.New("fail to ensure network"))
+				m.EXPECT().Ensure(gomock.Any(), n).Return(errors.New("ensure network"))
 			},
-			Error: "fail to ensure",
+			Error: "ensure",
 		}, {
 			Name: "overlay: should return error if storage fails to retrieve list of endpoints",
 			ExpectNetManager: func(t *testing.T, m *netmanagermock.MockNetManager, n types.Network) {
@@ -59,12 +59,12 @@ func TestRepository_Ensure(t *testing.T) {
 			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
 				m.EXPECT().Get(
 					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
-				).Return(errors.New("fail to get endpoints"))
+				).Return(errors.New("get endpoints"))
 			},
-			Error: "fail to get endpoints",
+			Error: "get endpoints",
 		}, {
 			Name:             "overlay: if there are more than 1 endpoint, add neighbors",
-			ExpectNetManager: expectNetManager(errors.New("fail to add neighbors")),
+			ExpectNetManager: expectNetManager(errors.New("add neighbors")),
 			ExpectStore: func(t *testing.T, m *storemock.MockStore, n types.Network) {
 				m.EXPECT().Get(
 					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
@@ -74,7 +74,7 @@ func TestRepository_Ensure(t *testing.T) {
 					},
 				).Return(nil)
 			},
-			Error: "fail to add neighbors",
+			Error: "add neighbors",
 		}, {
 			Name:             "overlay: it should add entries in the store",
 			ExpectNetManager: expectNetManager(nil),
@@ -103,9 +103,8 @@ func TestRepository_Ensure(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
 
-			config, err := config.Build()
+			config, err := config.Build(t.Context())
 			config.PeerHostname = "test-hostname"
 
 			require.NoError(t, err)
@@ -134,7 +133,7 @@ func TestRepository_Ensure(t *testing.T) {
 				c.ExpectStore(t, store, network)
 			}
 
-			err = r.Ensure(context.Background(), network)
+			err = r.Ensure(t.Context(), network)
 			if c.Error != "" {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), c.Error)

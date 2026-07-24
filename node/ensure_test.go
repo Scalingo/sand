@@ -84,7 +84,6 @@ func TestEnsureNetworkEndpoints(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
 
 			networkRepo := networkmock.NewMockRepository(ctrl)
 			endpointRepo := endpointmock.NewMockRepository(ctrl)

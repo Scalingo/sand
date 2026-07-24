@@ -1,15 +1,17 @@
 package etcd
 
 import (
+	"context"
 	"os"
 
-	etcdutils "github.com/Scalingo/go-utils/etcd"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/pkg/errors"
+	etcdutils "github.com/Scalingo/go-utils/etcd"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
-func NewClient() (*clientv3.Client, error) {
+func NewClient(ctx context.Context) (*clientv3.Client, error) {
 	// Error has already been checked in the config initialization. We can safely ignore it here
 	etcdConfig, _ := etcdutils.ConfigFromEnv()
 	if os.Getenv("GO_ENV") == "development" && etcdConfig.TLS != nil {
@@ -18,7 +20,7 @@ func NewClient() (*clientv3.Client, error) {
 
 	client, err := clientv3.New(etcdConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create etcd client")
+		return nil, errors.Wrap(ctx, err, "create etcd client")
 	}
 	return client, nil
 }

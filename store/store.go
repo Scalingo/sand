@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"reflect"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/config"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
-var ErrNotFound = errors.New("not found")
+var ErrNotFound = stderrors.New("not found")
 
 type Store interface {
 	Get(ctx context.Context, key string, recursive bool, data interface{}) error
@@ -34,14 +36,14 @@ func New(c *config.Config) Store {
 func (s *store) get(ctx context.Context, key string, data interface{}, opts []clientv3.OpOption) error {
 	log := logger.Get(ctx).WithField("scope", "store")
 	key = prefixedKey(s.config, key)
-	c, closer, err := s.newEtcdClient()
+	c, closer, err := s.newEtcdClient(ctx)
 	if err != nil {
-		return errors.Wrap(err, "fail to build etcd client")
+		return errors.Wrap(ctx, err, "build etcd client")
 	}
 	defer closer.Close()
 	res, err := c.Get(ctx, key, opts...)
 	if err != nil {
-		return errors.Wrapf(err, "fail to read key %v", key)
+		return errors.Wrapf(ctx, err, "read key %v", key)
 	}
 	log.WithFields(logrus.Fields{"key": key, "nodes": len(res.Kvs)}).Debug("get key")
 
@@ -87,20 +89,20 @@ func (s *store) Get(ctx context.Context, key string, recursive bool, data interf
 func (s *store) Set(ctx context.Context, key string, data interface{}) error {
 	log := logger.Get(ctx).WithField("scope", "store")
 	key = prefixedKey(s.config, key)
-	c, closer, err := s.newEtcdClient()
+	c, closer, err := s.newEtcdClient(ctx)
 	if err != nil {
-		return errors.Wrap(err, "fail to build etcd client")
+		return errors.Wrap(ctx, err, "build etcd client")
 	}
 	defer closer.Close()
 
 	out, err := json.Marshal(&data)
 	if err != nil {
-		return errors.Wrapf(err, "fail to encode to JSON")
+		return errors.Wrapf(ctx, err, "encode to JSON")
 	}
 
 	_, err = c.Put(ctx, key, string(out))
 	if err != nil {
-		return errors.Wrapf(err, "fail to read key %v", key)
+		return errors.Wrapf(ctx, err, "read key %v", key)
 	}
 
 	log.WithFields(logrus.Fields{"key": key}).Debug("put key")
@@ -110,15 +112,15 @@ func (s *store) Set(ctx context.Context, key string, data interface{}) error {
 func (s *store) Delete(ctx context.Context, key string) error {
 	log := logger.Get(ctx).WithField("scope", "store")
 	key = prefixedKey(s.config, key)
-	c, closer, err := s.newEtcdClient()
+	c, closer, err := s.newEtcdClient(ctx)
 	if err != nil {
-		return errors.Wrap(err, "fail to build etcd client")
+		return errors.Wrap(ctx, err, "build etcd client")
 	}
 	defer closer.Close()
 
 	_, err = c.Delete(ctx, key)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete key %v", key)
+		return errors.Wrapf(ctx, err, "delete key %v", key)
 	}
 	log.WithFields(logrus.Fields{"key": key}).Debug("delete key")
 	return nil

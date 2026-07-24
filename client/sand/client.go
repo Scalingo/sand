@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
@@ -34,7 +34,7 @@ type httpClient struct {
 	*http.Client
 }
 
-func (c httpClient) Do(r *http.Request) (*http.Response, error) {
+func (c httpClient) Do(ctx context.Context, r *http.Request) (*http.Response, error) {
 	r.Header.Set("User-Agent", "SAND Client")
 	if r.Header.Get("Accept") == "" {
 		r.Header.Set("Accept", "application/json")
@@ -42,6 +42,7 @@ func (c httpClient) Do(r *http.Request) (*http.Response, error) {
 	if r.Header.Get("Content-Type") == "" {
 		r.Header.Set("Content-Type", "application/json")
 	}
+	r = r.WithContext(ctx)
 	res, err := c.Client.Do(r)
 	if err != nil {
 		return nil, err
@@ -49,7 +50,7 @@ func (c httpClient) Do(r *http.Request) (*http.Response, error) {
 	if res.StatusCode == 404 {
 		err := res.Body.Close()
 		if err != nil {
-			return nil, errors.Wrapf(err, "fail to close HTTP body")
+			return nil, errors.Wrapf(ctx, err, "close HTTP body")
 		}
 		return nil, httpresp.Error{Error_: "Not found"}
 	}
@@ -124,6 +125,6 @@ func WithTlsConfig(config *tls.Config) Opt {
 	}
 }
 
-func TlsConfig(ca, cert, key string) (*tls.Config, error) {
-	return apptls.NewConfig(ca, cert, key, false)
+func TlsConfig(ctx context.Context, ca, cert, key string) (*tls.Config, error) {
+	return apptls.NewConfig(ctx, ca, cert, key, false)
 }

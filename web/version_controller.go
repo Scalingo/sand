@@ -21,7 +21,7 @@ func (c VersionController) Show(w http.ResponseWriter, r *http.Request, params m
 	w.WriteHeader(200)
 	err := json.NewEncoder(w).Encode(map[string]string{"version": c.Config.Version})
 	if err != nil {
-		log.WithError(err).Error("fail to encode JSON")
+		log.WithError(err).Error("Failed to encode JSON")
 	}
 	return nil
 }

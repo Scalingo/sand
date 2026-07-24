@@ -6,19 +6,19 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/sand/api/params"
 )
 
 func (c *client) rawDialer(ctx context.Context, sandNetworkID, network, address string) (net.Conn, error) {
 	if network != "tcp" {
-		return nil, errors.New("only TCP connections are supported")
+		return nil, errors.New(ctx, "only TCP connections are supported")
 	}
 
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return nil, errors.Wrapf(err, "invalid address: %s", address)
+		return nil, errors.Wrapf(ctx, err, "invalid address: %s", address)
 	}
 
 	return c.NetworkConnect(ctx, sandNetworkID, params.NetworkConnect{

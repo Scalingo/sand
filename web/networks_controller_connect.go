@@ -9,9 +9,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
@@ -34,20 +35,20 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	ctx = logger.ToCtx(ctx, log)
 	if ip == "" || port == "" {
 		w.WriteHeader(400)
-		return errors.New("IP and port are mandatory")
+		return errors.New(ctx, "IP and port are mandatory")
 	}
 
 	network, ok, err := c.NetworkRepository.Exists(ctx, urlparams["id"])
 	if err != nil {
-		return errors.Wrapf(err, "query store")
+		return errors.Wrapf(ctx, err, "query store")
 	} else if !ok {
 		w.WriteHeader(404)
-		return errors.New("network not found")
+		return errors.New(ctx, "network not found")
 	}
 
 	endpoints, err := c.EndpointRepository.List(ctx, map[string]string{"network_id": network.ID})
 	if err != nil {
-		return errors.Wrapf(err, "list endpoints for network %v", network)
+		return errors.Wrapf(ctx, err, "list endpoints for network %v", network)
 	}
 
 	activeEndpoints := []types.Endpoint{}
@@ -65,18 +66,18 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		w.WriteHeader(400)
 		jsonerr := json.NewEncoder(w).Encode(map[string]string{"error": "no active endpoint in network " + network.ID})
 		if jsonerr != nil {
-			log.WithError(jsonerr).Error("Fail to encode error response")
+			log.WithError(jsonerr).Error("Failed to encode error response")
 		}
 		return nil
 	}
 
 	h, ok := w.(http.Hijacker)
 	if !ok {
-		return errors.New("invalid response writer")
+		return errors.New(ctx, "invalid response writer")
 	}
 	socket, _, err := h.Hijack()
 	if err != nil {
-		return errors.Wrapf(err, "hijack http connection")
+		return errors.Wrapf(ctx, err, "hijack http connection")
 	}
 	fmt.Fprintf(socket, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n")
 
@@ -85,7 +86,8 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	// the network namespace available on it.
 	if localEndpoint.ID != "" {
 		err := netutils.ForwardConnection(ctx, socket, localEndpoint.TargetNetnsPath, ip, port)
-		if operr, ok := errors.Cause(err).(*net.OpError); ok {
+		var operr *net.OpError
+		if errors.As(err, &operr) {
 			if syscallerr, ok := operr.Err.(*os.SyscallError); ok && syscallerr.Err == unix.ECONNREFUSED {
 				// It happens that the target from the network connection (ip:port) is not
 				// actually bound in the network namespace, in this case a standard
@@ -97,10 +99,10 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 				// to a no route to host error. This error is not related to sand itself
 				log.WithError(err).Infof("local endpoint %v no route to host", localEndpoint)
 			} else {
-				return errors.Wrapf(err, "network connection error when forwarding to %v", localEndpoint)
+				return errors.Wrapf(ctx, err, "network connection error when forwarding to %v", localEndpoint)
 			}
 		} else if err != nil {
-			return errors.Wrapf(err, "hijack and forward connection to %v", localEndpoint)
+			return errors.Wrapf(ctx, err, "hijack and forward connection to %v", localEndpoint)
 		}
 		return nil
 	}
@@ -111,10 +113,10 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	if c.Config.IsHttpTLSEnabled() {
 		scheme = "https"
 
-		config, err := sand.TlsConfig(c.Config.HTTPTLSCA, c.Config.HTTPTLSCert, c.Config.HTTPTLSKey)
+		config, err := sand.TlsConfig(ctx, c.Config.HTTPTLSCA, c.Config.HTTPTLSCert, c.Config.HTTPTLSKey)
 		if err != nil {
 			socket.Close()
-			return errors.Wrap(err, "generate TLS configuration")
+			return errors.Wrap(ctx, err, "generate TLS configuration")
 		}
 		options = append(options, sand.WithTlsConfig(config))
 	}
@@ -126,7 +128,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	dstConn, err := client.NetworkConnect(ctx, network.ID, params.NetworkConnect{IP: ip, Port: port})
 	if err != nil {
 		socket.Close()
-		return errors.Wrapf(err, "connect sand %v", url)
+		return errors.Wrapf(ctx, err, "connect sand %v", url)
 	}
 
 	// The two following conditions should never be wrong, but who knows, the two only
@@ -134,12 +136,12 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 	src, ok := socket.(netutils.Conn)
 	if !ok {
 		socket.Close()
-		return errors.Wrap(err, "src socket does not implement netutils.Conn")
+		return errors.Wrap(ctx, err, "src socket does not implement netutils.Conn")
 	}
 	dst, ok := dstConn.(netutils.Conn)
 	if !ok {
 		socket.Close()
-		return errors.Wrap(err, "dst socket does not implement netutils.Conn")
+		return errors.Wrap(ctx, err, "dst socket does not implement netutils.Conn")
 	}
 
 	wg := &sync.WaitGroup{}
@@ -155,7 +157,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		defer dst.CloseWrite()
 		_, err := io.Copy(dst, src)
 		if err != nil && err != io.EOF {
-			log.WithError(err).Info("fail to copy data from src socket to next sand agent")
+			log.WithError(err).Info("copy data from src socket to next sand agent")
 			return
 		}
 		log.Info("end of connection from client to next sand agent")
@@ -167,7 +169,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		defer dst.Close()
 		_, err := io.Copy(src, dst)
 		if err != nil && err != io.EOF {
-			log.WithError(err).Info("fail to copy data next sand agent to src")
+			log.WithError(err).Info("copy data next sand agent to src")
 			return
 		}
 		log.Info("end of connection from next sand agent to src")

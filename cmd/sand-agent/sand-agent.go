@@ -50,31 +50,31 @@ func main() {
 		return
 	}
 
-	c, err := config.Build()
+	c, err := config.Build(ctx)
 	if err != nil {
-		log.WithError(err).Error("fail to generate initial config")
+		log.WithError(err).Error("Failed to generate initial config")
 		os.Exit(-1)
 	}
 
 	err = c.CreateDirectories()
 	if err != nil {
-		log.WithError(err).Error("fail to create runtime directories")
+		log.WithError(err).Error("Failed to create runtime directories")
 		os.Exit(-1)
 	}
 
 	dataStore := store.New(c)
 	endpointsWatcher, err := store.NewWatcher(ctx, c, store.WithPrefix(types.NetworkEndpointStoragePrefix))
 	if err != nil {
-		log.WithError(err).Error("fail to initialize store watcher")
+		log.WithError(err).Error("Failed to initialize store watcher")
 	}
 	peerListener := overlay.NewNetworkEndpointListener(ctx, c, endpointsWatcher, dataStore)
 
 	managers := netmanager.NewManagerMap()
 	managers.Set(types.OverlayNetworkType, overlay.NewManager(c, peerListener))
 
-	etcdClient, err := etcd.NewClient()
+	etcdClient, err := etcd.NewClient(ctx)
 	if err != nil {
-		log.WithError(err).Error("fail to initialize etcd client")
+		log.WithError(err).Error("Failed to initialize etcd client")
 		os.Exit(-1)
 	}
 
@@ -86,12 +86,12 @@ func main() {
 
 	err = node.EnsureNetworkEndpoints(ctx, c, networkRepository, endpointRepository)
 	if err != nil {
-		log.WithError(err).Error("fail to ensure existing networks")
+		log.WithError(err).Error("Failed to ensure existing networks")
 		os.Exit(-1)
 	}
 	stopEndpointEnsureCron, err := setupEndpointEnsureCron(ctx, c, networkRepository, endpointRepository)
 	if err != nil {
-		log.WithError(err).Error("fail to setup endpoint ensure cron")
+		log.WithError(err).Error("Failed to setup endpoint ensure cron")
 		os.Exit(-1)
 	}
 	defer stopEndpointEnsureCron()
@@ -125,9 +125,9 @@ func main() {
 
 	var tlsConfig *tls.Config
 	if c.IsHttpTLSEnabled() {
-		tlsConfig, err = apptls.NewConfig(c.HTTPTLSCA, c.HTTPTLSCert, c.HTTPTLSKey, true)
+		tlsConfig, err = apptls.NewConfig(ctx, c.HTTPTLSCA, c.HTTPTLSCert, c.HTTPTLSKey, true)
 		if err != nil {
-			log.WithError(err).Error("fail to create tls configuration")
+			log.WithError(err).Error("Failed to create tls configuration")
 			os.Exit(-1)
 		}
 	}
@@ -145,7 +145,7 @@ func main() {
 
 		err = docker.WritePluginSpecsOnDisk(ctx, c)
 		if err != nil {
-			log.WithError(err).Error("fail to write plugin spec file on disk")
+			log.WithError(err).Error("Failed to write plugin spec file on disk")
 			os.Exit(-1)
 		}
 
@@ -160,7 +160,7 @@ func main() {
 			err = gracefulService.ListenAndServe(ctxDocker, "tcp", dockerPluginEndpoint, dockerPluginRouter)
 		}
 		if err != nil {
-			log.WithError(err).Error("fail to initialize docker plugin listener")
+			log.WithError(err).Error("Failed to initialize docker plugin listener")
 			os.Exit(-1)
 		}
 	}
@@ -174,12 +174,12 @@ func main() {
 		err = gracefulService.ListenAndServe(ctxHandler, "tcp", serviceEndpoint, sandRouter)
 	}
 	if err != nil {
-		log.WithError(err).Error("fail to listen and serve")
+		log.WithError(err).Error("Failed to listen and serve")
 		os.Exit(-1)
 	}
 	log.Info("HTTP API stopped")
 	log.Info("Stop watching etcd changes")
-	endpointsWatcher.Close()
+	endpointsWatcher.Close(ctx)
 	log.Info("All APIs stopped, shutting down..")
 }
 

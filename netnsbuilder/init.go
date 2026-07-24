@@ -19,10 +19,11 @@ func reexecCreateNamespace() {
 	if len(os.Args) < 2 {
 		logrus.Fatal("no namespace path provided")
 	}
-	log := logger.Default().WithField("mount-netns", os.Args[1])
-	ctx := logger.ToCtx(context.Background(), log)
+	ctx, log := logger.WithFieldToCtx(
+		logger.NewContextWithLogger(), "mount-netns", os.Args[1],
+	)
 	if err := mountNetworkNamespace(ctx, "/proc/self/ns/net", os.Args[1]); err != nil {
-		logrus.Fatal(err)
+		log.WithError(err).Fatal("mount network namespace")
 	}
 }
 

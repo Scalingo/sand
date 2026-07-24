@@ -7,24 +7,25 @@ import (
 	"sync"
 
 	"go.etcd.io/etcd/api/v3/mvccpb"
-	"go.etcd.io/etcd/client/v3"
+	etcdv3 "go.etcd.io/etcd/client/v3"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/network/netmanager"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type NetworkEndpointListener interface {
-	Add(context.Context, netmanager.NetManager, types.Network) (chan struct{}, error)
-	Remove(context.Context, types.Network) error
+	Add(ctx context.Context, manager netmanager.NetManager, network types.Network) (chan struct{}, error)
+	Remove(ctx context.Context, network types.Network) error
 }
 
 type Registrar interface {
-	Register(string) (store.Registration, error)
+	Register(ctx context.Context, prefix string) (store.Registration, error)
 }
 
 type listener struct {
@@ -74,9 +75,9 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 	listenerCtx := logger.ToCtx(l.globalContext, log)
 
 	log.Info("registering to network modifications")
-	r, err := l.registrar.Register(network.EndpointsStorageKey(""))
+	r, err := l.registrar.Register(ctx, network.EndpointsStorageKey(""))
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create registration for network %s", network)
+		return nil, errors.Wrapf(ctx, err, "create registration for network %s", network)
 	}
 	l.networkRegistrations[network.ID] = r
 
@@ -87,7 +88,7 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 		for event := range r.EventChan() {
 			err := l.handleEvent(listenerCtx, event, nm, network)
 			if err != nil {
-				log.WithError(err).Error("fail to handle registration response")
+				log.WithError(err).Error("Failed to handle registration response")
 			}
 		}
 		log.Info("stop listening registration events")
@@ -96,14 +97,14 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 	return done, nil
 }
 
-func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm netmanager.NetManager, network types.Network) error {
+func (l *listener) handleEvent(ctx context.Context, event *etcdv3.Event, nm netmanager.NetManager, network types.Network) error {
 	log := logger.Get(ctx)
 	switch event.Type {
 	case mvccpb.PUT:
 		var endpoint types.Endpoint
 		err := json.NewDecoder(bytes.NewReader(event.Kv.Value)).Decode(&endpoint)
 		if err != nil {
-			return errors.Wrapf(err, "fail to decode JSON")
+			return errors.Wrapf(ctx, err, "decode JSON")
 		}
 
 		log = log.WithFields(logrus.Fields{
@@ -116,14 +117,14 @@ func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm ne
 
 		err = nm.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
-			log.WithError(err).Error("fail to add endpoint ARP/FDB neigh rules")
+			log.WithError(err).Error("Failed to add endpoint ARP/FDB neigh rules")
 		}
 
 	case mvccpb.DELETE:
 		var endpoint types.Endpoint
 		err := l.store.GetWithRevision(ctx, string(event.Kv.Key), event.Kv.ModRevision-1, false, &endpoint)
 		if err != nil {
-			return errors.Wrapf(err, "fail to get endpoint %v", string(event.Kv.Key))
+			return errors.Wrapf(ctx, err, "get endpoint %v", string(event.Kv.Key))
 		}
 
 		log = log.WithFields(logrus.Fields{
@@ -136,7 +137,7 @@ func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm ne
 
 		err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
-			log.WithError(err).Error("fail to remove endpoint ARP/FDB neigh rules")
+			log.WithError(err).Error("Failed to remove endpoint ARP/FDB neigh rules")
 		}
 	}
 	return nil

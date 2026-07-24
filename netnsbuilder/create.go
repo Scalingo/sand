@@ -2,19 +2,21 @@ package netnsbuilder
 
 import (
 	"context"
+	stderrors "errors"
 	"os"
 	"os/exec"
 
 	"github.com/moby/moby/pkg/reexec"
-	"github.com/pkg/errors"
 	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/config"
 )
 
 var (
-	ErrAlreadyExist = errors.New("network namespace already exists")
+	ErrAlreadyExist = stderrors.New("network namespace already exists")
 )
 
 type Manager interface {
@@ -32,27 +34,27 @@ func NewManager(c *config.Config) Manager {
 func (m *manager) Create(ctx context.Context, name string, n types.Network) error {
 	_, err := os.Stat(n.NSHandlePath)
 	if !os.IsNotExist(err) && err != nil {
-		return errors.Wrap(err, "fail to create namespace")
+		return errors.Wrap(ctx, err, "create namespace")
 	} else if err == nil {
 		return ErrAlreadyExist
 	}
 
 	err = m.createNS(ctx, n.NSHandlePath)
 	if err != nil {
-		return errors.Wrapf(err, "fail to create new namespace")
+		return errors.Wrapf(ctx, err, "create new namespace")
 	}
 
 	return nil
 }
 
-func (m *manager) createNS(_ context.Context, path string) error {
+func (m *manager) createNS(ctx context.Context, path string) error {
 	f, err := os.Create(path)
 	if err != nil {
-		return errors.Wrap(err, "fail to touch netns mountpoint file")
+		return errors.Wrap(ctx, err, "touch netns mountpoint file")
 	}
 	err = f.Close()
 	if err != nil {
-		return errors.Wrap(err, "fail to close netns mountpoint file")
+		return errors.Wrap(ctx, err, "close netns mountpoint file")
 	}
 
 	cmd := &exec.Cmd{
@@ -64,7 +66,7 @@ func (m *manager) createNS(_ context.Context, path string) error {
 	}
 	err = cmd.Run()
 	if err != nil {
-		return errors.Wrap(err, "namespace creation reexec command failed")
+		return errors.Wrap(ctx, err, "namespace creation reexec command failed")
 	}
 
 	return nil

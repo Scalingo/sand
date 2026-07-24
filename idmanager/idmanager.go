@@ -2,17 +2,18 @@ package idmanager
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	etcdlock "github.com/Scalingo/go-etcd-lock/v5/lock"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/store"
 )
 
-var ErrNoIDAvailable = errors.New("no new ID available")
+var ErrNoIDAvailable = stderrors.New("no new ID available")
 
 type Manager interface {
 	Lock(context.Context) (Unlocker, error)
@@ -41,13 +42,13 @@ func New(maxIDValue int, s store.Store, name string, field string, prefix string
 }
 
 func (m *manager) Lock(ctx context.Context) (Unlocker, error) {
-	client, err := etcd.NewClient()
+	client, err := etcd.NewClient(ctx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get etcd client")
+		return nil, errors.Wrapf(ctx, err, "get etcd client")
 	}
 	resourceLock, err := etcdlock.NewEtcdLocker(client).WaitAcquire(fmt.Sprintf("/%s-idgen", m.name), 300)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get etcd lock")
+		return nil, errors.Wrapf(ctx, err, "get etcd lock")
 	}
 	return lock{
 		resourceLock:   resourceLock,
@@ -57,15 +58,15 @@ func (m *manager) Lock(ctx context.Context) (Unlocker, error) {
 
 func (l lock) Unlock(ctx context.Context) error {
 	if l.resourceLock == nil {
-		return errors.New("not locked")
+		return errors.New(ctx, "not locked")
 	}
 	lockErr := l.resourceLock.Release()
 	backendErr := l.lockingBackend.Close()
 	if lockErr != nil {
-		return errors.Wrapf(lockErr, "fail to release etcd lock, backendErr: %v", backendErr)
+		return errors.Wrapf(ctx, lockErr, "release etcd lock, backendErr: %v", backendErr)
 	}
 	if backendErr != nil {
-		return errors.Wrapf(backendErr, "fail to close etcd client")
+		return errors.Wrapf(ctx, backendErr, "close etcd client")
 	}
 	return nil
 }
@@ -79,7 +80,7 @@ func (m *manager) Generate(ctx context.Context) (int, error) {
 		return 1, nil
 	}
 	if err != nil {
-		return -1, errors.Wrapf(err, "fail to get list of items with prefix %s from store", m.prefix)
+		return -1, errors.Wrapf(ctx, err, "get list of items with prefix %s from store", m.prefix)
 	}
 
 	// Generating a "set" of existing IDs

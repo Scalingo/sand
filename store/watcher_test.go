@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -72,21 +71,21 @@ func TestWatcher_Register(t *testing.T) {
 			etcdWatcher := NewMockEtcdWatcher(ctrl)
 			incomingEvents := make(chan clientv3.WatchResponse, 1)
 
-			etcdWatcher.EXPECT().WatchChan().Return(clientv3.WatchChan(incomingEvents))
-			etcdWatcher.EXPECT().Close().Return(nil)
+			etcdWatcher.EXPECT().WatchChan(gomock.Any()).Return(clientv3.WatchChan(incomingEvents))
+			etcdWatcher.EXPECT().Close(gomock.Any()).Return(nil)
 
-			config, err := config.Build()
+			config, err := config.Build(t.Context())
 			require.NoError(t, err)
 
 			Watcher, err := NewWatcher(
-				context.Background(), config,
+				t.Context(), config,
 				WithEtcdWatcher(etcdWatcher),
 				WithPrefix("/prefix"),
 			)
 			require.NoError(t, err)
-			defer Watcher.Close()
+			defer Watcher.Close(t.Context())
 
-			r, err := Watcher.Register(c.registrationKey)
+			r, err := Watcher.Register(t.Context(), c.registrationKey)
 			require.NoError(t, err)
 
 			// Ensure the watcher has started watching etcd events, sleep to schedule the goroutine

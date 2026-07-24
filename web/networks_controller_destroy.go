@@ -3,8 +3,8 @@ package web
 import (
 	"net/http"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
-	"github.com/pkg/errors"
 )
 
 func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -17,7 +17,7 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 
 	n, ok, err := c.NetworkRepository.Exists(ctx, p["id"])
 	if err != nil {
-		return errors.Wrapf(err, "fail to know if network '%s' exists", p["id"])
+		return errors.Wrapf(ctx, err, "know if network '%s' exists", p["id"])
 	}
 	if !ok {
 		w.WriteHeader(404)
@@ -31,22 +31,22 @@ func (c NetworksController) Destroy(w http.ResponseWriter, r *http.Request, p ma
 		"network_id": n.ID,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "fail to get network %s endpoints", n)
+		return errors.Wrapf(ctx, err, "get network %s endpoints", n)
 	}
 
 	if len(endpoints) > 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		return errors.Errorf("fail to delete network %s, %d endpoints are still present.", n, len(endpoints))
+		return errors.Errorf(ctx, "delete network %s, %d endpoints are still present.", n, len(endpoints))
 	}
 
 	err = c.NetworkRepository.Deactivate(ctx, n)
 	if err != nil {
-		return errors.Wrapf(err, "fail to deactivate network %s", n)
+		return errors.Wrapf(ctx, err, "deactivate network %s", n)
 	}
 
 	err = c.NetworkRepository.Delete(ctx, n, c.IPAllocator)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete network %s", n)
+		return errors.Wrapf(ctx, err, "delete network %s", n)
 	}
 
 	w.WriteHeader(204)

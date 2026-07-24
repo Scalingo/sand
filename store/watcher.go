@@ -9,16 +9,17 @@ import (
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc/codes"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/config"
 	"github.com/Scalingo/sand/etcd"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type EtcdWatcher interface {
-	WatchChan() clientv3.WatchChan
-	Close() error
+	WatchChan(ctx context.Context) clientv3.WatchChan
+	Close(ctx context.Context) error
 }
 
 type Registration interface {
@@ -82,9 +83,9 @@ func NewWatcher(ctx context.Context, config *config.Config, opts ...WatcherOpt) 
 	log.Infof("create endpoints Watcher on prefix %v", w.prefix)
 
 	if w.etcdWatcher == nil {
-		etcdWatcher, err := etcd.NewWatcher(w.prefix)
+		etcdWatcher, err := etcd.NewWatcher(ctx, w.prefix)
 		if err != nil {
-			return Watcher{}, errors.Wrapf(err, "fail to create etcd Watcher on %v", w.prefix)
+			return Watcher{}, errors.Wrapf(ctx, err, "create etcd Watcher on %v", w.prefix)
 		}
 		w.etcdWatcher = etcdWatcher
 	}
@@ -98,7 +99,7 @@ func NewWatcher(ctx context.Context, config *config.Config, opts ...WatcherOpt) 
 
 func (w Watcher) watchModifications(ctx context.Context) {
 	log := logger.Get(ctx)
-	for res := range w.etcdWatcher.WatchChan() {
+	for res := range w.etcdWatcher.WatchChan(ctx) {
 		if err := res.Err(); err != nil {
 			// If the connection is canceled because grpc (HTTP/2) connection is
 			// closed as etcd restart We don't want to throw an error but just keep
@@ -106,7 +107,7 @@ func (w Watcher) watchModifications(ctx context.Context) {
 			if etcderr, ok := err.(rpctypes.EtcdError); ok && etcderr.Code() == codes.Canceled {
 				log.WithError(err).Info("watch response canceled, retry")
 			} else if err != nil {
-				log.WithError(err).Error("fail to handle watcher response")
+				log.WithError(err).Error("Failed to handle watcher response")
 			}
 			continue
 		}
@@ -127,14 +128,14 @@ func (w Watcher) watchModifications(ctx context.Context) {
 	}
 }
 
-func (w Watcher) Register(key string) (Registration, error) {
+func (w Watcher) Register(ctx context.Context, key string) (Registration, error) {
 	w.registrationsM.Lock()
 	defer w.registrationsM.Unlock()
 
 	key = prefixedKey(w.config, key)
 
 	if _, ok := w.registrations[key]; ok {
-		return registration{}, errors.Errorf("etcd Watcher registration already exists: %v", key)
+		return registration{}, errors.Errorf(ctx, "etcd Watcher registration already exists: %v", key)
 	}
 
 	c := make(chan *clientv3.Event, 10)
@@ -160,7 +161,7 @@ func (w Watcher) unregister(key string) {
 	delete(w.registrations, key)
 }
 
-func (w Watcher) Close() error {
+func (w Watcher) Close(ctx context.Context) error {
 	w.registrationsM.Lock()
 	for key, r := range w.registrations {
 		close(r.eventChan)
@@ -168,5 +169,5 @@ func (w Watcher) Close() error {
 	}
 	w.registrationsM.Unlock()
 
-	return w.etcdWatcher.Close()
+	return w.etcdWatcher.Close(ctx)
 }

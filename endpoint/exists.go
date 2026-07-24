@@ -3,7 +3,7 @@ package endpoint
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/store"
@@ -19,7 +19,7 @@ func (r *repository) Exists(ctx context.Context, id string) (types.Endpoint, boo
 		return endpoint, false, nil
 	}
 	if err != nil {
-		return endpoint, false, errors.Wrapf(err, "fail to get endpoint %s", id)
+		return endpoint, false, errors.Wrapf(ctx, err, "get endpoint %s", id)
 	}
 
 	return endpoint, true, nil

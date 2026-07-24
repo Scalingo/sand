@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/store"
-	"github.com/pkg/errors"
 )
 
 func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params map[string]string) error {
@@ -17,10 +17,10 @@ func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params 
 	log := logger.Get(ctx)
 
 	networks, err := c.NetworkRepository.List(ctx)
-	if errors.Cause(err) == store.ErrNotFound {
+	if errors.Is(err, store.ErrNotFound) {
 		networks = []types.Network{}
 	} else if err != nil {
-		return errors.Wrapf(err, "fail to query store")
+		return errors.Wrapf(ctx, err, "query store")
 	}
 	res := httpresp.NetworksList{
 		Networks: networks,
@@ -29,7 +29,7 @@ func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params 
 	w.WriteHeader(200)
 	err = json.NewEncoder(w).Encode(&res)
 	if err != nil {
-		log.WithError(err).Error("fail to encode JSON")
+		log.WithError(err).Error("Failed to encode JSON")
 	}
 	return nil
 }

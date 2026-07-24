@@ -6,7 +6,7 @@ import (
 
 	"gopkg.in/errgo.v1"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
@@ -19,20 +19,20 @@ func (c *repository) Deactivate(ctx context.Context, network types.Network) erro
 	case types.OverlayNetworkType:
 		err := m.Deactivate(ctx, network)
 		if err != nil {
-			return errgo.Notef(err, "fail to deactive overlay network")
+			return errgo.Notef(err, "deactive overlay network")
 		}
 
 		err = m.StopListenNetworkChange(ctx, network)
 		if err != nil {
-			return errors.Wrapf(err, "fail to stop listening for endpoints change on network '%s'", network)
+			return errors.Wrapf(ctx, err, "stop listening for endpoints change on network '%s'", network)
 		}
 	default:
-		return errors.New("unknown network type")
+		return errors.New(ctx, "unknown network type")
 	}
 
 	err := c.deleteNodeFromStore(ctx, c.config.GetPeerHostname(), network)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete network from store")
+		return errors.Wrapf(ctx, err, "delete network from store")
 	}
 	return nil
 }
@@ -46,14 +46,14 @@ func (c *repository) deleteNodeFromStore(ctx context.Context, hostname string, n
 		fmt.Sprintf("/nodes/%s/networks/%s", hostname, network.ID),
 	)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete network-host link %s from store", network)
+		return errors.Wrapf(ctx, err, "delete network-host link %s from store", network)
 	}
 	err = c.store.Delete(
 		ctx,
 		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, hostname),
 	)
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete network-host link %s from store", network)
+		return errors.Wrapf(ctx, err, "delete network-host link %s from store", network)
 	}
 	return nil
 }
