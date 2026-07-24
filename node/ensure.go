@@ -50,14 +50,14 @@ func EnsureNetworkEndpoints(ctx context.Context, c *config.Config, repo network.
 			return errors.Wrapf(ctx, err, "get network")
 		}
 		if !ok {
-			log.WithError(errors.Errorf(ctx, "network not found for %v", endpoint)).Error("skip endpoint")
+			log.WithError(errors.Errorf(ctx, "network not found for %v", endpoint)).Error("Failed to find network, skip endpoint")
 			continue
 		}
 
 		log.Info("ensuring network")
 		err = repo.Ensure(ctx, network)
 		if err != nil {
-			log.WithError(err).Error("ensure network")
+			log.WithError(err).Error("Failed to ensure network")
 			continue
 		}
 
@@ -72,11 +72,11 @@ func EnsureNetworkEndpoints(ctx context.Context, c *config.Config, repo network.
 			if errors.Is(err, os.ErrNotExist) {
 				_, err = erepo.Deactivate(ctx, network, endpoint)
 				if err != nil {
-					log.WithError(err).Error("deactivate endpoint")
+					log.WithError(err).Error("Failed to deactivate endpoint")
 					continue
 				}
 			} else {
-				log.WithError(err).Error("ensure endpoint")
+				log.WithError(err).Error("Failed to ensure endpoint")
 				continue
 			}
 		}

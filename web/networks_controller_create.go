@@ -53,7 +53,7 @@ func (c NetworksController) Create(w http.ResponseWriter, r *http.Request, p map
 		Network: network,
 	})
 	if err != nil {
-		log.WithError(err).Error("encode JSON")
+		log.WithError(err).Error("Failed to encode JSON")
 	}
 	return nil
 }

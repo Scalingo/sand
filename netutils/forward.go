@@ -47,7 +47,7 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 	defer func() {
 		err = netns.Set(current)
 		if err != nil {
-			log.WithError(err).Error("get back to original ns")
+			log.WithError(err).Error("Failed to get back to original ns")
 		}
 	}()
 

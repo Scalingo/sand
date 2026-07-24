@@ -85,7 +85,7 @@ func (c EndpointsController) Create(w http.ResponseWriter, r *http.Request, p ma
 		Endpoint: endpoint,
 	})
 	if err != nil {
-		log.WithError(err).Error("encode JSON")
+		log.WithError(err).Error("Failed to encode JSON")
 	}
 
 	return nil

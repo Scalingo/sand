@@ -88,7 +88,7 @@ func (l *listener) Add(ctx context.Context, nm netmanager.NetManager, network ty
 		for event := range r.EventChan() {
 			err := l.handleEvent(listenerCtx, event, nm, network)
 			if err != nil {
-				log.WithError(err).Error("handle registration response")
+				log.WithError(err).Error("Failed to handle registration response")
 			}
 		}
 		log.Info("stop listening registration events")
@@ -117,7 +117,7 @@ func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm ne
 
 		err = nm.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
-			log.WithError(err).Error("add endpoint ARP/FDB neigh rules")
+			log.WithError(err).Error("Failed to add endpoint ARP/FDB neigh rules")
 		}
 
 	case mvccpb.DELETE:
@@ -137,7 +137,7 @@ func (l *listener) handleEvent(ctx context.Context, event *clientv3.Event, nm ne
 
 		err = nm.RemoveEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
-			log.WithError(err).Error("remove endpoint ARP/FDB neigh rules")
+			log.WithError(err).Error("Failed to remove endpoint ARP/FDB neigh rules")
 		}
 	}
 	return nil

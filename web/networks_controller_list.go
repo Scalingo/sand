@@ -29,7 +29,7 @@ func (c NetworksController) List(w http.ResponseWriter, r *http.Request, params 
 	w.WriteHeader(200)
 	err = json.NewEncoder(w).Encode(&res)
 	if err != nil {
-		log.WithError(err).Error("encode JSON")
+		log.WithError(err).Error("Failed to encode JSON")
 	}
 	return nil
 }

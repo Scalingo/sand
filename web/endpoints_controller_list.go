@@ -28,7 +28,7 @@ func (c EndpointsController) List(w http.ResponseWriter, r *http.Request, p map[
 		Endpoints: endpoints,
 	})
 	if err != nil {
-		log.WithError(err).Error("encode JSON")
+		log.WithError(err).Error("Failed to encode JSON")
 	}
 
 	return nil

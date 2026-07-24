@@ -66,7 +66,7 @@ func (c NetworksController) Connect(w http.ResponseWriter, r *http.Request, urlp
 		w.WriteHeader(400)
 		jsonerr := json.NewEncoder(w).Encode(map[string]string{"error": "no active endpoint in network " + network.ID})
 		if jsonerr != nil {
-			log.WithError(jsonerr).Error("Fail to encode error response")
+			log.WithError(jsonerr).Error("Failed to encode error response")
 		}
 		return nil
 	}

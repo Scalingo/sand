@@ -84,7 +84,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	if idlock != nil {
 		err := idlock.Unlock(ctx)
 		if err != nil {
-			log.WithError(err).Errorf("unlock VNI generator for %s", network)
+			log.WithError(err).Errorf("Failed to unlock VNI generator for %s", network)
 		}
 	}
 

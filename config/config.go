@@ -61,7 +61,7 @@ func Build(ctx context.Context) (*Config, error) {
 	var c Config
 	envconfig.Process("", &c)
 
-	err := c.checkEtcdConfig()
+	err := c.checkEtcdConfig(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(ctx, err, "build etcd config")
 	}
@@ -82,10 +82,10 @@ func Build(ctx context.Context) (*Config, error) {
 	return &c, nil
 }
 
-func (c *Config) checkEtcdConfig() error {
+func (c *Config) checkEtcdConfig(ctx context.Context) error {
 	_, err := etcdutils.ConfigFromEnv()
 	if err != nil {
-		return errors.Wrap(context.Background(), err, "get etcd config from environment")
+		return errors.Wrapf(ctx, err, "get etcd config from environment")
 	}
 
 	return nil
