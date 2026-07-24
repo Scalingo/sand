@@ -188,7 +188,7 @@ func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network
 		WithoutTelemetry: true,
 		Jobs: []cronsetup.Job{
 			{
-				Name:   "ensure network endpoints",
+				Name:   "ensure-network-endpoints",
 				Rhythm: "@every " + c.EndpointEnsureInterval.String(),
 				Func: func(ctx context.Context) error {
 					err := node.EnsureNetworkEndpoints(ctx, c, repo, erepo)
