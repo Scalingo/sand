@@ -88,17 +88,16 @@ func TestListener_Add(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
 			nm := netmanagermock.NewMockNetManager(ctrl)
 			store := storemock.NewMockStore(ctrl)
 			registrar := overlaymock.NewMockRegistrar(ctrl)
 			registration := storemock.NewMockRegistration(ctrl)
 
-			config, err := config.Build()
+			config, err := config.Build(t.Context())
 			require.NoError(t, err)
 
 			network := types.Network{ID: "1"}
-			registrar.EXPECT().Register("/network-endpoints/1").Return(registration, nil)
+			registrar.EXPECT().Register(gomock.Any(), "/network-endpoints/1").Return(registration, nil)
 
 			listener := NewNetworkEndpointListener(t.Context(), config, registrar, store)
 

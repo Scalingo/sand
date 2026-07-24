@@ -49,7 +49,7 @@ func (a *App) Curl(ctx context.Context, c *cli.Command) error {
 
 	req, err := http.NewRequest(c.String("method"), c.Args().Get(0), body)
 	if err != nil {
-		return errors.Wrap(ctx, err, "fail to build request")
+		return errors.Wrap(ctx, err, "build request")
 	}
 
 	for _, header := range c.StringSlice("header") {
@@ -59,11 +59,11 @@ func (a *App) Curl(ctx context.Context, c *cli.Command) error {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return errors.Wrap(ctx, err, "fail to make HTTP request")
+		return errors.Wrap(ctx, err, "make HTTP request")
 	}
 	_, err = io.Copy(os.Stdout, resp.Body)
 	if err != nil {
-		return errors.Wrap(ctx, err, "fail to copy response body")
+		return errors.Wrap(ctx, err, "copy response body")
 	}
 	return nil
 }

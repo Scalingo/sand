@@ -3,9 +3,9 @@ package web
 import (
 	"net/http"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/endpoint"
-	"github.com/pkg/errors"
 )
 
 func (c EndpointsController) Destroy(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -15,7 +15,7 @@ func (c EndpointsController) Destroy(w http.ResponseWriter, r *http.Request, p m
 
 	e, ok, err := c.EndpointRepository.Exists(ctx, p["id"])
 	if err != nil {
-		return errors.Wrapf(err, "fail to get endpoint %v", p["id"])
+		return errors.Wrapf(ctx, err, "get endpoint %v", p["id"])
 	}
 	if !ok {
 		w.WriteHeader(404)
@@ -27,10 +27,10 @@ func (c EndpointsController) Destroy(w http.ResponseWriter, r *http.Request, p m
 
 	network, ok, err := c.NetworkRepository.Exists(ctx, e.NetworkID)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get network %v", e.NetworkID)
+		return errors.Wrapf(ctx, err, "get network %v", e.NetworkID)
 	}
 	if !ok {
-		return errors.Wrapf(err, "endpoint %v has unreferenced network ID %v", e, e.NetworkID)
+		return errors.Wrapf(ctx, err, "endpoint %v has unreferenced network ID %v", e, e.NetworkID)
 	}
 
 	log = log.WithField("network_id", network.ID)
@@ -40,7 +40,7 @@ func (c EndpointsController) Destroy(w http.ResponseWriter, r *http.Request, p m
 		ForceDeactivation: true,
 	})
 	if err != nil {
-		return errors.Wrapf(err, "fail to destroy endpoint")
+		return errors.Wrapf(ctx, err, "destroy endpoint")
 	}
 
 	w.WriteHeader(204)

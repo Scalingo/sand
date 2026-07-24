@@ -3,8 +3,9 @@ package etcd
 import (
 	"context"
 
-	"github.com/pkg/errors"
 	clientv3 "go.etcd.io/etcd/client/v3"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 type Watcher struct {
@@ -13,10 +14,10 @@ type Watcher struct {
 	watchChan clientv3.WatchChan
 }
 
-func NewWatcher(prefix string) (Watcher, error) {
-	client, err := NewClient()
+func NewWatcher(ctx context.Context, prefix string) (Watcher, error) {
+	client, err := NewClient(ctx)
 	if err != nil {
-		return Watcher{}, errors.Wrapf(err, "fail to create etcd client")
+		return Watcher{}, errors.Wrapf(ctx, err, "create etcd client")
 	}
 	wc := clientv3.NewWatcher(client)
 
@@ -31,19 +32,19 @@ func NewWatcher(prefix string) (Watcher, error) {
 	}, nil
 }
 
-func (w Watcher) WatchChan() clientv3.WatchChan {
+func (w Watcher) WatchChan(ctx context.Context) clientv3.WatchChan {
 	return w.watchChan
 }
 
-func (w Watcher) Close() error {
+func (w Watcher) Close(ctx context.Context) error {
 	err := w.watcher.Close()
 	if err != nil {
-		return errors.Wrapf(err, "fail to close etcd watcher")
+		return errors.Wrapf(ctx, err, "close etcd watcher")
 	}
 
 	err = w.client.Close()
 	if err != nil {
-		return errors.Wrapf(err, "fail to close etcd client")
+		return errors.Wrapf(ctx, err, "close etcd client")
 	}
 
 	return nil

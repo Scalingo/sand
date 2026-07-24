@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
-	"github.com/pkg/errors"
 )
 
 func (c *client) EndpointCreate(ctx context.Context, params params.EndpointCreate) (types.Endpoint, error) {
@@ -20,16 +20,15 @@ func (c *client) EndpointCreate(ctx context.Context, params params.EndpointCreat
 	)
 	err := json.NewEncoder(buffer).Encode(&params)
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to serialize JSON")
+		return endpoint, errors.Wrapf(ctx, err, "serialize JSON")
 	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/endpoints", c.url), buffer)
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to create http request")
+		return endpoint, errors.Wrapf(ctx, err, "create http request")
 	}
-	req = req.WithContext(ctx)
-	res, err := c.httpClient.Do(req)
+	res, err := c.httpClient.Do(ctx, req)
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to execute POST /endpoints")
+		return endpoint, errors.Wrapf(ctx, err, "execute POST /endpoints")
 	}
 	defer res.Body.Close()
 
@@ -37,7 +36,7 @@ func (c *client) EndpointCreate(ctx context.Context, params params.EndpointCreat
 		var reserr httpresp.Error
 		err = json.NewDecoder(res.Body).Decode(&reserr)
 		if err != nil {
-			return endpoint, errors.Wrapf(err, "fail to unserialize JSON")
+			return endpoint, errors.Wrapf(ctx, err, "unserialize JSON")
 		}
 		return endpoint, reserr
 	}
@@ -45,7 +44,7 @@ func (c *client) EndpointCreate(ctx context.Context, params params.EndpointCreat
 	var r httpresp.EndpointCreate
 	err = json.NewDecoder(res.Body).Decode(&r)
 	if err != nil {
-		return endpoint, errors.Wrapf(err, "fail to unserialize JSON")
+		return endpoint, errors.Wrapf(ctx, err, "unserialize JSON")
 	}
 
 	return r.Endpoint, nil
@@ -55,19 +54,18 @@ func (c *client) EndpointsList(ctx context.Context, params params.EndpointsList)
 	url := fmt.Sprintf("%s/endpoints?network_id=%s&hostname=%s", c.url, params.NetworkID, params.Hostname)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create http request")
+		return nil, errors.Wrapf(ctx, err, "create http request")
 	}
-	req = req.WithContext(ctx)
-	res, err := c.httpClient.Do(req)
+	res, err := c.httpClient.Do(ctx, req)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to execute GET /endpoints")
+		return nil, errors.Wrapf(ctx, err, "execute GET /endpoints")
 	}
 	defer res.Body.Close()
 
 	var r httpresp.EndpointsList
 	err = json.NewDecoder(res.Body).Decode(&r)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to unserialize JSON")
+		return nil, errors.Wrapf(ctx, err, "unserialize JSON")
 	}
 
 	return r.Endpoints, nil
@@ -76,12 +74,11 @@ func (c *client) EndpointsList(ctx context.Context, params params.EndpointsList)
 func (c *client) EndpointDelete(ctx context.Context, id string) error {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/endpoints/%s", c.url, id), nil)
 	if err != nil {
-		return errors.Wrapf(err, "fail to create http request")
+		return errors.Wrapf(ctx, err, "create http request")
 	}
-	req = req.WithContext(ctx)
-	res, err := c.httpClient.Do(req)
+	res, err := c.httpClient.Do(ctx, req)
 	if err != nil {
-		return errors.Wrapf(err, "fail to execute DELETE /endpoints/%s", id)
+		return errors.Wrapf(ctx, err, "execute DELETE /endpoints/%s", id)
 	}
 	defer res.Body.Close()
 
@@ -89,7 +86,7 @@ func (c *client) EndpointDelete(ctx context.Context, id string) error {
 		var reserr httpresp.Error
 		err = json.NewDecoder(res.Body).Decode(&reserr)
 		if err != nil {
-			return errors.Wrapf(err, "fail to unserialize JSON")
+			return errors.Wrapf(ctx, err, "unserialize JSON")
 		}
 		return reserr
 	}

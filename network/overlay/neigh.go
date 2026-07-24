@@ -4,11 +4,12 @@ import (
 	"context"
 	"net"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
@@ -18,7 +19,7 @@ func (m manager) EnsureEndpointsNeigh(ctx context.Context, network types.Network
 	for _, endpoint := range endpoints {
 		err := m.AddEndpointNeigh(ctx, network, endpoint)
 		if err != nil {
-			return errors.Wrapf(err, "fail to add endpoint ARP/FDB neigh rules")
+			return errors.Wrapf(ctx, err, "add endpoint ARP/FDB neigh rules")
 		}
 	}
 	return nil
@@ -56,32 +57,32 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 
 	nsfd, err := netns.GetFromPath(network.NSHandlePath)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get namespace handler")
+		return errors.Wrapf(ctx, err, "get namespace handler")
 	}
 	defer nsfd.Close()
 
 	nlh, err := netlink.NewHandleAt(nsfd, unix.NETLINK_ROUTE)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get netlink handler of netns")
+		return errors.Wrapf(ctx, err, "get netlink handler of netns")
 	}
 	defer nlh.Delete()
 
 	link, err := nlh.LinkByName(VxLANInNSName)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get vxlan interface")
+		return errors.Wrapf(ctx, err, "get vxlan interface")
 	}
 
 	ip, _, err := net.ParseCIDR(endpoint.TargetVethIP)
 	if err != nil {
-		return errors.Wrapf(err, "fail to parse IP of %v '%s'", endpoint.TargetVethName, endpoint.TargetVethIP)
+		return errors.Wrapf(ctx, err, "parse IP of %v '%s'", endpoint.TargetVethName, endpoint.TargetVethIP)
 	}
 	mac, err := net.ParseMAC(endpoint.TargetVethMAC)
 	if err != nil {
-		return errors.Wrapf(err, "fail to parse MAC of %v '%s'", endpoint.TargetVethName, endpoint.TargetVethMAC)
+		return errors.Wrapf(ctx, err, "parse MAC of %v '%s'", endpoint.TargetVethName, endpoint.TargetVethMAC)
 	}
 	vtepIP := net.ParseIP(endpoint.HostIP)
 	if vtepIP == nil {
-		return errors.Errorf("fail to parse endpoint host IP (VTEP IP) '%s'", endpoint.HostIP)
+		return errors.Errorf(ctx, "parse endpoint host IP (VTEP IP) '%s'", endpoint.HostIP)
 	}
 
 	nlnh := &netlink.Neigh{
@@ -91,7 +92,7 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 		LinkIndex:    link.Attrs().Index,
 	}
 	if err := action(nlh, nlnh); err != nil {
-		return errors.Wrapf(err, "could not modify neighbor entry: %+v", nlnh)
+		return errors.Wrapf(ctx, err, "could not modify neighbor entry: %+v", nlnh)
 	}
 
 	nlnh = &netlink.Neigh{
@@ -103,7 +104,7 @@ func (m manager) endpointNeighAction(ctx context.Context, network types.Network,
 		Flags:        netlink.NTF_SELF,
 	}
 	if err := action(nlh, nlnh); err != nil {
-		return errors.Wrapf(err, "could not modify neighbor entry: %+v", nlnh)
+		return errors.Wrapf(ctx, err, "could not modify neighbor entry: %+v", nlnh)
 	}
 	return nil
 }

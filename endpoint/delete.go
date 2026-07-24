@@ -2,15 +2,16 @@ package endpoint
 
 import (
 	"context"
+	stderrors "errors"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 )
 
 var (
-	ErrActivated = errors.New("endpoint is still active")
+	ErrActivated = stderrors.New("endpoint is still active")
 )
 
 type DeleteOpts struct {
@@ -26,7 +27,7 @@ func (r *repository) Delete(ctx context.Context, n types.Network, e types.Endpoi
 	if opts.ForceDeactivation {
 		e, err = r.Deactivate(ctx, n, e)
 		if err != nil {
-			return errors.Wrapf(err, "fail to deactivate endpoint")
+			return errors.Wrapf(ctx, err, "deactivate endpoint")
 		}
 	}
 
@@ -36,12 +37,12 @@ func (r *repository) Delete(ctx context.Context, n types.Network, e types.Endpoi
 
 	err = r.store.Delete(ctx, e.StorageKey())
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete endpoint storage key")
+		return errors.Wrapf(ctx, err, "delete endpoint storage key")
 	}
 
 	err = r.store.Delete(ctx, e.NetworkStorageKey())
 	if err != nil {
-		return errors.Wrapf(err, "fail to delete endpoint storage key")
+		return errors.Wrapf(ctx, err, "delete endpoint storage key")
 	}
 
 	log.Info("Endpoint deleted")

@@ -57,7 +57,7 @@ func EnsureNetworkEndpoints(ctx context.Context, c *config.Config, repo network.
 		log.Info("ensuring network")
 		err = repo.Ensure(ctx, network)
 		if err != nil {
-			log.WithError(err).Error("failed to ensure network")
+			log.WithError(err).Error("ensure network")
 			continue
 		}
 
@@ -72,11 +72,11 @@ func EnsureNetworkEndpoints(ctx context.Context, c *config.Config, repo network.
 			if errors.Is(err, os.ErrNotExist) {
 				_, err = erepo.Deactivate(ctx, network, endpoint)
 				if err != nil {
-					log.WithError(err).Error("failed to deactivate endpoint")
+					log.WithError(err).Error("deactivate endpoint")
 					continue
 				}
 			} else {
-				log.WithError(err).Error("failed to ensure endpoint")
+				log.WithError(err).Error("ensure endpoint")
 				continue
 			}
 		}

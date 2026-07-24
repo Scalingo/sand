@@ -3,7 +3,7 @@ package endpoint
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
@@ -21,7 +21,7 @@ func (r *repository) Deactivate(ctx context.Context, n types.Network, e types.En
 
 	err := r.managers.Get(n.Type).DeleteEndpoint(ctx, n, e)
 	if err != nil && err != netmanager.EndpointAlreadyDisabledErr {
-		return e, errors.Wrapf(err, "fail to delete endpoint from overlay network")
+		return e, errors.Wrapf(ctx, err, "delete endpoint from overlay network")
 	}
 
 	e.Active = false
@@ -29,12 +29,12 @@ func (r *repository) Deactivate(ctx context.Context, n types.Network, e types.En
 
 	err = r.store.Set(ctx, e.StorageKey(), &e)
 	if err != nil {
-		return e, errors.Wrapf(err, "fail to save endpoint %s in store", e)
+		return e, errors.Wrapf(ctx, err, "save endpoint %s in store", e)
 	}
 
 	err = r.store.Set(ctx, e.NetworkStorageKey(), &e)
 	if err != nil {
-		return e, errors.Wrapf(err, "fail to save endpoint %s in store network", e)
+		return e, errors.Wrapf(ctx, err, "save endpoint %s in store network", e)
 	}
 
 	log.Info("Endpoint deactivated")

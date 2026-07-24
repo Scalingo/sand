@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
@@ -22,27 +22,27 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	case types.OverlayNetworkType:
 		err := m.Ensure(ctx, network)
 		if err != nil {
-			return errors.Wrapf(err, "fail to ensure overlay network %s", network)
+			return errors.Wrapf(ctx, err, "ensure overlay network %s", network)
 		}
 		var endpoints []types.Endpoint
 		err = c.store.Get(ctx, network.EndpointsStorageKey(""), true, &endpoints)
 		if err != nil && err != store.ErrNotFound {
-			return errors.Wrapf(err, "fail to get network endpoints")
+			return errors.Wrapf(ctx, err, "get network endpoints")
 		}
 
 		if len(endpoints) > 0 {
 			err = m.EnsureEndpointsNeigh(ctx, network, endpoints)
 			if err != nil {
-				return errors.Wrapf(err, "fail to ensure neighbors (ARP/FDB)")
+				return errors.Wrapf(ctx, err, "ensure neighbors (ARP/FDB)")
 			}
 		}
 
 		err = m.ListenNetworkChange(ctx, network)
 		if err != nil {
-			return errors.Wrapf(err, "fail to listen for new endpoints on network '%s'", network)
+			return errors.Wrapf(ctx, err, "listen for new endpoints on network '%s'", network)
 		}
 	default:
-		return errors.New("invalid network type")
+		return errors.New(ctx, "invalid network type")
 	}
 
 	// Ability to list all networks with node hostname as prefix
@@ -52,7 +52,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
-		return errors.Wrapf(err, "err to store nodes link to network %s", network)
+		return errors.Wrapf(ctx, err, "err to store nodes link to network %s", network)
 	}
 
 	// Ability to list nodes present in a network
@@ -62,7 +62,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
-		return errors.Wrapf(err, "err to store network %s link to hostname", network)
+		return errors.Wrapf(ctx, err, "err to store network %s link to hostname", network)
 	}
 
 	log.Info("Network setup ensured")

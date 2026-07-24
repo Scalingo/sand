@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/store"
@@ -31,7 +31,7 @@ func (r *repository) List(ctx context.Context, filters map[string]string) ([]typ
 		return []types.Endpoint{}, nil
 	}
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get endpoints")
+		return nil, errors.Wrapf(ctx, err, "get endpoints")
 	}
 
 	return endpoints, nil

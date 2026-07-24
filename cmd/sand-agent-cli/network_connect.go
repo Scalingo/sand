@@ -27,7 +27,7 @@ func (a *App) NetworkConnect(ctx context.Context, c *cli.Command) error {
 
 	listener, err := net.Listen("tcp", ":")
 	if err != nil {
-		return errors.Wrapf(ctx, err, "fail to bind a socket")
+		return errors.Wrapf(ctx, err, "bind a socket")
 	}
 	defer listener.Close()
 
@@ -36,7 +36,7 @@ func (a *App) NetworkConnect(ctx context.Context, c *cli.Command) error {
 	for {
 		localConn, err := listener.Accept()
 		if err != nil {
-			return errors.Wrapf(ctx, err, "fail to accept connection")
+			return errors.Wrapf(ctx, err, "accept connection")
 		}
 
 		go func(localConn net.Conn) {
@@ -45,7 +45,7 @@ func (a *App) NetworkConnect(ctx context.Context, c *cli.Command) error {
 				Port: c.String("port"),
 			})
 			if err != nil {
-				log.WithError(err).Errorf("fail to connect to network %v", c.String("network"))
+				log.WithError(err).Errorf("connect to network %v", c.String("network"))
 				return
 			}
 
@@ -63,7 +63,7 @@ func (a *App) NetworkConnect(ctx context.Context, c *cli.Command) error {
 				log.Info("remote connection opened to the SAND network")
 				_, err := io.Copy(localConn, conn)
 				if err != io.EOF && err != nil && !closed {
-					log.WithError(err).Error("fail to copy data from local socket to remote network")
+					log.WithError(err).Error("copy data from local socket to remote network")
 				}
 				log.Info("remote connection closed to the SAND network")
 			}()
@@ -78,7 +78,7 @@ func (a *App) NetworkConnect(ctx context.Context, c *cli.Command) error {
 
 				_, err := io.Copy(conn, localConn)
 				if err != io.EOF && err != nil && !closed {
-					log.WithError(err).Error("fail to copy data from remote network to local socket")
+					log.WithError(err).Error("copy data from remote network to local socket")
 				}
 				log.Infof("local connection on %v closed", listener.Addr())
 			}()

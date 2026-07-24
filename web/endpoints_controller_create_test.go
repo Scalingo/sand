@@ -61,7 +61,7 @@ func TestEndpointsController_Create(t *testing.T) {
 			Path:   "/endpoints",
 			Method: "POST",
 			Body:   `{"network_id": "1"}`,
-			Error:  "fail to ensure network",
+			Error:  "ensure network",
 			ExpectIPAllocator: func(m *ipallocatormock.MockIPAllocator) {
 				m.EXPECT().AllocateIP(gomock.Any(), "1", ipallocator.AllocateIPOpts{
 					Address: "",
@@ -70,14 +70,14 @@ func TestEndpointsController_Create(t *testing.T) {
 			ExpectNetworkRepository: func(r *networkmock.MockRepository) {
 				network := types.Network{ID: "1"}
 				r.EXPECT().Exists(gomock.Any(), "1").Return(network, true, nil)
-				r.EXPECT().Ensure(gomock.Any(), network).Return(errors.New("fail to ensure network"))
+				r.EXPECT().Ensure(gomock.Any(), network).Return(errors.New("ensure network"))
 			},
 		}, {
 			Name:   "error if endpoint creation fails",
 			Path:   "/endpoints",
 			Method: "POST",
 			Body:   `{"network_id": "1", "activate": true, "activate_params": { "ns_handle_path": "/proc/self/ns/net"}}`,
-			Error:  "fail to create endpoint",
+			Error:  "create endpoint",
 			ExpectIPAllocator: func(m *ipallocatormock.MockIPAllocator) {
 				m.EXPECT().AllocateIP(gomock.Any(), "1", ipallocator.AllocateIPOpts{
 					Address: "",
@@ -99,7 +99,7 @@ func TestEndpointsController_Create(t *testing.T) {
 						SetAddr:      true,
 					},
 				}
-				r.EXPECT().Create(gomock.Any(), network, params).Return(types.Endpoint{}, errors.New("fail to create endpoint"))
+				r.EXPECT().Create(gomock.Any(), network, params).Return(types.Endpoint{}, errors.New("create endpoint"))
 			},
 		},
 	}
@@ -107,7 +107,6 @@ func TestEndpointsController_Create(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
 
 			networkRepo := networkmock.NewMockRepository(ctrl)
 			endpointRepo := endpointmock.NewMockRepository(ctrl)

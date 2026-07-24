@@ -1,13 +1,15 @@
 package config
 
 import (
+	"context"
 	"os"
 	"time"
 
 	etcdutils "github.com/Scalingo/go-utils/etcd"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/pkg/errors"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 var Version = "v1.1.5"
@@ -55,22 +57,22 @@ type Config struct {
 	MaxVNI int `envconfig:"MAX_VNI" default:"999_999"`
 }
 
-func Build() (*Config, error) {
+func Build(ctx context.Context) (*Config, error) {
 	var c Config
 	envconfig.Process("", &c)
 
 	err := c.checkEtcdConfig()
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to build etcd config")
+		return nil, errors.Wrapf(ctx, err, "build etcd config")
 	}
 	if c.EndpointEnsureInterval <= 0 {
-		return nil, errors.New("endpoint ensure interval must be positive")
+		return nil, errors.New(ctx, "endpoint ensure interval must be positive")
 	}
 
 	if c.PublicHostname == "" {
 		h, err := os.Hostname()
 		if err != nil {
-			return nil, errors.Wrapf(err, "fail to get hostname")
+			return nil, errors.Wrapf(ctx, err, "get hostname")
 		}
 		c.PublicHostname = h
 	}
@@ -83,7 +85,7 @@ func Build() (*Config, error) {
 func (c *Config) checkEtcdConfig() error {
 	_, err := etcdutils.ConfigFromEnv()
 	if err != nil {
-		return errors.Wrap(err, "fail to get etcd config from environment")
+		return errors.Wrap(context.Background(), err, "get etcd config from environment")
 	}
 
 	return nil

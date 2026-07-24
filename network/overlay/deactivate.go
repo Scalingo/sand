@@ -5,10 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 	"golang.org/x/sys/unix"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/sand/api/types"
 )
@@ -19,25 +20,25 @@ func (netm manager) Deactivate(ctx context.Context, network types.Network) error
 		return nil
 	}
 	if err != nil {
-		return errors.Wrapf(err, "fail to get namespace handler")
+		return errors.Wrapf(ctx, err, "get namespace handler")
 	}
 	defer nsfd.Close()
 
 	nlh, err := netlink.NewHandleAt(nsfd, unix.NETLINK_ROUTE)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get netlink handler of netns")
+		return errors.Wrapf(ctx, err, "get netlink handler of netns")
 	}
 	defer nlh.Delete()
 
 	links, err := nlh.LinkList()
 	if err != nil {
-		return errors.Wrapf(err, "fail to list interfaces")
+		return errors.Wrapf(ctx, err, "list interfaces")
 	}
 	interfacesToClean := []string{"vxlan0", "br0"}
 
 	for _, link := range links {
 		if strings.HasPrefix(link.Attrs().Name, "sand") {
-			return errors.Errorf("an endpoint interface is still up: %v", link.Attrs().Name)
+			return errors.Errorf(ctx, "an endpoint interface is still up: %v", link.Attrs().Name)
 		}
 	}
 
@@ -52,12 +53,12 @@ func (netm manager) Deactivate(ctx context.Context, network types.Network) error
 				continue
 			}
 			if err != nil {
-				return errors.Wrapf(err, "fail to get %s link", linkToClean)
+				return errors.Wrapf(ctx, err, "get %s link", linkToClean)
 			}
 
 			err = nlh.LinkDel(link)
 			if err != nil {
-				return errors.Wrapf(err, "fail to delete %s link", linkToClean)
+				return errors.Wrapf(ctx, err, "delete %s link", linkToClean)
 			}
 		}
 	}

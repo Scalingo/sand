@@ -10,24 +10,24 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/sand/api/params"
-	"github.com/pkg/errors"
 )
 
 func (c *client) NetworkConnect(ctx context.Context, id string, opts params.NetworkConnect) (net.Conn, error) {
 	req, err := http.NewRequest("CONNECT", fmt.Sprintf("%s/networks/%s?ip=%s&port=%s", c.url, id, opts.IP, opts.Port), nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to create http request")
+		return nil, errors.Wrapf(ctx, err, "create http request")
 	}
 	req = req.WithContext(ctx)
 
 	url, err := url.Parse(c.url)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to parse URL '%s'", c.url)
+		return nil, errors.Wrapf(ctx, err, "parse URL '%s'", c.url)
 	}
 	dial, err := net.Dial("tcp", url.Host)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to connect to %s", url.Host)
+		return nil, errors.Wrapf(ctx, err, "connect to %s", url.Host)
 	}
 
 	var conn *httputil.ClientConn
@@ -44,11 +44,11 @@ func (c *client) NetworkConnect(ctx context.Context, id string, opts params.Netw
 	res, err := conn.Do(req)
 	if err != httputil.ErrPersistEOF && err != nil {
 		conn.Close()
-		return nil, errors.Wrapf(err, "fail to execute CONNECT /networks/%s", id)
+		return nil, errors.Wrapf(ctx, err, "execute CONNECT /networks/%s", id)
 	}
 	if res.StatusCode != 200 {
 		conn.Close()
-		return nil, errors.Errorf("invalid return code %v", res.StatusCode)
+		return nil, errors.Errorf(ctx, "invalid return code %v", res.StatusCode)
 	}
 
 	socket, _ := conn.Hijack()

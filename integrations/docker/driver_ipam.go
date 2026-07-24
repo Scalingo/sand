@@ -5,11 +5,11 @@ import (
 	"net"
 
 	"github.com/Scalingo/go-plugins-helpers/ipam"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/network"
-	"github.com/pkg/errors"
 )
 
 type dockerIPAMPlugin struct {
@@ -35,15 +35,15 @@ func (p *dockerIPAMPlugin) RequestPool(ctx context.Context, req *ipam.RequestPoo
 
 	id := req.Options["sand-id"]
 	if id == "" {
-		return nil, errors.New("IPAM option sand-id is mandatory")
+		return nil, errors.New(ctx, "IPAM option sand-id is mandatory")
 	}
 
 	network, ok, err := p.networkRepository.Exists(ctx, id)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to get network %v", id)
+		return nil, errors.Wrapf(ctx, err, "get network %v", id)
 	}
 	if !ok {
-		return nil, errors.Errorf("SAND network %v does not exist", id)
+		return nil, errors.Errorf(ctx, "SAND network %v does not exist", id)
 	}
 
 	log.Info("pool initialized")
@@ -68,10 +68,10 @@ func (p *dockerIPAMPlugin) RequestAddress(ctx context.Context, req *ipam.Request
 		id := req.PoolID
 		network, ok, err := p.networkRepository.Exists(ctx, id)
 		if err != nil {
-			return nil, errors.Wrapf(err, "fail to get network %v", id)
+			return nil, errors.Wrapf(ctx, err, "get network %v", id)
 		}
 		if !ok {
-			return nil, errors.Errorf("SAND network %v does not exist", id)
+			return nil, errors.Errorf(ctx, "SAND network %v does not exist", id)
 		}
 
 		return &ipam.RequestAddressResponse{
@@ -83,7 +83,7 @@ func (p *dockerIPAMPlugin) RequestAddress(ctx context.Context, req *ipam.Request
 		Address: req.Address,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to request address in pool %v - %v", req.PoolID, req.Address)
+		return nil, errors.Wrapf(ctx, err, "request address in pool %v - %v", req.PoolID, req.Address)
 	}
 	log.Infof("obtained address: %v", ip)
 	return &ipam.RequestAddressResponse{
@@ -98,15 +98,15 @@ func (p *dockerIPAMPlugin) ReleaseAddress(ctx context.Context, req *ipam.Release
 
 	network, ok, err := p.networkRepository.Exists(ctx, id)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get network %v", id)
+		return errors.Wrapf(ctx, err, "get network %v", id)
 	}
 	if !ok {
-		return errors.Errorf("SAND network %v does not exist", id)
+		return errors.Errorf(ctx, "SAND network %v does not exist", id)
 	}
 
 	ip, _, err := net.ParseCIDR(network.Gateway)
 	if err != nil {
-		return errors.Errorf("SAND network %v gateway is not a valid CIDR", id)
+		return errors.Errorf(ctx, "SAND network %v gateway is not a valid CIDR", id)
 	}
 
 	if req.Address == ip.String() {
@@ -116,7 +116,7 @@ func (p *dockerIPAMPlugin) ReleaseAddress(ctx context.Context, req *ipam.Release
 
 	err = p.allocator.ReleaseIP(ctx, id, req.Address)
 	if err != nil {
-		return errors.Wrapf(err, "fail to release address in pool %v - %v", id, req.Address)
+		return errors.Wrapf(ctx, err, "release address in pool %v - %v", id, req.Address)
 	}
 	log.Infof("released address: %v", req.Address)
 	return nil

@@ -23,7 +23,7 @@ func (a *App) Version(ctx context.Context, c *cli.Command) error {
 
 	version, err := client.Version(ctx)
 	if err != nil {
-		return errors.Wrapf(ctx, err, "fail to get server version")
+		return errors.Wrapf(ctx, err, "get server version")
 	}
 
 	fmt.Printf("Server version: %v\n", version)

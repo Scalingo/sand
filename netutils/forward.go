@@ -8,8 +8,9 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/vishvananda/netns"
+
+	"github.com/Scalingo/go-utils/errors/v3"
 
 	"github.com/Scalingo/go-utils/logger"
 )
@@ -29,24 +30,24 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 
 	dst, err := netns.GetFromPath(ns)
 	if err != nil {
-		return errors.Wrapf(err, "fail to get dest namespace handler %v", ns)
+		return errors.Wrapf(ctx, err, "get dest namespace handler %v", ns)
 	}
 	defer dst.Close()
 
 	current, err := netns.Get()
 	if err != nil {
-		return errors.Wrapf(err, "fail to get current namespace handler")
+		return errors.Wrapf(ctx, err, "get current namespace handler")
 	}
 	defer current.Close()
 
 	err = netns.Set(dst)
 	if err != nil {
-		return errors.Wrapf(err, "fail to set current namespace to dst %v", dst)
+		return errors.Wrapf(ctx, err, "set current namespace to dst %v", dst)
 	}
 	defer func() {
 		err = netns.Set(current)
 		if err != nil {
-			log.WithError(err).Error("fail to get back to original ns")
+			log.WithError(err).Error("get back to original ns")
 		}
 	}()
 
@@ -54,7 +55,7 @@ func ForwardConnection(ctx context.Context, srcSocket net.Conn, ns, ip, port str
 	dialer := net.Dialer{}
 	dstSocket, err := dialer.DialContext(ctx, "tcp", dstHost)
 	if err != nil {
-		return errors.Wrapf(err, "fail to open connection to %v", dstHost)
+		return errors.Wrapf(ctx, err, "open connection to %v", dstHost)
 	}
 
 	wg := &sync.WaitGroup{}

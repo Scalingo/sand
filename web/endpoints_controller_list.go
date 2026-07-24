@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/httpresp"
-	"github.com/pkg/errors"
 )
 
 func (c EndpointsController) List(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -20,7 +20,7 @@ func (c EndpointsController) List(w http.ResponseWriter, r *http.Request, p map[
 	}
 	endpoints, err := c.EndpointRepository.List(ctx, filter)
 	if err != nil {
-		return errors.Wrapf(err, "fail to list endpoints with filters %v", filter)
+		return errors.Wrapf(ctx, err, "list endpoints with filters %v", filter)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -28,7 +28,7 @@ func (c EndpointsController) List(w http.ResponseWriter, r *http.Request, p map[
 		Endpoints: endpoints,
 	})
 	if err != nil {
-		log.WithError(err).Error("fail to encode JSON")
+		log.WithError(err).Error("encode JSON")
 	}
 
 	return nil
