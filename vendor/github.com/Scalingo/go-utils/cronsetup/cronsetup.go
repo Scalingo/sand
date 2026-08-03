@@ -47,7 +47,7 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	} else {
 		ctx, log = logger.WithFieldToCtx(ctx, "mode", "distributed")
 
-		etcdMutexBuilder, err := createEtcdMutextBuilderFromOpts(ctx, opts)
+		etcdMutexBuilder, err := createEtcdMutexBuilderFromOpts(ctx, opts)
 		if err != nil {
 			return nil, errors.Wrap(ctx, err, "create the etcd mutex builder")
 		}
@@ -88,7 +88,7 @@ func Setup(ctx context.Context, opts SetupOpts) (func(), error) {
 	}, nil
 }
 
-func createEtcdMutextBuilderFromOpts(ctx context.Context, opts SetupOpts) (cron.EtcdMutexBuilder, error) {
+func createEtcdMutexBuilderFromOpts(ctx context.Context, opts SetupOpts) (cron.EtcdMutexBuilder, error) {
 	if opts.EtcdClient != nil {
 		etcdMutexBuilder, err := cron.NewEtcdMutexBuilderFromClient(opts.EtcdClient)
 		if err != nil {

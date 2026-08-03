@@ -1,4 +1,4 @@
-# Package `cronsetup` v1.6.0
+# Package `cronsetup` v1.7.0
 
 The `cronsetup` package eases the configuration and the execution of cron jobs on Go services. It has two modes: a distributed one (backed by etcd), and a local one.
 

@@ -2,6 +2,11 @@
 
 ## To be Released
 
+## v1.7.0
+
+* refactor(cronsetup): rename `*MutextBuilder` to `*MutexBuilder`
+* refactor: replace `github.com/golang/mock` with `go.uber.org/mock`
+
 ## v1.6.0
 
 * feat(opentelemetry) Add ability to instrument execution of cron job through OpenTelemetry

@@ -25,7 +25,7 @@ type Cron struct {
 	errorsHandler     func(context.Context, Job, error)
 	funcCtx           func(context.Context, Job) context.Context
 	running           bool
-	etcdMutextBuilder EtcdMutexBuilder
+	etcdMutexBuilder  EtcdMutexBuilder
 }
 
 // Job contains 3 mandatory options to define a job
@@ -170,7 +170,7 @@ func WithErrorsHandler(f func(context.Context, Job, error)) Opt {
 // WithEtcdMutexBuilder sets an etcd client to pose mutex. Setting such a client enables the distributed mode.
 func WithEtcdMutexBuilder(etcdMutexBuilder EtcdMutexBuilder) Opt {
 	return Opt(func(cron *Cron) {
-		cron.etcdMutextBuilder = etcdMutexBuilder
+		cron.etcdMutexBuilder = etcdMutexBuilder
 	})
 }
 
@@ -340,7 +340,7 @@ func (c *Cron) runEntry(ctx context.Context, effective time.Time, e *Entry) {
 		ctx = c.funcCtx(ctx, e.Job)
 	}
 
-	if c.etcdMutextBuilder == nil {
+	if c.etcdMutexBuilder == nil {
 		// In the local mode, we execute the job anyway with no need of any mutex
 		err := e.Job.Run(ctx)
 		if err != nil {
@@ -351,7 +351,7 @@ func (c *Cron) runEntry(ctx context.Context, effective time.Time, e *Entry) {
 	}
 
 	// In the distributed mode, we need to set a distributed mutex to ensure the job is only executed once.
-	m, err := c.etcdMutextBuilder.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
+	m, err := c.etcdMutexBuilder.NewMutex(fmt.Sprintf("etcd_cron/%s/%d", e.Job.canonicalName(), effective.Unix()))
 	if err != nil {
 		go c.etcdErrorsHandler(ctx, e.Job, errors.Wrapf(ctx, err, "create etcd mutex for job '%v'", e.Job.Name))
 		return
