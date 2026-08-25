@@ -2,6 +2,8 @@
 
 ## To be Released
 
+## v1.2.0 - 25 Aug 2026
+
 * chore: use go-utils/errors for errors, make them not start by 'fail to', contextify everywhere for the errors
 * feat(ensure-networks): Add API endpoint and CLI command to trigger it manually without restartng the service (19 minutes ago)
 * feat(control-loop/ensure-networks): Add notion of control loop, ensure every 30 minutes (34 minutes ago)

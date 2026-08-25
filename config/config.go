@@ -12,7 +12,7 @@ import (
 	"github.com/Scalingo/go-utils/errors/v3"
 )
 
-var Version = "v1.1.5"
+var Version = "v1.2.0"
 
 type Config struct {
 	RollbarToken string
