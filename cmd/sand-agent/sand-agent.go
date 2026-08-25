@@ -4,8 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"net/http"
-	"net/http/pprof"
 	"os"
 	"path/filepath"
 
@@ -171,8 +169,13 @@ func main() {
 	}
 
 	if c.PprofEnabled {
+		pprofRouter, pprofErr := handlers.NewProfilingRouter(ctx)
+		if pprofErr != nil {
+			log.WithError(pprofErr).Error("Failed to initialize pprof router")
+			os.Exit(-1)
+		}
 		log.WithField("port", c.PprofPort).Info("Enabling pprof server")
-		err = gracefulService.ListenAndServe(ctx, "tcp", fmt.Sprintf("localhost:%d", c.PprofPort), newPprofMux())
+		err = gracefulService.ListenAndServe(ctx, "tcp", fmt.Sprintf("localhost:%d", c.PprofPort), pprofRouter)
 		if err != nil {
 			log.WithError(err).Error("Failed to initialize pprof listener")
 			os.Exit(-1)
@@ -195,23 +198,6 @@ func main() {
 	log.Info("Stop watching etcd changes")
 	endpointsWatcher.Close(ctx)
 	log.Info("All APIs stopped, shutting down..")
-}
-
-func newPprofMux() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	mux.Handle("/debug/pprof/allocs", pprof.Handler("allocs"))
-	mux.Handle("/debug/pprof/block", pprof.Handler("block"))
-	mux.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
-	mux.Handle("/debug/pprof/heap", pprof.Handler("heap"))
-	mux.Handle("/debug/pprof/mutex", pprof.Handler("mutex"))
-	mux.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-
-	return mux
 }
 
 func setupEndpointEnsureCron(ctx context.Context, c *config.Config, repo network.Repository, erepo endpoint.Repository) (func(), error) {
