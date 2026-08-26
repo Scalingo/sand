@@ -49,6 +49,10 @@ go install github.com/Scalingo/sand/cmd/sand-agent-cli@latest
 * `NETNS_PATH` default: `/var/run/netns`, location where SAND will create network namespace handlers
 * `NETNS_PREFIX` default: `sc-ns-`, name prefix for the network namespace handler files
 * `HTTP_PORT` default: `9999`, port bind by the SAND HTTP API
+* `PPROF_ENABLED` default: `false`, enables the pprof server
+* `PPROF_PORT` default: `9997`, pprof server port on `localhost`
+* `PPROF_USERNAME` username for pprof Basic Auth
+* `PPROF_PASSWORD` password for pprof Basic Auth
 * `PUBLIC_HOSTNAME` default: `$(hostname)`, endpoints are attached to a
   hostname, an agent won't accept to delete a endpoint if its not owned by its hostname
 * `PUBLIC_IP` IP of the host which will be used in the configuration of VXLAN routing rules

@@ -121,6 +121,9 @@ func main() {
 	if c.EnableDockerPlugin {
 		numServers++
 	}
+	if c.PprofEnabled {
+		numServers++
+	}
 	gracefulService := graceful.NewService(graceful.WithNumServers(numServers))
 
 	var tlsConfig *tls.Config
@@ -161,6 +164,20 @@ func main() {
 		}
 		if err != nil {
 			log.WithError(err).Error("Failed to initialize docker plugin listener")
+			os.Exit(-1)
+		}
+	}
+
+	if c.PprofEnabled {
+		pprofRouter, pprofErr := handlers.NewProfilingRouter(ctx)
+		if pprofErr != nil {
+			log.WithError(pprofErr).Error("Failed to initialize pprof router")
+			os.Exit(-1)
+		}
+		log.WithField("port", c.PprofPort).Info("Enabling pprof server")
+		err = gracefulService.ListenAndServe(ctx, "tcp", fmt.Sprintf("localhost:%d", c.PprofPort), pprofRouter)
+		if err != nil {
+			log.WithError(err).Error("Failed to initialize pprof listener")
 			os.Exit(-1)
 		}
 	}

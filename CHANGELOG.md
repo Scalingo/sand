@@ -2,6 +2,8 @@
 
 ## To be Released
 
+* feat(debug/pprof) Add ability to expose pprof on a custom port (default 9997), disabled by default
+
 ## v1.2.0 - 25 Aug 2026
 
 * chore: use go-utils/errors for errors, make them not start by 'fail to', contextify everywhere for the errors

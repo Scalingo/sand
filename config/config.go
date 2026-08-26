@@ -21,6 +21,8 @@ type Config struct {
 	NetnsPrefix  string `default:"sc-ns-"`
 	NetnsPath    string `default:"/var/run/netns"`
 	HTTPPort     int    `envconfig:"PORT" default:"9999"`
+	PprofEnabled bool   `envconfig:"PPROF_ENABLED" default:"false"`
+	PprofPort    int    `envconfig:"PPROF_PORT" default:"9997"`
 
 	// Deprecated: use PeerHostname
 	PublicHostname string `envconfig:"PUBLIC_HOSTNAME"`
