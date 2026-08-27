@@ -10,7 +10,6 @@ import (
 	"github.com/gofrs/uuid/v5"
 
 	"github.com/Scalingo/go-utils/errors/v3"
-
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
@@ -24,7 +23,7 @@ var (
 
 func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	var err error
-	log := logger.Get(ctx).WithField("network_name", params.Name)
+	ctx, log := logger.WithFieldToCtx(ctx, "network_name", params.Name)
 	log.Info("Create network")
 
 	if params.Type == "" {
@@ -54,8 +53,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 			r.config.NetnsPath, fmt.Sprintf("%s%s", r.config.NetnsPrefix, uuid),
 		),
 	}
-	log = log.WithField("network_id", network.ID)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, _ = logger.WithStructToCtx(ctx, "network", network)
 
 	vniGen := overlay.NewVNIGenerator(ctx, r.config, r.store)
 	var idlock idmanager.Unlocker
@@ -70,7 +68,8 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 			return network, errors.Wrapf(ctx, err, "generate VNI for %s", network)
 		}
 
-		log.Debugf("vni is %v", vni)
+		ctx, log = logger.WithFieldToCtx(ctx, "network_vni", vni)
+		log.Debugf("VNI is %v", vni)
 		network.VxLANVNI = vni
 	default:
 		return network, errors.New(ctx, "invalid network type for init")
