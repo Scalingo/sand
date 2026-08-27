@@ -2,18 +2,16 @@ package sand
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"net/http"
 	"time"
 
 	"github.com/Scalingo/go-utils/errors/v3"
-
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	apptls "github.com/Scalingo/sand/utils/tls"
-
-	"crypto/tls"
 )
 
 type Client interface {

@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/Scalingo/go-utils/errors/v3"
-
 	"github.com/Scalingo/sand/api/params"
 )
 
