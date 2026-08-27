@@ -7,9 +7,9 @@
   "netnsbuilder.Manager": "a6 09 40 c9 bd 01 75 b8 13 49 af ae c5 13 89 a2 44 c6 a8 51",
   "network.Repository": "2c 5f e1 70 12 c0 55 34 4f 2f 39 f7 87 1a f6 d8 c5 fa 36 56",
   "network/netmanager.NetManager": "d2 0d b9 f1 ec 34 14 58 fb 6c 1f a2 79 85 48 99 16 0b 03 07",
-  "network/overlay.NetworkEndpointListener": "69 80 62 b8 bf 70 82 e9 86 03 6d 2f 7e bc 83 7b 82 d8 63 de",
+  "network/overlay.NetworkEndpointListener": "95 e1 50 d5 a1 6c e3 4a 43 bc 64 45 c0 fb 49 48 54 e6 fe 2c",
   "network/overlay.Registrar": "ff f3 66 a8 f5 75 86 77 17 6c 5e 42 85 15 51 e3 b5 63 cc d8",
   "store.EtcdWatcher": "66 f7 2c a8 a6 53 d5 d3 ba 8e 77 95 ad 79 95 65 b9 3a e8 56",
-  "store.Registration": "84 a9 1c 56 20 af 3f 58 f1 e7 34 19 cf cf 0c 17 0d 28 f0 c4",
-  "store.Store": "e3 73 0b 3a 27 9a 00 00 54 19 d5 a3 78 0b 5e 6e 1b c5 c2 d5"
+  "store.Registration": "d7 f7 41 c6 89 ed e3 cb b1 ef fa 95 9b e5 f1 7f 34 4e 7a 11",
+  "store.Store": "33 b6 96 58 0a 16 59 d0 a6 ff 66 32 74 d1 22 3a c2 10 80 1a"
 }

@@ -19,9 +19,9 @@ import (
 var ErrNotFound = stderrors.New("not found")
 
 type Store interface {
-	Get(ctx context.Context, key string, recursive bool, data interface{}) error
-	GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data interface{}) error
-	Set(ctx context.Context, key string, data interface{}) error
+	Get(ctx context.Context, key string, recursive bool, data any) error
+	GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data any) error
+	Set(ctx context.Context, key string, data any) error
 	Delete(ctx context.Context, key string) error
 }
 
@@ -33,7 +33,7 @@ func New(c *config.Config) Store {
 	return &store{config: c}
 }
 
-func (s *store) get(ctx context.Context, key string, data interface{}, opts []clientv3.OpOption) error {
+func (s *store) get(ctx context.Context, key string, data any, opts []clientv3.OpOption) error {
 	log := logger.Get(ctx).WithField("scope", "store")
 	key = prefixedKey(s.config, key)
 	c, closer, err := s.newEtcdClient(ctx)
@@ -67,7 +67,7 @@ func (s *store) get(ctx context.Context, key string, data interface{}, opts []cl
 	return json.NewDecoder(bytes.NewReader(content)).Decode(&data)
 }
 
-func (s *store) GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data interface{}) error {
+func (s *store) GetWithRevision(ctx context.Context, key string, rev int64, recursive bool, data any) error {
 	ctx = logger.ToCtx(ctx, logger.Get(ctx).WithField("rev", rev))
 	opts := []clientv3.OpOption{
 		clientv3.WithRev(rev),
@@ -78,7 +78,7 @@ func (s *store) GetWithRevision(ctx context.Context, key string, rev int64, recu
 	return s.get(ctx, key, data, opts)
 }
 
-func (s *store) Get(ctx context.Context, key string, recursive bool, data interface{}) error {
+func (s *store) Get(ctx context.Context, key string, recursive bool, data any) error {
 	opts := []clientv3.OpOption{}
 	if recursive {
 		opts = append(opts, clientv3.WithPrefix())
@@ -86,7 +86,7 @@ func (s *store) Get(ctx context.Context, key string, recursive bool, data interf
 	return s.get(ctx, key, data, opts)
 }
 
-func (s *store) Set(ctx context.Context, key string, data interface{}) error {
+func (s *store) Set(ctx context.Context, key string, data any) error {
 	log := logger.Get(ctx).WithField("scope", "store")
 	key = prefixedKey(s.config, key)
 	c, closer, err := s.newEtcdClient(ctx)

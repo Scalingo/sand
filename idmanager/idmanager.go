@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Scalingo/go-utils/errors/v3"
-
 	etcdlock "github.com/Scalingo/go-etcd-lock/v5/lock"
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/sand/etcd"
 	"github.com/Scalingo/sand/store"
 )
@@ -72,7 +71,7 @@ func (l lock) Unlock(ctx context.Context) error {
 }
 
 func (m *manager) Generate(ctx context.Context) (int, error) {
-	var items []map[string]interface{}
+	var items []map[string]any
 
 	// Retrieving the list of networks as a map of etcd keys to network objects
 	err := m.store.Get(ctx, m.prefix, true, &items)

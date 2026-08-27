@@ -49,7 +49,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	err := c.store.Set(
 		ctx,
 		fmt.Sprintf("/nodes/%s/networks/%s", c.config.GetPeerHostname(), network.ID),
-		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
+		map[string]any{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
 		return errors.Wrapf(ctx, err, "err to store nodes link to network %s", network)
@@ -59,7 +59,7 @@ func (c *repository) Ensure(ctx context.Context, network types.Network) error {
 	err = c.store.Set(
 		ctx,
 		fmt.Sprintf("/nodes-networks/%s/%s", network.ID, c.config.GetPeerHostname()),
-		map[string]interface{}{"id": network.ID, "created_at": time.Now()},
+		map[string]any{"id": network.ID, "created_at": time.Now()},
 	)
 	if err != nil {
 		return errors.Wrapf(ctx, err, "err to store network %s link to hostname", network)

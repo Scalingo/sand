@@ -38,30 +38,30 @@ func (m *MockNetworkEndpointListener) EXPECT() *MockNetworkEndpointListenerMockR
 }
 
 // Add mocks base method.
-func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 netmanager.NetManager, arg2 types.Network) (chan struct{}, error) {
+func (m *MockNetworkEndpointListener) Add(ctx context.Context, manager netmanager.NetManager, network types.Network) (chan struct{}, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Add", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Add", ctx, manager, network)
 	ret0, _ := ret[0].(chan struct{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Add indicates an expected call of Add.
-func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1, arg2 any) *gomock.Call {
+func (mr *MockNetworkEndpointListenerMockRecorder) Add(ctx, manager, network any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), ctx, manager, network)
 }
 
 // Remove mocks base method.
-func (m *MockNetworkEndpointListener) Remove(arg0 context.Context, arg1 types.Network) error {
+func (m *MockNetworkEndpointListener) Remove(ctx context.Context, network types.Network) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Remove", arg0, arg1)
+	ret := m.ctrl.Call(m, "Remove", ctx, network)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Remove indicates an expected call of Remove.
-func (mr *MockNetworkEndpointListenerMockRecorder) Remove(arg0, arg1 any) *gomock.Call {
+func (mr *MockNetworkEndpointListenerMockRecorder) Remove(ctx, network any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Remove), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Remove), ctx, network)
 }

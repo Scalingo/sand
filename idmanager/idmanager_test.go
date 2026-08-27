@@ -28,11 +28,11 @@ func TestManager_Generate(t *testing.T) {
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
-			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
-				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+			func(_ context.Context, _ string, _ bool, rawPtrItems any) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]any)
 				require.True(t, ok)
 				for _, id := range existedIDs {
-					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+					*ptrItems = append(*ptrItems, map[string]any{manager.field: float64(id)})
 				}
 			},
 		).Return(nil)
@@ -60,11 +60,11 @@ func TestManager_Generate(t *testing.T) {
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
-			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
-				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+			func(_ context.Context, _ string, _ bool, rawPtrItems any) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]any)
 				require.True(t, ok)
 				for _, id := range existedIDs {
-					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+					*ptrItems = append(*ptrItems, map[string]any{manager.field: float64(id)})
 				}
 			},
 		).Return(nil)
@@ -115,11 +115,11 @@ func TestManager_Generate(t *testing.T) {
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
-			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
-				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+			func(_ context.Context, _ string, _ bool, rawPtrItems any) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]any)
 				require.True(t, ok)
 				for _, id := range existedIDs {
-					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+					*ptrItems = append(*ptrItems, map[string]any{manager.field: float64(id)})
 				}
 			},
 		).Return(nil)
@@ -146,11 +146,11 @@ func TestManager_Generate(t *testing.T) {
 		}
 
 		store.EXPECT().Get(gomock.Any(), manager.prefix, true, gomock.Any()).Do(
-			func(_ context.Context, _ string, _ bool, rawPtrItems interface{}) {
-				ptrItems, ok := rawPtrItems.(*[]map[string]interface{})
+			func(_ context.Context, _ string, _ bool, rawPtrItems any) {
+				ptrItems, ok := rawPtrItems.(*[]map[string]any)
 				require.True(t, ok)
 				for _, id := range existedIDs {
-					*ptrItems = append(*ptrItems, map[string]interface{}{manager.field: float64(id)})
+					*ptrItems = append(*ptrItems, map[string]any{manager.field: float64(id)})
 				}
 			},
 		).Return(nil)
