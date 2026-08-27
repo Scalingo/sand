@@ -23,7 +23,7 @@ var (
 
 func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	var err error
-	ctx, log := logger.WithFieldToCtx(ctx, "network_name", params.Name)
+	ctx, log := logger.WithStructToCtx(ctx, "network_create", params)
 	log.Info("Create network")
 
 	if params.Type == "" {
@@ -33,7 +33,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	uuid := uuid.Must(uuid.NewV4()).String()
 	if params.ID != "" {
 		if !uuidRegexp.MatchString(params.ID) {
-			return types.Network{}, errors.Errorf(ctx, "invalid UUID %v", params.ID)
+			return types.Network{}, errors.Errorf(ctx, "network ID is not a valid UUID")
 		}
 		uuid = params.ID
 	}
@@ -61,11 +61,11 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	case types.OverlayNetworkType:
 		idlock, err = vniGen.Lock(ctx)
 		if err != nil {
-			return network, errors.Wrapf(ctx, err, "lock VNI generator for %s", network)
+			return network, errors.Wrap(ctx, err, "lock VNI generator")
 		}
 		vni, err := vniGen.Generate(ctx)
 		if err != nil {
-			return network, errors.Wrapf(ctx, err, "generate VNI for %s", network)
+			return network, errors.Wrap(ctx, err, "generate VNI")
 		}
 
 		ctx, log = logger.WithFieldToCtx(ctx, "network_vni", vni)
@@ -77,7 +77,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 
 	err = r.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
-		return network, errors.Wrapf(ctx, err, "get network %s from store", network)
+		return network, errors.Wrap(ctx, err, "store network")
 	}
 
 	if idlock != nil {
