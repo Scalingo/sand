@@ -3,14 +3,17 @@ package types
 import (
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type NetworkType string
 
 const (
 	OverlayNetworkType NetworkType = "overlay"
-	DefaultIPRange                 = "10.0.0.0/24"
-	DefaultGateway                 = "10.0.0.1/24"
+
+	DefaultIPRange = "10.0.0.0/24"
+	DefaultGateway = "10.0.0.1/24"
 )
 
 type Network struct {
@@ -22,6 +25,13 @@ type Network struct {
 	VxLANVNI     int         `json:"vxlan_vni"`
 	IPRange      string      `json:"ip_range"`
 	Gateway      string      `json:"gateway"`
+}
+
+func (n Network) LogFields() logrus.Fields {
+	return logrus.Fields{
+		"id":   n.ID,
+		"name": n.Name,
+	}
 }
 
 func (n Network) StorageKey() string {

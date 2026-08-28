@@ -73,7 +73,7 @@ func (c *client) NetworkCreate(ctx context.Context, params params.NetworkCreate)
 	defer res.Body.Close()
 
 	if res.StatusCode != 201 {
-		errmap := map[string]interface{}{}
+		errmap := map[string]any{}
 		json.NewDecoder(res.Body).Decode(&errmap)
 		return network, errors.Errorf(ctx, "invalid response %v: %v", res.Status, errmap)
 	}

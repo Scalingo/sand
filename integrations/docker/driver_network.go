@@ -31,9 +31,9 @@ func (p *dockerNetworkPlugin) CreateNetwork(ctx context.Context, req *network.Cr
 	log := logger.Get(ctx)
 	log.Info("Create network by docker integration")
 
-	opts, ok := req.Options["com.docker.network.generic"].(map[string]interface{})
+	opts, ok := req.Options["com.docker.network.generic"].(map[string]any)
 	if !ok {
-		return errors.Errorf(ctx, "invalid generic options: %+v, not a map[string]interface{}", req.Options["com.docker.network.generic"])
+		return errors.Errorf(ctx, "invalid generic options: %+v, not a map[string]any", req.Options["com.docker.network.generic"])
 	}
 
 	id, ok := opts["sand-id"].(string)

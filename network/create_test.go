@@ -69,7 +69,7 @@ func TestRepository_Ensure(t *testing.T) {
 				m.EXPECT().Get(
 					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
 				).Do(
-					func(ctx context.Context, key string, recursive bool, data interface{}) {
+					func(ctx context.Context, key string, recursive bool, data any) {
 						reflect.ValueOf(data).Elem().Set(reflect.ValueOf([]types.Endpoint{{ID: "ep-1"}}))
 					},
 				).Return(nil)
@@ -82,15 +82,15 @@ func TestRepository_Ensure(t *testing.T) {
 				m.EXPECT().Get(
 					gomock.Any(), n.EndpointsStorageKey(""), true, gomock.Any(),
 				).Do(
-					func(ctx context.Context, key string, recursive bool, data interface{}) {
+					func(ctx context.Context, key string, recursive bool, data any) {
 						reflect.ValueOf(data).Elem().Set(reflect.ValueOf([]types.Endpoint{{ID: "ep-1"}}))
 					},
 				).Return(nil)
 				for _, key := range []string{"/nodes/test-hostname/networks/1", "/nodes-networks/1/test-hostname"} {
 					m.EXPECT().Set(
 						gomock.Any(), key, gomock.Any(),
-					).Do(func(ctx context.Context, key string, data interface{}) {
-						m, ok := data.(map[string]interface{})
+					).Do(func(ctx context.Context, key string, data any) {
+						m, ok := data.(map[string]any)
 						assert.True(t, ok)
 						assert.Equal(t, "1", m["id"].(string))
 						assert.IsType(t, time.Now(), m["created_at"])

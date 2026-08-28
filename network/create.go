@@ -10,7 +10,6 @@ import (
 	"github.com/gofrs/uuid/v5"
 
 	"github.com/Scalingo/go-utils/errors/v3"
-
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
@@ -24,7 +23,7 @@ var (
 
 func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (types.Network, error) {
 	var err error
-	log := logger.Get(ctx).WithField("network_name", params.Name)
+	ctx, log := logger.WithStructToCtx(ctx, "network_create", params)
 	log.Info("Create network")
 
 	if params.Type == "" {
@@ -34,7 +33,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	uuid := uuid.Must(uuid.NewV4()).String()
 	if params.ID != "" {
 		if !uuidRegexp.MatchString(params.ID) {
-			return types.Network{}, errors.Errorf(ctx, "invalid UUID %v", params.ID)
+			return types.Network{}, errors.Errorf(ctx, "network ID is not a valid UUID")
 		}
 		uuid = params.ID
 	}
@@ -54,8 +53,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 			r.config.NetnsPath, fmt.Sprintf("%s%s", r.config.NetnsPrefix, uuid),
 		),
 	}
-	log = log.WithField("network_id", network.ID)
-	ctx = logger.ToCtx(ctx, log)
+	ctx, _ = logger.WithStructToCtx(ctx, "network", network)
 
 	vniGen := overlay.NewVNIGenerator(ctx, r.config, r.store)
 	var idlock idmanager.Unlocker
@@ -63,14 +61,15 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 	case types.OverlayNetworkType:
 		idlock, err = vniGen.Lock(ctx)
 		if err != nil {
-			return network, errors.Wrapf(ctx, err, "lock VNI generator for %s", network)
+			return network, errors.Wrap(ctx, err, "lock VNI generator")
 		}
 		vni, err := vniGen.Generate(ctx)
 		if err != nil {
-			return network, errors.Wrapf(ctx, err, "generate VNI for %s", network)
+			return network, errors.Wrap(ctx, err, "generate VNI")
 		}
 
-		log.Debugf("vni is %v", vni)
+		ctx, log = logger.WithFieldToCtx(ctx, "network_vni", vni)
+		log.Debugf("VNI is %v", vni)
 		network.VxLANVNI = vni
 	default:
 		return network, errors.New(ctx, "invalid network type for init")
@@ -78,7 +77,7 @@ func (r *repository) Create(ctx context.Context, params params.NetworkCreate) (t
 
 	err = r.store.Set(ctx, network.StorageKey(), &network)
 	if err != nil {
-		return network, errors.Wrapf(ctx, err, "get network %s from store", network)
+		return network, errors.Wrap(ctx, err, "store network")
 	}
 
 	if idlock != nil {

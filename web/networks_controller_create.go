@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Scalingo/go-utils/errors/v3"
 	"github.com/Scalingo/go-utils/logger"
 	"github.com/Scalingo/sand/api/httpresp"
 	"github.com/Scalingo/sand/api/params"
 	"github.com/Scalingo/sand/api/types"
 	"github.com/Scalingo/sand/ipallocator"
 	"github.com/Scalingo/sand/netutils"
-
-	"github.com/Scalingo/go-utils/errors/v3"
 )
 
 func (c NetworksController) Create(w http.ResponseWriter, r *http.Request, p map[string]string) error {
@@ -48,7 +47,7 @@ func (c NetworksController) Create(w http.ResponseWriter, r *http.Request, p map
 		return errors.Wrapf(ctx, err, "initialize IP pool for network '%v'", network.ID)
 	}
 
-	w.WriteHeader(201)
+	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(&httpresp.NetworkCreate{
 		Network: network,
 	})

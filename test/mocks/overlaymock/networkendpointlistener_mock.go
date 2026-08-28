@@ -44,7 +44,7 @@ func (m *MockNetworkEndpointListener) Add(arg0 context.Context, arg1 types.Netwo
 }
 
 // Add indicates an expected call of Add
-func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNetworkEndpointListenerMockRecorder) Add(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Add), arg0, arg1)
 }
 
@@ -56,6 +56,6 @@ func (m *MockNetworkEndpointListener) Remove(arg0 context.Context, arg1 types.Ne
 }
 
 // Remove indicates an expected call of Remove
-func (mr *MockNetworkEndpointListenerMockRecorder) Remove(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockNetworkEndpointListenerMockRecorder) Remove(arg0, arg1 any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockNetworkEndpointListener)(nil).Remove), arg0, arg1)
 }
