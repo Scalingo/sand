@@ -38,7 +38,7 @@ github.com/Scalingo/go-utils/etcd
 # github.com/Scalingo/go-utils/graceful v1.3.3
 ## explicit; go 1.25.0
 github.com/Scalingo/go-utils/graceful
-# github.com/Scalingo/go-utils/logger v1.12.2
+# github.com/Scalingo/go-utils/logger v1.13.0
 ## explicit; go 1.25.0
 github.com/Scalingo/go-utils/logger
 github.com/Scalingo/go-utils/logger/plugins/rollbarplugin
@@ -86,8 +86,8 @@ github.com/golang/protobuf/proto
 # github.com/gorilla/mux v1.8.1
 ## explicit; go 1.20
 github.com/gorilla/mux
-# github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0
-## explicit; go 1.25.0
+# github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0
+## explicit; go 1.26.0
 github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options
 # github.com/kelseyhightower/envconfig v1.4.0
 ## explicit
@@ -118,7 +118,7 @@ github.com/stretchr/testify/assert/yaml
 github.com/stretchr/testify/internal/difflib
 github.com/stretchr/testify/internal/spew
 github.com/stretchr/testify/require
-# github.com/urfave/cli/v3 v3.11.0
+# github.com/urfave/cli/v3 v3.13.0
 ## explicit; go 1.22
 github.com/urfave/cli/v3
 # github.com/urfave/negroni/v3 v3.1.1
@@ -131,7 +131,7 @@ github.com/vishvananda/netlink/nl
 # github.com/vishvananda/netns v0.0.5
 ## explicit; go 1.17
 github.com/vishvananda/netns
-# go.etcd.io/etcd/api/v3 v3.7.1
+# go.etcd.io/etcd/api/v3 v3.7.2
 ## explicit; go 1.26
 go.etcd.io/etcd/api/v3/authpb
 go.etcd.io/etcd/api/v3/etcdserverpb
@@ -140,7 +140,7 @@ go.etcd.io/etcd/api/v3/mvccpb
 go.etcd.io/etcd/api/v3/v3rpc/rpctypes
 go.etcd.io/etcd/api/v3/version
 go.etcd.io/etcd/api/v3/versionpb
-# go.etcd.io/etcd/client/pkg/v3 v3.7.1
+# go.etcd.io/etcd/client/pkg/v3 v3.7.2
 ## explicit; go 1.26
 go.etcd.io/etcd/client/pkg/v3/fileutil
 go.etcd.io/etcd/client/pkg/v3/logutil
@@ -149,7 +149,7 @@ go.etcd.io/etcd/client/pkg/v3/tlsutil
 go.etcd.io/etcd/client/pkg/v3/transport
 go.etcd.io/etcd/client/pkg/v3/types
 go.etcd.io/etcd/client/pkg/v3/verify
-# go.etcd.io/etcd/client/v3 v3.7.1
+# go.etcd.io/etcd/client/v3 v3.7.2
 ## explicit; go 1.26
 go.etcd.io/etcd/client/v3
 go.etcd.io/etcd/client/v3/concurrency
@@ -213,8 +213,8 @@ go.uber.org/zap/zapgrpc
 # go.yaml.in/yaml/v3 v3.0.5
 ## explicit; go 1.16
 go.yaml.in/yaml/v3
-# golang.org/x/net v0.58.0
-## explicit; go 1.25.0
+# golang.org/x/net v0.59.0
+## explicit; go 1.26.0
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
@@ -223,24 +223,24 @@ golang.org/x/net/internal/httpcommon
 golang.org/x/net/internal/httpsfv
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.47.0
-## explicit; go 1.25.0
+# golang.org/x/sys v0.48.0
+## explicit; go 1.26.0
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/text v0.41.0
-## explicit; go 1.25.0
+# golang.org/x/text v0.42.0
+## explicit; go 1.26.0
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/genproto/googleapis/api v0.0.0-20260803160001-6ac0973c030d
-## explicit; go 1.25.0
+# google.golang.org/genproto/googleapis/api v0.0.0-20260921155816-b14227669459
+## explicit; go 1.26.0
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20260803160001-6ac0973c030d
-## explicit; go 1.25.0
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20260918162117-cecb64721679
+## explicit; go 1.26.0
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.83.2
+# google.golang.org/grpc v1.84.0
 ## explicit; go 1.25.0
 google.golang.org/grpc
 google.golang.org/grpc/attributes
